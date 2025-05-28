@@ -27,7 +27,7 @@
 
 ## Project Access
 
-The application is hosted on Firebase and can be accessed at the following URL:  
+The first version of the application is hosted on Firebase and can be accessed at the following URL:  
 [fantaprof-ef27d.web.app](https://fantaprof-ef27d.web.app)
 
 ---
