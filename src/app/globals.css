@@ -1,0 +1,57 @@
+@import "tailwindcss";
+
+@plugin "daisyui" {
+  themes: light --default, dark --prefersdark, fantaprof-light;
+  prefix: "d-";
+}
+
+@theme inline {
+  /** Surface */
+  --color-surface-100: #f0f0f0;
+  --color-surface-200: #d6d6d6;
+  --color-surface-300: #c2c2c2;
+  --color-surface-400: #adadad;
+  --color-surface-500: #999999;
+  --color-surface-600: #7a7a7a;
+  --color-surface-700: #5c5c5c;
+  --color-surface-800: #3d3d3d;
+  --color-surface-900: #2e2e2e;
+
+  /** Primary */
+  --color-primary-100: #7a74d4;
+  --color-primary-200: #4e45c5;
+  --color-primary-d: #2217b7;
+  --color-primary-400: #1b1292;
+  --color-primary-500: #140e6e;
+  --color-primary-600: #0e0949;
+
+  /** Text */
+  --color-text-100: #1f1f1f;
+  --color-text-200: #2e2e2e;
+  --color-text-300: #3d3d3d;
+  --color-text-400: #5c5c5c;
+  --color-text-500: #7a7a7a;
+  --color-text-600: #999999;
+  --color-text-700: #c2c2c2;
+  --color-text-800: #d6d6d6;
+  --color-text-900: #ffffff;
+  --color-text-1000: #ebebeb;
+}
+
+@plugin "daisyui/theme" {
+  name: "fantaprof-light";
+  default: true;
+  prefersdark: false;
+  color-scheme: light;
+
+  --color-base-100: var(--color-surface-100);
+  --color-base-200: var(--color-surface-200);
+  --color-base-300: var(--color-surface-500);
+  --color-base-content: var(--color-text-100);
+  --color-primary: var(--color-primary-d);
+  --color-primary-content: var(--color-surface-100);
+  --color-accent: var(--color-primary-500);
+  --color-accent-content: var(--color-surface-100);
+  --color-neutral: var(--color-surface-600);
+  --color-neutral-content: var(--color-surface-100);
+}
