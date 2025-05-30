@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
 @plugin "daisyui" {
-  themes: light --default, dark --prefersdark, fantaprof-light;
+  themes: light --default, dark --prefersdark, fantaprof-light, dracula;
   prefix: "d-";
 }
 
@@ -36,6 +36,241 @@
   --color-text-800: #d6d6d6;
   --color-text-900: #ffffff;
   --color-text-1000: #ebebeb;
+
+  /** Fade-in Animations */
+  --animate-fade-in: fade-in 0.7s ease-in-out forwards;
+  --animate-fade-in-top: fade-in-top 0.7s ease-in-out forwards;
+  --animate-fade-in-bottom: fade-in-bottom 0.7s ease-in-out forwards;
+  --animate-fade-in-left: fade-in-left 0.7s ease-in-out forwards;
+  --animate-fade-in-right: fade-in-right 0.7s ease-in-out forwards;
+  --animate-fade-in-top-left: fade-in-top-left 0.7s ease-in-out forwards;
+  --animate-fade-in-top-right: fade-in-top-right 0.7s ease-in-out forwards;
+  --animate-fade-in-bottom-left: fade-in-bottom-left 0.7s ease-in-out forwards;
+  --animate-fade-in-bottom-right: fade-in-bottom-right 0.7s ease-in-out forwards;
+
+  /** Fade-out Animations */
+  --animate-fade-out: fade-out 0.7s ease-in-out forwards;
+  --animate-fade-out-top: fade-out-top 0.7s ease-in-out forwards;
+  --animate-fade-out-bottom: fade-out-bottom 0.7s ease-in-out forwards;
+  --animate-fade-out-left: fade-out-left 0.7s ease-in-out forwards;
+  --animate-fade-out-right: fade-out-right 0.7s ease-in-out forwards;
+  --animate-fade-out-top-left: fade-out-top-left 0.7s ease-in-out forwards;
+  --animate-fade-out-top-right: fade-out-top-right 0.7s ease-in-out forwards;
+  --animate-fade-out-bottom-left: fade-out-bottom-left 0.7s ease-in-out forwards;
+  --animate-fade-out-bottom-right: fade-out-bottom-right 0.7s ease-in-out
+    forwards;
+
+  /** Wiggle Animation*/
+  --animate-wiggle: wiggle 1s ease-in-out infinite;
+
+  /** Keyframes for Fade-In */
+  /*#region fading Keyframes*/
+  @keyframes fade-in {
+    0% {
+      opacity: 0;
+    }
+    100% {
+      opacity: 1;
+    }
+  }
+
+  @keyframes fade-in-top {
+    0% {
+      opacity: 0;
+      transform: translateY(-30%);
+    }
+    100% {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes fade-in-bottom {
+    0% {
+      opacity: 0;
+      transform: translateY(30%);
+    }
+    100% {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes fade-in-left {
+    0% {
+      opacity: 0;
+      transform: translateX(-30%);
+    }
+    100% {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+
+  @keyframes fade-in-right {
+    0% {
+      opacity: 0;
+      transform: translateX(30%);
+    }
+    100% {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+
+  @keyframes fade-in-top-left {
+    0% {
+      opacity: 0;
+      transform: translate(-30%, -30%);
+    }
+    100% {
+      opacity: 1;
+      transform: translate(0);
+    }
+  }
+
+  @keyframes fade-in-top-right {
+    0% {
+      opacity: 0;
+      transform: translate(30%, -30%);
+    }
+    100% {
+      opacity: 1;
+      transform: translate(0);
+    }
+  }
+
+  @keyframes fade-in-bottom-left {
+    0% {
+      opacity: 0;
+      transform: translate(-30%, 30%);
+    }
+    100% {
+      opacity: 1;
+      transform: translate(0);
+    }
+  }
+
+  @keyframes fade-in-bottom-right {
+    0% {
+      opacity: 0;
+      transform: translate(30%, 30%);
+    }
+    100% {
+      opacity: 1;
+      transform: translate(0);
+    }
+  }
+
+  /** Keyframes for Fade-Out */
+  @keyframes fade-out {
+    0% {
+      opacity: 1;
+    }
+    100% {
+      opacity: 0;
+    }
+  }
+
+  @keyframes fade-out-top {
+    0% {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    100% {
+      opacity: 0;
+      transform: translateY(-30%);
+    }
+  }
+
+  @keyframes fade-out-bottom {
+    0% {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    100% {
+      opacity: 0;
+      transform: translateY(30%);
+    }
+  }
+
+  @keyframes fade-out-left {
+    0% {
+      opacity: 1;
+      transform: translateX(0);
+    }
+    100% {
+      opacity: 0;
+      transform: translateX(-30%);
+    }
+  }
+
+  @keyframes fade-out-right {
+    0% {
+      opacity: 1;
+      transform: translateX(0);
+    }
+    100% {
+      opacity: 0;
+      transform: translateX(30%);
+    }
+  }
+
+  @keyframes fade-out-top-left {
+    0% {
+      opacity: 1;
+      transform: translate(0, 0);
+    }
+    100% {
+      opacity: 0;
+      transform: translate(-30%, -30%);
+    }
+  }
+
+  @keyframes fade-out-top-right {
+    0% {
+      opacity: 1;
+      transform: translate(0, 0);
+    }
+    100% {
+      opacity: 0;
+      transform: translate(30%, -30%);
+    }
+  }
+
+  @keyframes fade-out-bottom-left {
+    0% {
+      opacity: 1;
+      transform: translate(0, 0);
+    }
+    100% {
+      opacity: 0;
+      transform: translate(-30%, 30%);
+    }
+  }
+
+  @keyframes fade-out-bottom-right {
+    0% {
+      opacity: 1;
+      transform: translate(0, 0);
+    }
+    100% {
+      opacity: 0;
+      transform: translate(30%, 30%);
+    }
+  }
+  /*#endregion*/
+
+  /**Keyframes for Fade-In */
+  @keyframes wiggle {
+    0%,
+    100% {
+      transform: rotate(-3deg);
+    }
+    50% {
+      transform: rotate(3deg);
+    }
+  }
 }
 
 @plugin "daisyui/theme" {
@@ -54,4 +289,41 @@
   --color-accent-content: var(--color-surface-100);
   --color-neutral: var(--color-surface-600);
   --color-neutral-content: var(--color-surface-100);
+}
+
+.animation-delay-100 {
+  animation-delay: 100ms;
+}
+.animation-delay-200 {
+  animation-delay: 200ms;
+}
+.animation-delay-300 {
+  animation-delay: 300ms;
+}
+.animation-delay-400 {
+  animation-delay: 400ms;
+}
+.animation-delay-500 {
+  animation-delay: 500ms;
+}
+.animation-delay-600 {
+  animation-delay: 600ms;
+}
+.animation-delay-700 {
+  animation-delay: 700ms;
+}
+.animation-delay-800 {
+  animation-delay: 800ms;
+}
+.animation-delay-900 {
+  animation-delay: 900ms;
+}
+.animation-delay-1000 {
+  animation-delay: 1000ms;
+}
+
+.login-form-image {
+  background-image: url("../../public/login_background.jpg");
+  background-repeat: no-repeat;
+  background-size: cover;
 }

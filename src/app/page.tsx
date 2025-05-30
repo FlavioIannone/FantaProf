@@ -1,31 +1,32 @@
 import Footer from "@/components/Footer";
 import LandingCard from "@/components/LandingCard";
+import Navbar from "@/components/Navbar";
 import Link from "next/link";
 
 export default function Home() {
   return (
     <>
+      <header>
+        <Navbar className="lg:px-20 md:px-15 sm:px-10 px-5"></Navbar>
+      </header>
       <main className="w-full min-h-dvh lg:px-20 md:px-15 sm:px-10 px-5 lg:m-0 my-20 flex flex-col justify-center items-center">
-        <header className="flex flex-col md:mb-9 mb-5 items-center">
-          <h1 className="lg:text-9xl md:text-6xl text-5xl md:mb-4 mb-2 text-center font-bold ">
+        <div className="flex flex-col md:mb-9 mb-5 items-center animate-fade-in-bottom motion-reduce:animate-none">
+          <h1 className="lg:text-7xl md:text-5xl text-4xl md:mb-4 mb-2 text-center font-bold ">
             Fanta Prof
           </h1>
-          <h3 className="lg:text-4xl md:text-2xl text-xl text-center md:w-2/3 w-full opacity-50">
+          <h3 className="lg:text-3xl md:text-2xl text-xl text-center md:w-2/3 w-full opacity-50">
             Crea il tuo team composto dai tuoi professori e competi con i tuoi
             compagni di classe!
           </h3>
-        </header>
+        </div>
         <div className="flex md:mb-12 mb-7 gap-5">
           <Link href="/rules" className="flex">
-            <button type="button" className="d-btn d-btn-ghost text-lg">
-              <i className="bi bi-journals" aria-hidden="true"></i>
+            <button className="group d-btn d-btn-ghost d-btn-lg text-xl opacity-0 animate-fade-in-bottom animation-delay-200 motion-reduce:animate-none">
+              <i
+                className="bi bi-journals group-hover:animate-bounce"
+                aria-hidden="true"
+              ></i>
               Regole
-            </button>
-          </Link>
-          <Link href="/auth/login">
-            <button type="button" className="d-btn d-btn-primary text-lg">
-              <i className="bi bi-box-arrow-in-right" aria-hidden="true"></i>
-              Login
             </button>
           </Link>
         </div>
@@ -43,7 +44,7 @@ export default function Home() {
           <LandingCard
             icon={
               <i
-                className="bi bi-people text-green-800 lg:text-8xl md:text-7xl text-6xl"
+                className="bi bi-people text-teal-700 lg:text-8xl md:text-7xl text-6xl"
                 aria-hidden="true"
               ></i>
             }
@@ -62,7 +63,7 @@ export default function Home() {
           ></LandingCard>
         </div>
       </main>
-      <Footer classlist="lg:px-20 md:px-15 sm:px-10 px-5"></Footer>
+      <Footer className="lg:px-20 md:px-15 sm:px-10 px-5"></Footer>
     </>
   );
 }

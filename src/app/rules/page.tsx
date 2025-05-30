@@ -1,7 +1,7 @@
 import Footer from "@/components/Footer";
+import ReturnToHome from "@/components/ReturnToHome";
 import RuleCard from "@/components/RuleCard";
 import { Metadata } from "next";
-import Link from "next/link";
 
 export const metadata: Metadata = {
   title: "Regole",
@@ -11,23 +11,12 @@ export const metadata: Metadata = {
 export default function RulesPage() {
   return (
     <>
-      <nav className="lg:px-5 px-1.5 d-navbar">
-        <Link href="/">
-          <button
-            type="button"
-            className="d-btn d-btn-ghost text-xl flex gap-1 justify-center items-center"
-          >
-            <i
-              className="bi bi-arrow-left-short text-4xl"
-              aria-hidden="true"
-            ></i>
-            Ritorna alla home
-          </button>
-        </Link>
+      <nav className="lg:px-5 px-1.5 d-navbar ">
+        <ReturnToHome />
       </nav>
       <main className="lg:px-5 px-1.5 lg:mt-14 md:mt-10 sm:mt-5 mt-0">
         <header className="md:mb-8 mb-4">
-          <h1 className="lg:text-6xl md:text-5xl text-4xl md:mb-2 mb-2 font-bold ">
+          <h1 className="lg:text-6xl md:text-5xl text-4xl md:mb-2 mb-2 font-bold">
             Come funziona Fanta Prof
           </h1>
           <h3 className="lg:text-4xl md:text-2xl text-xl  md:w-2/3 w-full opacity-50">
@@ -35,9 +24,9 @@ export default function RulesPage() {
           </h3>
         </header>
         <RuleCard>
-          <h1 className="d-card-title font-bold lg:text-4xl md:text-2xl text-xl inline-block align-bottom">
+          <h1 className="d-card-title font-bold lg:text-4xl md:text-2xl text-xl lg:mb-5 mb-2.5 inline-block align-bottom">
             <i
-              className="bi bi-mortarboard md:me-4 me-2 text-teal-800 lg:text-6xl md:text-4xl text-2xl"
+              className="bi bi-mortarboard md:me-4 me-2 text-teal-700"
               aria-hidden="true"
             ></i>
             Composizione della Squadra
@@ -60,18 +49,17 @@ export default function RulesPage() {
           </ul>
         </RuleCard>
         <RuleCard>
-          <h1 className="d-card-title font-bold lg:text-4xl md:text-2xl text-xl inline-block align-bottom">
+          <h1 className="d-card-title font-bold lg:text-4xl md:text-2xl text-xl lg:mb-5 mb-2.5 inline-block align-bottom">
             <i
-              className="bi bi-bullseye md:me-4 me-2 text-amber-800 lg:text-6xl md:text-4xl text-2xl"
+              className="bi bi-bullseye md:me-4 me-2 text-amber-800"
               aria-hidden="true"
             ></i>
             Punteggi: Bonus e Malus
           </h1>
-          <h3 className="opacity-70 lg:text-2xl md:text-xl text-lg">
+          <h3 className="opacity-70 lg:text-2xl md:text-xl text-lg mb-1.5">
             I punti vengono assegnati in base a comportamenti osservati durante
             le lezioni. Ecco alcuni esempi:
           </h3>
-          <br />
           <h1 className="lg:text-3xl md:text-2xl text-xl">
             <i
               className="bi bi-check-square text-success md:me-2.5 me-1.5"
@@ -84,19 +72,9 @@ export default function RulesPage() {
             <li>Relax (no spiegazione, ripasso): +15</li>
             <li>Parolaccia (non citazione): +30</li>
             <li>Gergo giovanile: +15</li>
-            <li>Scrive alla lavagna: +5</li>
-            <li>Correzione immediata: +15</li>
             <li>Capriola sulla cattedra: +1000</li>
             <li>Si sente male in classe: +200</li>
-            <li>Fa un complimento: +10</li>
             <li>Ci porta in gita: +50</li>
-            <li>Non funziona il computer: +5</li>
-            <li>Inciampa/cade: +20</li>
-            <li>Vediamo film/video: +15</li>
-            <li>Risata (non sorriso): +10</li>
-            <li>Esercitazione nella sua ora: +20</li>
-            <li>Nomina l’esame: +1</li>
-            <li>Veste monocromo: +10</li>
           </ul>
           <h1 className="lg:text-3xl md:text-2xl text-xl">
             <i
@@ -107,31 +85,18 @@ export default function RulesPage() {
           </h1>
           <ul className="list-disc list-inside opacity-50 lg:text-2xl md:text-xl text-lg">
             <li>Sbaglia nome/cognome: -10</li>
-            <li>Fa tardi: -10</li>
             <li>Poco preavviso per verifiche/compiti: -15</li>
             <li>Battuta da boomer: -15</li>
             <li>Mette una nota: -30</li>
             <li>Dimentica verifiche: -20</li>
-            <li>Vestiti a pois: -5</li>
-            <li>Positivo al Covid: -30</li>
-            <li>Manca ma c’è il supplente: -10</li>
             <li>Insulto / presa in giro: -10</li>
-            <li>Non si ricorda un nome: -5</li>
-            <li>Apre porta o finestre quando fa freddo: -10</li>
-            <li>Chiede la chiave: -15</li>
-            <li>Rifiuta il collettivo: -30</li>
-            <li>Lavoro di gruppo: -15</li>
-            <li>Catastrofe naturale durante la sua ora: -100</li>
-            <li>Tocca alunno: -25</li>
-            <li>Piange in classe: -50</li>
             <li>Non manda in bagno: -15</li>
-            <li>Litiga con alunno: -50</li>
           </ul>
         </RuleCard>
         <RuleCard>
-          <h1 className="d-card-title font-bold lg:text-4xl md:text-2xl text-xl inline-block align-bottom">
+          <h1 className="d-card-title font-bold lg:text-4xl md:text-2xl text-xl lg:mb-5 mb-2.5 inline-block align-bottom">
             <i
-              className="bi bi-pencil-square md:me-4 me-2 text-blue-600 lg:text-6xl md:text-4xl text-2xl"
+              className="bi bi-pencil-square md:me-4 me-2 text-blue-600"
               aria-hidden="true"
             ></i>
             Personalizzazione
@@ -144,9 +109,9 @@ export default function RulesPage() {
           </h3>
         </RuleCard>
         <RuleCard>
-          <h1 className="d-card-title font-bold lg:text-4xl md:text-2xl text-xl inline-block align-bottom">
+          <h1 className="d-card-title font-bold lg:text-4xl md:text-2xl lg:mb-5 mb-2.5 text-xl inline-block align-bottom">
             <i
-              className="bi bi-clock md:me-4 me-2 text-lime-400 lg:text-6xl md:text-4xl text-2xl"
+              className="bi bi-clock md:me-4 me-2 text-rose-700"
               aria-hidden="true"
             ></i>
             Inizio del Gioco
@@ -159,9 +124,9 @@ export default function RulesPage() {
           </h3>
         </RuleCard>
         <RuleCard>
-          <h1 className="d-card-title font-bold lg:text-4xl md:text-2xl text-xl inline-block align-bottom">
+          <h1 className="d-card-title font-bold lg:text-4xl md:text-2xl lg:mb-5 mb-2.5 text-xl inline-block align-bottom">
             <i
-              className="bi bi-exclamation-triangle md:me-4 me-2 text-warning lg:text-6xl md:text-4xl text-2xl"
+              className="bi bi-exclamation-triangle md:me-4 me-2 text-warning"
               aria-hidden="true"
             ></i>
             Nota
@@ -174,7 +139,7 @@ export default function RulesPage() {
           </h3>
         </RuleCard>
       </main>
-      <Footer classlist="lg:px-5 px-1.5"></Footer>
+      <Footer className="lg:px-5 px-1.5"></Footer>
     </>
   );
 }

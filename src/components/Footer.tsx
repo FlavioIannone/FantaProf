@@ -1,9 +1,9 @@
 export default function Footer({
-  classlist,
-}: Readonly<{ classlist?: string }>) {
+  className,
+}: Readonly<{ className?: string }>) {
   return (
     <footer
-      className={`footer md:flex sm:footer-horizontal bg-base-200  py-10 ${classlist}`}
+      className={`footer md:flex sm:footer-horizontal bg-base-200  py-10 ${className}`}
     >
       <aside>
         <p className="d-footer-title lg:text-2xl md:text-xl sm:text-lg text-primary">
