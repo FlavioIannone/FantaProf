@@ -12,11 +12,11 @@ export default function Login() {
     <>
       <main className="w-full h-dvh">
         <div className="w-full h-full flex sm:p-0 p-5">
-          <nav className="lg:px-5 px-1.5 d-navbar fixed">
-            <ReturnToHome />
-          </nav>
-          <div className="sm:flex-1/2 w-0">
-            <div className="w-full h-full login-form-image shadow"></div>
+          <div className="sm:flex-1/2 w-0 p-5">
+            <nav className="lg:px-5 px-1.5 d-navbar fixed">
+              <ReturnToHome />
+            </nav>
+            <div className="w-full h-full login-form-image shadow rounded-xl"></div>
           </div>
           <div className="sm:flex-1/2 flex flex-col justify-center items-center w-full">
             <LoginForm></LoginForm>

@@ -80,7 +80,7 @@ export default function LoginForm() {
         >
           Registrati
         </button>
-        <p className="text-end mt-2.5 opacity-0 animate-fade-in animation-delay-500">
+        <p className="mt-2.5 opacity-0 animate-fade-in animation-delay-500">
           Hai già un account?{" "}
           <Link href="/auth/login" className="d-link text-primary">
             Accedi qui.

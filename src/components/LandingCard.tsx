@@ -11,10 +11,12 @@ export default function LandingCard({
 }>) {
   return (
     <section
-      className={`d-card border-2 border-base-content/30 py-16 flex-1 animate-fade-in-bottom opacity-0 animation-delay-400 motion-reduce:animate-none`}
+      className={`d-card border-2 group border-base-content/30 py-16 flex-1 animate-fade-in-bottom opacity-0 animation-delay-400 motion-reduce:animate-none`}
     >
       <div className="d-card-body items-center justify-center">
-        <div className="animate-wiggle motion-reduce:animate-none">{icon}</div>
+        <div className="group-hover:animate-wiggle motion-reduce:animate-none">
+          {icon}
+        </div>
         <h1 className="text-3xl">{title}</h1>
         <h3 className="text-xl text-center opacity-50">{subtitle}</h3>
       </div>

@@ -26,7 +26,7 @@ export default function Home() {
                 className="bi bi-journals group-hover:animate-bounce"
                 aria-hidden="true"
               ></i>
-              Regole
+              Regolamento
             </button>
           </Link>
         </div>

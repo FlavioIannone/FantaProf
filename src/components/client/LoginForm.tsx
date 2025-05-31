@@ -74,7 +74,7 @@ export default function LoginForm() {
         >
           Accedi
         </button>
-        <p className="text-end mt-2.5 opacity-0 animate-fade-in animation-delay-500">
+        <p className="mt-2.5 opacity-0 animate-fade-in animation-delay-500">
           Non hai un account?{" "}
           <Link href="/auth/signin" className="d-link text-primary">
             Crealo qui.
