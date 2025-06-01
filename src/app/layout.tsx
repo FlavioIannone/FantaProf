@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import "bootstrap-icons/font/bootstrap-icons.css";
+import { ThemeProvider } from "@/components/client/ThemeContext";
 
 const inter = Inter({
   weight: ["400"],
@@ -19,13 +20,9 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html
-      lang="it"
-      data-theme="dracula"
-      className={`bg-base-100 ${inter.className}`}
-    >
+    <html lang="it" className={`bg-base-100 ${inter.className}`}>
       <body className={`w-full overflow-x-hidden bg-base-100 m-0 antialiased`}>
-        {children}
+        <ThemeProvider>{children}</ThemeProvider>
       </body>
     </html>
   );

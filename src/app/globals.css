@@ -1,7 +1,9 @@
 @import "tailwindcss";
 
 @plugin "daisyui" {
-  themes: light --default, dark --prefersdark, fantaprof-light, dracula;
+  themes: light --default, dark --prefersdark, fantaprof-light, dracula, black,
+    synthwave, retro, valentine, halloween, business, forest, coffee, night,
+    lofi, luxury, sunset, garden, pastel, fantasy, coffee;
   prefix: "d-";
 }
 

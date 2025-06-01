@@ -16,20 +16,19 @@ export default function LoginForm() {
         }}
       >
         <div className="p-5">
-          <h1 className="text-primary text-center sm:text-5xl text-4xl opacity-0 animate-fade-in-bottom">
+          <h1 className="text-primary text-center sm:text-5xl text-4xl opacity-0 animate-fade-in-bottom motion-reduce:animate-none">
             Bentornato
           </h1>
-          <h3 className="opacity-60 text-center sm:text-3xl text-2xl animate-fade-in-bottom animation-delay-100">
+          <h3 className="opacity-60 text-center sm:text-3xl text-2xl animate-fade-in-bottom animation-delay-100 motion-reduce:animate-none">
             Accedi al tuo account
           </h3>
         </div>
         <div className="w-full mb-5 flex flex-col gap-1">
-          <div className="opacity-0 animate-fade-in-bottom animation-delay-200">
+          <div className="opacity-0 animate-fade-in-bottom animation-delay-200 motion-reduce:animate-none">
             <label htmlFor="email" className="d-label">
               Email
             </label>
             <input
-              id="email"
               name="email"
               type="email"
               className="d-input d-validator w-full peer"
@@ -41,12 +40,11 @@ export default function LoginForm() {
             </div>
           </div>
 
-          <div className="opacity-0 animate-fade-in-bottom animation-delay-300">
+          <div className="opacity-0 animate-fade-in-bottom animation-delay-300 motion-reduce:animate-none">
             <label htmlFor="password" className="d-label">
               Password
             </label>
             <input
-              id="password"
               name="password"
               type="password"
               className="peer d-input d-validator w-full"
@@ -59,33 +57,33 @@ export default function LoginForm() {
             <p className="d-validator-hint h-0 peer-user-invalid:h-auto">
               Deve avere almeno 8 caratteri, includere
               <br />
-              At least one numero
+              Almeno un numero
               <br />
-              At least one lettera minuscola
+              Almeno una lettera minuscola
               <br />
-              At least one lettera maiuscola
+              Almeno una lettera maiuscola
             </p>
           </div>
         </div>
 
         <button
           type="submit"
-          className="d-btn d-btn-primary d-btn-block animate-fade-in-bottom opacity-0 text-lg animation-delay-400"
+          className="d-btn d-btn-primary d-btn-block animate-fade-in-bottom opacity-0 text-lg animation-delay-400 motion-reduce:animate-none"
         >
           Accedi
         </button>
-        <p className="mt-2.5 opacity-0 animate-fade-in animation-delay-500">
+        <p className="mt-2.5 w-full opacity-0 animate-fade-in animation-delay-500 motion-reduce:animate-none">
           Non hai un account?{" "}
           <Link href="/auth/signin" className="d-link text-primary">
             Crealo qui.
           </Link>
         </p>
-        <div className="d-divider sm:my-10 my-6 w-full sm:px-10 opacity-0 animate-fade-in animation-delay-500">
+        <div className="d-divider sm:my-10 my-6 w-full sm:px-10 opacity-0 animate-fade-in animation-delay-500 motion-reduce:animate-none">
           Oppure accedi con
         </div>
         <button
           type="button"
-          className="d-btn d-btn-outline d-btn-block opacity-0 animate-fade-in-bottom animation-delay-600"
+          className="d-btn d-btn-outline d-btn-block opacity-0 animate-fade-in-bottom animation-delay-600 motion-reduce:animate-none"
         >
           <i className="bi bi-google"></i>Accedi con google
         </button>

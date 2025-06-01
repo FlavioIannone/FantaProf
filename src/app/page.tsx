@@ -20,7 +20,7 @@ export default function Home() {
           </h3>
         </div>
         <div className="flex md:mb-12 mb-7 gap-5">
-          <Link href="/rules" className="flex">
+          <Link href="/rules/team-creation" className="flex">
             <button className="group d-btn d-btn-ghost d-btn-lg text-xl opacity-0 animate-fade-in-bottom animation-delay-200 motion-reduce:animate-none">
               <i
                 className="bi bi-journals group-hover:animate-bounce"
