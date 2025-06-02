@@ -16,21 +16,22 @@ export default function LoginForm() {
         }}
       >
         <div className="p-5">
-          <h1 className="text-primary text-center sm:text-5xl text-4xl opacity-0 animate-fade-in-bottom motion-reduce:animate-none">
+          <h1 className="text-primary text-center sm:text-5xl text-4xl motion-safe:opacity-0 animate-fade-in-bottom motion-reduce:animate-none">
             Bentornato
           </h1>
-          <h3 className="opacity-60 text-center sm:text-3xl text-2xl animate-fade-in-bottom animation-delay-100 motion-reduce:animate-none">
+          <h2 className="opacity-60 text-center sm:text-3xl text-2xl animate-fade-in-bottom animation-delay-100 motion-reduce:animate-none">
             Accedi al tuo account
-          </h3>
+          </h2>
         </div>
         <div className="w-full mb-5 flex flex-col gap-1">
-          <div className="opacity-0 animate-fade-in-bottom animation-delay-200 motion-reduce:animate-none">
+          <div className="motion-safe:opacity-0 animate-fade-in-bottom animation-delay-200 motion-reduce:animate-none">
             <label htmlFor="email" className="d-label">
               Email
             </label>
             <input
               name="email"
               type="email"
+              aria-label="Email"
               className="d-input d-validator w-full peer"
               placeholder="esempio@dominio.com"
               required
@@ -40,13 +41,14 @@ export default function LoginForm() {
             </div>
           </div>
 
-          <div className="opacity-0 animate-fade-in-bottom animation-delay-300 motion-reduce:animate-none">
+          <div className="motion-safe:opacity-0 animate-fade-in-bottom animation-delay-300 motion-reduce:animate-none">
             <label htmlFor="password" className="d-label">
               Password
             </label>
             <input
               name="password"
               type="password"
+              aria-label="Password"
               className="peer d-input d-validator w-full"
               placeholder="Inserisci la tua password"
               minLength={8}
@@ -68,22 +70,28 @@ export default function LoginForm() {
 
         <button
           type="submit"
-          className="d-btn d-btn-primary d-btn-block animate-fade-in-bottom opacity-0 text-lg animation-delay-400 motion-reduce:animate-none"
+          aria-label="Accedi"
+          className="d-btn d-btn-primary d-btn-block animate-fade-in-bottom motion-safe:opacity-0 text-lg animation-delay-400 motion-reduce:animate-none"
         >
           Accedi
         </button>
-        <p className="mt-2.5 w-full opacity-0 animate-fade-in animation-delay-500 motion-reduce:animate-none">
+        <p className="mt-2.5 w-full motion-safe:opacity-0 animate-fade-in animation-delay-500 motion-reduce:animate-none">
           Non hai un account?{" "}
-          <Link href="/auth/signin" className="d-link text-primary">
+          <Link
+            href="/auth/signin"
+            className="d-link"
+            aria-label="Crea account"
+          >
             Crealo qui.
           </Link>
         </p>
-        <div className="d-divider sm:my-10 my-6 w-full sm:px-10 opacity-0 animate-fade-in animation-delay-500 motion-reduce:animate-none">
+        <div className="d-divider sm:my-10 my-6 w-full sm:px-10 motion-safe:opacity-0 animate-fade-in animation-delay-500 motion-reduce:animate-none">
           Oppure accedi con
         </div>
         <button
           type="button"
-          className="d-btn d-btn-outline d-btn-block opacity-0 animate-fade-in-bottom animation-delay-600 motion-reduce:animate-none"
+          aria-label="Accedi con google"
+          className="d-btn d-btn-outline d-btn-block motion-safe:opacity-0 animate-fade-in-bottom animation-delay-600 motion-reduce:animate-none"
         >
           <i className="bi bi-google"></i>Accedi con google
         </button>

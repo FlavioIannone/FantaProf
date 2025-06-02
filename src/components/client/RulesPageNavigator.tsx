@@ -11,15 +11,15 @@ export default function RulesPageNavigator() {
   };
 
   return (
-    <ul className="d-menu flex flex-col gap-2">
-      <Link
-        href="/rules/team-creation"
-        onClick={() => {
-          handleClick();
-        }}
-        className="opacity-0 motion-reduce:animate-none animate-fade-in-left animation-delay-100"
-      >
-        <li>
+    <ul className="d-menu space-y-2.5">
+      <li>
+        <Link
+          href="/rules/team-creation"
+          onClick={() => {
+            handleClick();
+          }}
+          className="motion-safe:opacity-0 motion-reduce:animate-none animate-fade-in-left animation-delay-100"
+        >
           <p
             className={`text-nowrap w-full ${
               pathname === "/rules/team-creation" && "d-menu-active"
@@ -27,16 +27,16 @@ export default function RulesPageNavigator() {
           >
             Composizione della squadra
           </p>
-        </li>
-      </Link>
-      <Link
-        href="/rules/bonus-malus"
-        onClick={() => {
-          handleClick();
-        }}
-        className="opacity-0 motion-reduce:animate-none animate-fade-in-left animation-delay-200"
-      >
-        <li>
+        </Link>
+      </li>
+      <li>
+        <Link
+          href="/rules/bonus-malus"
+          onClick={() => {
+            handleClick();
+          }}
+          className="motion-safe:opacity-0 motion-reduce:animate-none animate-fade-in-left animation-delay-200"
+        >
           <p
             className={`text-nowrap w-full ${
               pathname === "/rules/bonus-malus" && "d-menu-active"
@@ -44,16 +44,16 @@ export default function RulesPageNavigator() {
           >
             Punteggi: Bonus e Malus
           </p>
-        </li>
-      </Link>
-      <Link
-        href="/rules/personalization"
-        onClick={() => {
-          handleClick();
-        }}
-        className="opacity-0 motion-reduce:animate-none animate-fade-in-left animation-delay-300"
-      >
-        <li>
+        </Link>
+      </li>
+      <li>
+        <Link
+          href="/rules/personalization"
+          onClick={() => {
+            handleClick();
+          }}
+          className="motion-safe:opacity-0 motion-reduce:animate-none animate-fade-in-left animation-delay-300"
+        >
           <p
             className={`text-nowrap w-full ${
               pathname === "/rules/personalization" && "d-menu-active"
@@ -61,16 +61,16 @@ export default function RulesPageNavigator() {
           >
             Personalizzazione
           </p>
-        </li>
-      </Link>
-      <Link
-        href="/rules/starting-game"
-        onClick={() => {
-          handleClick();
-        }}
-        className="opacity-0 motion-reduce:animate-none animate-fade-in-left animation-delay-400"
-      >
-        <li>
+        </Link>
+      </li>
+      <li>
+        <Link
+          href="/rules/starting-game"
+          onClick={() => {
+            handleClick();
+          }}
+          className="motion-safe:opacity-0 motion-reduce:animate-none animate-fade-in-left animation-delay-400"
+        >
           <p
             className={`w-full text-nowrap ${
               pathname === "/rules/starting-game" ? "d-menu-active" : ""
@@ -78,16 +78,16 @@ export default function RulesPageNavigator() {
           >
             Inizio del Gioco
           </p>
-        </li>
-      </Link>
-      <Link
-        href="/rules/site-explaination"
-        onClick={() => {
-          handleClick();
-        }}
-        className="opacity-0 motion-reduce:animate-none animate-fade-in-left animation-delay-500"
-      >
-        <li>
+        </Link>
+      </li>
+      <li>
+        <Link
+          href="/rules/site-explaination"
+          onClick={() => {
+            handleClick();
+          }}
+          className="motion-safe:opacity-0 motion-reduce:animate-none animate-fade-in-left animation-delay-500"
+        >
           <p
             className={`w-full text-nowrap ${
               pathname === "/rules/site-explaination" ? "d-menu-active" : ""
@@ -95,8 +95,8 @@ export default function RulesPageNavigator() {
           >
             Funzionamento Sito
           </p>
-        </li>
-      </Link>
+        </Link>
+      </li>
     </ul>
   );
 }

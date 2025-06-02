@@ -16,18 +16,24 @@ export default function RulesLayout({
         hideLogoOnSmallBrP
       />
       <div className="d-drawer">
-        <input id="rules-drawer" type="checkbox" className="d-drawer-toggle" />
+        <input
+          id="rules-drawer"
+          type="checkbox"
+          className="d-drawer-toggle"
+          aria-hidden
+        />
         <div className="d-drawer-content flex flex-col">
           <div className="lg:px-30 md:px-20 px-1.5 lg:py-10 md:py-5 s:py-4 py-3 min-h-dvh flex">
             <aside className="h-full sm:px-5 p-0 sm:block hidden relative">
               <div className="fixed">
-                <h1 className="text-4xl text-primary mb-2.5 opacity-0 motion-reduce:animate-none animate-fade-in">
+                <h1 className="text-4xl text-primary mb-2.5 motion-safe:opacity-0 motion-reduce:animate-none animate-fade-in">
                   Sezioni
                 </h1>
                 <RulesPageNavigator />
               </div>
+              {/**Invisible aside to make it occupy the right amount of space while having the real aside fixed */}
               <div className="invisible" aria-hidden>
-                <h1 className="text-4xl text-primary mb-2.5 opacity-0 motion-reduce:animate-none animate-fade-in">
+                <h1 className="text-4xl text-primary mb-2.5 motion-safe:opacity-0 motion-reduce:animate-none animate-fade-in">
                   Sezioni
                 </h1>
                 <RulesPageNavigator />
@@ -35,10 +41,10 @@ export default function RulesLayout({
             </aside>
             <main className="w-full sm:p-0 px-5">
               <header>
-                <h1 className="lg:text-6xl md:text-4xl sm:text-2xl text-3xl text-primary lg:mb-4 md:mb-4 sm:mb-3 mb-2 opacity-0 motion-reduce:animate-none animate-fade-in-top">
+                <h1 className="lg:text-6xl md:text-4xl sm:text-2xl text-3xl text-primary lg:mb-4 md:mb-4 sm:mb-3 mb-2 motion-safe:opacity-0 motion-reduce:animate-none animate-fade-in-top">
                   Regolamento di FantaProf
                 </h1>
-                <h3 className="opacity-0 lg:text-3xl sm:text-2xl text-xl motion-reduce:animate-none animate-fade-in-top animation-delay-100">
+                <h3 className="motion-safe:opacity-0 lg:text-3xl sm:text-2xl text-xl motion-reduce:animate-none animate-fade-in-top animation-delay-100">
                   <p className="opacity-70">
                     Prima di iniziare a giocare, leggi il regolamento
                   </p>

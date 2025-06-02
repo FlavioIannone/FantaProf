@@ -6,7 +6,7 @@ export default function Footer({
       className={`footer md:flex sm:footer-horizontal bg-base-200  py-10 ${className}`}
     >
       <aside>
-        <p className="d-footer-title lg:text-2xl md:text-xl sm:text-lg text-primary">
+        <p className="d-footer-title lg:text-2xl md:text-xl sm:text-lg">
           {/*TODO: Inserire icona del sito */}Fanta Prof
         </p>
         <p className="lg:text-xl md:text-lg">
@@ -17,16 +17,12 @@ export default function Footer({
         </p>
       </aside>
       <div className="md:ms-5 ms-0">
-        <p className="d-footer-title lg:text-2xl md:text-xl sm:text-lg text-primary">
+        <p className="d-footer-title lg:text-2xl md:text-xl sm:text-lg">
           Licenze
         </p>
         <p className="lg:text-xl md:text-lg">
           Puoi trovare le licenze nella repository{" "}
-          <a
-            href="https://github.com"
-            target="blank"
-            className="d-btn-link text-primary"
-          >
+          <a href="https://github.com" target="blank" className="d-btn-link">
             GitHub
           </a>
           {/*TODO: Aggiungere repo di GitHub*/}

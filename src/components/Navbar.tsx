@@ -34,7 +34,7 @@ export default function Navbar({
           </div>
         </div>
         <div className="flex gap-2">
-          <ThemeController className="opacity-0 animate-fade-in-right motion-reduce:animate-none" />
+          <ThemeController className="motion-safe:opacity-0 animate-fade-in-right motion-reduce:animate-none" />
           <Link href="/auth/signin" className="sm:block hidden">
             <button className="group d-btn d-btn-outline lg:d-btn-md lg:text-xl md:text-lg animate-fade-in-right motion-reduce:animate-none animation-delay-100">
               <p>Registrazione</p>
@@ -74,7 +74,7 @@ export default function Navbar({
           </div>
         </div>
         <div className="flex gap-2">
-          <ThemeController className="opacity-0 animate-fade-in-right motion-reduce:animate-none" />
+          <ThemeController className="motion-safe:opacity-0 animate-fade-in-right motion-reduce:animate-none" />
           <Link href="/auth/signin" className="sm:block hidden">
             <button className="group d-btn d-btn-outline lg:d-btn-md lg:text-xl md:text-lg animate-fade-in-right motion-reduce:animate-none animation-delay-100">
               <p>Registrazione</p>

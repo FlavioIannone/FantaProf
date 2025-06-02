@@ -14,14 +14,14 @@ export default function Home() {
           <h1 className="lg:text-7xl md:text-5xl text-4xl md:mb-4 mb-2 text-center font-bold ">
             Fanta Prof
           </h1>
-          <h3 className="lg:text-3xl md:text-2xl text-xl text-center md:w-2/3 w-full opacity-50">
+          <h3 className="lg:text-3xl md:text-2xl text-xl text-center md:w-2/3 w-full opacity-70">
             Crea il tuo team composto dai tuoi professori e competi con i tuoi
             compagni di classe!
           </h3>
         </div>
         <div className="flex md:mb-12 mb-7 gap-5">
           <Link href="/rules/team-creation" className="flex">
-            <button className="group d-btn d-btn-ghost d-btn-lg text-xl opacity-0 animate-fade-in-bottom animation-delay-200 motion-reduce:animate-none">
+            <button className="group d-btn d-btn-ghost d-btn-lg text-xl motion-safe:opacity-0 animate-fade-in-bottom animation-delay-200 motion-reduce:animate-none">
               <i
                 className="bi bi-journals group-hover:animate-bounce"
                 aria-hidden="true"
