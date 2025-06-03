@@ -6,16 +6,16 @@ export default function BonusMalusRule() {
         Punteggi: Bonus e Malus
       </h1>
       <div className="mb-7">
-        <h3 className="motion-safe:opacity-0 lg:text-2xl sm:text-xl text-xl mb-0.5 sm:animate-fade-in-top animate-fade-in-left sm:animation-delay-700 animation-delay-300 motion-reduce:animate-none">
+        <h1 className="motion-safe:opacity-0 lg:text-2xl sm:text-xl text-xl mb-0.5 sm:animate-fade-in-top animate-fade-in-left sm:animation-delay-700 animation-delay-300 motion-reduce:animate-none">
           <i className="bi bi-check-square text-success me-1" aria-hidden></i>
           Bonus:
-        </h3>
-        <h4 className="motion-safe:opacity-0 text-xl lg:mb-3 md:mb-3 sm:mb-2 mb-1 sm:animate-fade-in-top animate-fade-in-left sm:animation-delay-700 animation-delay-300 motion-reduce:animate-none">
+        </h1>
+        <h2 className="motion-safe:opacity-0 text-xl lg:mb-3 md:mb-3 sm:mb-2 mb-1 sm:animate-fade-in-top animate-fade-in-left sm:animation-delay-700 animation-delay-300 motion-reduce:animate-none">
           <p className="opacity-90">
             I punti bonus vengono assegnati ai professori che eseguono azioni
             positive, come:
           </p>
-        </h4>
+        </h2>
         <ul className="list-disc list-inside">
           <li className="motion-safe:opacity-0 sm:animate-fade-in-top animate-fade-in-left motion-reduce:animate-none animation-delay-400">
             <span className="opacity-80">

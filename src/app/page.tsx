@@ -14,10 +14,10 @@ export default function Home() {
           <h1 className="lg:text-7xl md:text-5xl text-4xl md:mb-4 mb-2 text-center font-bold ">
             Fanta Prof
           </h1>
-          <h3 className="lg:text-3xl md:text-2xl text-xl text-center md:w-2/3 w-full opacity-70">
+          <h2 className="lg:text-3xl md:text-2xl text-xl text-center md:w-2/3 w-full opacity-70">
             Crea il tuo team composto dai tuoi professori e competi con i tuoi
             compagni di classe!
-          </h3>
+          </h2>
         </div>
         <div className="flex md:mb-12 mb-7 gap-5">
           <Link href="/rules/team-creation" className="flex">

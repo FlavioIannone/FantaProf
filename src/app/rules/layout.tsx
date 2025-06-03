@@ -20,6 +20,7 @@ export default function RulesLayout({
           id="rules-drawer"
           type="checkbox"
           className="d-drawer-toggle"
+          tabIndex={-1}
           aria-hidden
         />
         <div className="d-drawer-content flex flex-col">
@@ -44,11 +45,11 @@ export default function RulesLayout({
                 <h1 className="lg:text-6xl md:text-4xl sm:text-2xl text-3xl text-primary lg:mb-4 md:mb-4 sm:mb-3 mb-2 motion-safe:opacity-0 motion-reduce:animate-none animate-fade-in-top">
                   Regolamento di FantaProf
                 </h1>
-                <h3 className="motion-safe:opacity-0 lg:text-3xl sm:text-2xl text-xl motion-reduce:animate-none animate-fade-in-top animation-delay-100">
+                <h2 className="motion-safe:opacity-0 lg:text-3xl sm:text-2xl text-xl motion-reduce:animate-none animate-fade-in-top animation-delay-100">
                   <p className="opacity-70">
                     Prima di iniziare a giocare, leggi il regolamento
                   </p>
-                </h3>
+                </h2>
               </header>
               <div className="d-divider lg:my-9 md:my-8 sm:my-7 my-5"></div>
               {children}

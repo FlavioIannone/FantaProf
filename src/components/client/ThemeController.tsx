@@ -16,13 +16,10 @@ export default function ThemeController({
 
   return (
     <div className="d-dropdown d-dropdown-end">
-      <div tabIndex={1} role="button" className={`${className} d-btn`}>
+      <div tabIndex={0} role="button" className={`${className} d-btn`}>
         Tema <i className="bi bi-chevron-down"></i>
       </div>
-      <ul
-        tabIndex={0}
-        className="d-dropdown-content d-menu z-50 rounded-box lg:w-max flex-nowrap h-[25rem] overflow-y-auto bg-base-200 mt-4"
-      >
+      <ul className="d-dropdown-content d-menu z-50 rounded-box lg:w-max flex-nowrap h-[25rem] overflow-y-auto bg-base-200 mt-4">
         <li className="d-menu-title">Temi</li>
         <li onClick={() => handleDropdownClick("default")}>
           <p className="text-nowrap">Predefinito</p>

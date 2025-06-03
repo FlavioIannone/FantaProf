@@ -10,14 +10,14 @@ export default function Dashboard() {
             <div className="space-y-2 mb-5 flex flex-col">
               <button
                 type="button"
-                className="d-btn d-btn-primary text-xl space-x-1 d-btn-block font-medium"
+                className="d-btn d-btn-primary space-x-1 d-btn-block font-medium"
               >
                 <i className="bi bi-plus-circle"></i>
                 <p className="w-max">Crea classe</p>
               </button>
               <button
                 type="button"
-                className="d-btn d-btn-primary text-xl space-x-1 d-btn-block d-btn-outline font-medium"
+                className="d-btn d-btn-primary space-x-1 d-btn-block d-btn-outline font-medium"
               >
                 <i className="bi bi-person-add"></i>
                 <p className="w-max">Aggiungi classe</p>
@@ -46,7 +46,7 @@ export default function Dashboard() {
             </ul>
           </div>
           <ul className="d-menu w-full">
-            <div className="d-divider"></div>
+            <li className="d-divider"></li>
             <li>
               <p className="text-xl">
                 <i className="bi bi-gear me-0.5" aria-hidden></i>Impostazioni
@@ -124,6 +124,9 @@ export default function Dashboard() {
                       <td>720</td>
                       <td className="sm:block hidden">7</td>
                     </tr>
+                    <td colSpan={6} className="w-full border roundend-xl">
+                      Advertisement
+                    </td>
                   </tbody>
                   <tfoot>
                     <tr>

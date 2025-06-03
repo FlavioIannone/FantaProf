@@ -18,7 +18,7 @@ export default function LandingCard({
           {icon}
         </div>
         <h1 className="text-3xl">{title}</h1>
-        <h3 className="text-xl text-center opacity-50">{subtitle}</h3>
+        <p className="text-xl text-center opacity-50">{subtitle}</p>
       </div>
     </section>
   );

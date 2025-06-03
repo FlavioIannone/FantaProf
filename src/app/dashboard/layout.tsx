@@ -16,12 +16,13 @@ export default function DashboardLayout({
   return (
     <>
       <div className="d-drawer">
-        <input
-          id="dashboard-drawer"
-          type="checkbox"
-          className="d-drawer-toggle"
-          aria-hidden
-        />
+        <p aria-hidden>
+          <input
+            id="dashboard-drawer"
+            type="checkbox"
+            className="d-drawer-toggle"
+          />
+        </p>
         <div className="d-drawer-content flex flex-col h-dvh overflow-hidden">
           {/* Page content */}
           <DashboardNavbar />
@@ -36,10 +37,10 @@ export default function DashboardLayout({
           <ul className="d-menu bg-base-200 text-base-content min-h-full w-80 p-4">
             {/* Sidebar content here */}
             <li>
-              <a>Sidebar Item 1</a>
+              <p>Item</p>
             </li>
             <li>
-              <a>Sidebar Item 2</a>
+              <p>Item</p>
             </li>
           </ul>
         </div>
