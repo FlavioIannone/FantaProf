@@ -3,6 +3,8 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import "bootstrap-icons/font/bootstrap-icons.css";
 import { ThemeProvider } from "@/components/client/ThemeContext";
+import { ModalProvider } from "@/components/client/ModalContext";
+import { UserDataProvider } from "@/components/client/UserDataContext";
 
 const inter = Inter({
   weight: ["400"],
@@ -68,7 +70,11 @@ export default function RootLayout({
   return (
     <html lang="it" className={`bg-base-100 ${inter.className}`}>
       <body className={`w-full overflow-x-hidden bg-base-100 m-0 antialiased`}>
-        <ThemeProvider>{children}</ThemeProvider>
+        <ThemeProvider>
+          <UserDataProvider>
+            <ModalProvider>{children}</ModalProvider>
+          </UserDataProvider>
+        </ThemeProvider>
       </body>
     </html>
   );
