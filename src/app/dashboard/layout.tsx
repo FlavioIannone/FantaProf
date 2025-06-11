@@ -1,3 +1,4 @@
+import DashboardAside from "@/components/client/DashboardAside";
 import DashboardNavbar from "@/components/DashboardNavbar";
 import { Metadata } from "next";
 
@@ -16,17 +17,19 @@ export default function DashboardLayout({
   return (
     <>
       <div className="d-drawer">
-        <p aria-hidden>
-          <input
-            id="dashboard-drawer"
-            type="checkbox"
-            className="d-drawer-toggle"
-          />
-        </p>
+        <input
+          id="dashboard-drawer"
+          type="checkbox"
+          className="d-drawer-toggle"
+          tabIndex={-1}
+        />
         <div className="d-drawer-content flex flex-col h-dvh overflow-hidden">
           {/* Page content */}
           <DashboardNavbar />
-          {children}
+          <div className="flex grow w-full">
+            <DashboardAside />
+            {children}
+          </div>
         </div>
         <div className="d-drawer-side">
           <label
