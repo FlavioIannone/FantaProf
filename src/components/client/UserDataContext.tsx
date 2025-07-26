@@ -17,7 +17,7 @@ function UserDataProvider({ children }: { children: React.ReactNode }) {
   const [userData, setUserData] = useState<User | undefined>();
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(client_auth, (user) => {
+    const unsubscribe = client_auth.onAuthStateChanged((user) => {
       if (user) {
         setUserData(user);
       } else {

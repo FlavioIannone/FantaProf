@@ -1,4 +1,4 @@
-import RulesPageNavigator from "@/components/client/Rules/RulesPageNavigator";
+import RulesPageNavigator from "@/app/rules/components/RulesPageNavigator";
 import Footer from "@/components/server/Footer";
 import Navbar from "@/components/server/Navbar";
 import ReturnToHome from "@/components/server/BackToPathArrow";

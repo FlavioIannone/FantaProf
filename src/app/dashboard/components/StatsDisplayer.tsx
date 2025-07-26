@@ -1,27 +1,25 @@
 "use client";
 
 import { getGlobalStats } from "@/app/dashboard/(queryHandlers)/handlers";
-import { useQuery, isServer } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import DashboardCard from "./DashboardCard";
-import { client_auth } from "@/lib/firebase-connection";
-import { useAuthUser } from "@/lib/useAuthUser";
+import { useIdToken } from "@/lib/hooks/useIdToken";
 
 export default function StatsDisplayer() {
-  const user = useAuthUser();
+  const { token, loading: tokenLoading, error: tokenError } = useIdToken();
+
   const {
     data: stats,
     isLoading: statsLoading,
     isError: statsError,
   } = useQuery({
-    enabled: !!user,
-    queryKey: ["globalStats", client_auth.currentUser?.uid!],
+    enabled: !!token,
+    queryKey: ["globalStats"],
     queryFn: async () => {
-      if (isServer) return undefined;
-      return await getGlobalStats(client_auth.currentUser?.uid!);
+      return await getGlobalStats(token!);
     },
   });
-
-  if (statsLoading || !user) {
+  if (statsLoading || tokenLoading) {
     return (
       <div className="sm:mb-3.5 mb-2.5 lg:space-x-5 space-x-2.5 grid sm:grid-cols-3 grid-cols-2 md:w-full">
         <section className="d-card d-skeleton space-y-2.5 sm:px-5 sm:py-6 px-3 py-4 grow-1">
@@ -61,10 +59,6 @@ export default function StatsDisplayer() {
         </section>
       </div>
     );
-  }
-
-  if (statsError) {
-    return <>Error</>;
   }
 
   return (

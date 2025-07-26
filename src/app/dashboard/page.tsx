@@ -1,6 +1,6 @@
-import DashboardNavbar from "@/components/server/DashboardNavbar/DashboardNavbar";
-import ClassesTable from "@/components/server/Tables/ClassesTable";
-import StatsDisplayer from "@/components/client/Dashboard/StatsDisplayer";
+import DashboardNavbar from "@/app/dashboard/components/DashboardNavbar";
+import ClassesTable from "@/components/client/Tables/ClassesTable";
+import StatsDisplayer from "./components/StatsDisplayer";
 
 export default function Dashboard() {
   return (

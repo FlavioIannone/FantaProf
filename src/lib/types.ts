@@ -11,33 +11,33 @@ export const reqHasBodyBasedOnPath: (
   pathToVerify: string,
   methodsToVerify: string[] = []
 ) => {
-  // Lower case every element of the array
-  methodsToVerify = methodsToVerify.map((value) => value.toLowerCase());
+    // Lower case every element of the array
+    methodsToVerify = methodsToVerify.map((value) => value.toLowerCase());
 
-  // Obtain the path
-  const path = req.nextUrl.pathname.replace("/api/protected", "");
+    // Obtain the path
+    const path = req.nextUrl.pathname.replace("/api/protected", "");
 
-  // Verify if the path is in this list
-  if (path.startsWith(pathToVerify)) {
-    if (methodsToVerify.length === 0) {
-      // If the methodsToVerify is empty, verify both methods
-      if (req.method === "POST" || req.method === "PUT") {
-        if (parseInt(req.headers.get("Content-Length")!) === 0) {
-          return false;
+    // Verify if the path is in this list
+    if (path.startsWith(pathToVerify)) {
+      if (methodsToVerify.length === 0) {
+        // If the methodsToVerify is empty, verify both methods
+        if (req.method === "POST" || req.method === "PUT") {
+          if (parseInt(req.headers.get("Content-Length")!) === 0) {
+            return false;
+          }
         }
-      }
-    } else {
-      // If the methodsToVerify is not empty, verify the correct methods
-      if (methodsToVerify.includes(req.method.toLowerCase())) {
-        // Verify the content length
-        if (parseInt(req.headers.get("Content-Length")!) === 0) {
-          return false;
+      } else {
+        // If the methodsToVerify is not empty, verify the correct methods
+        if (methodsToVerify.includes(req.method.toLowerCase())) {
+          // Verify the content length
+          if (parseInt(req.headers.get("Content-Length")!) === 0) {
+            return false;
+          }
         }
       }
     }
-  }
-  return true; //If the path doesn't include pathToVerify or the request defines a body, just return true
-};
+    return true; //If the path doesn't include pathToVerify or the request defines a body, just return true
+  };
 
 export class FirebaseCollections {
   // *CLASSES* collections
@@ -55,8 +55,13 @@ export class FirebaseCollections {
   static readonly EVENT_REGISTRATIONS = "event_registrations";
 }
 
-export type FormData = {
+export type SignInData = {
   username: string | undefined;
+  email: string | undefined;
+  password: string | undefined;
+};
+
+export type LoginData = {
   email: string | undefined;
   password: string | undefined;
 };

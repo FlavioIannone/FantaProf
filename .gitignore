@@ -19,6 +19,8 @@ src/app/api/(api_lib)/fantaprof-app-firebase-adminsdk-*.json
 # next.js
 /.next/
 /out/
+/**/dist
+
 
 # production
 /build

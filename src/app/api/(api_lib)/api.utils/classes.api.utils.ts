@@ -1,21 +1,12 @@
 import { NextResponse } from "next/server";
-import { admin_firestore } from "./firebase-connection";
+import { admin_auth, admin_firestore } from "../firebase-connection";
 import { FieldValue } from "firebase-admin/firestore";
 import { FirebaseCollections } from "@/lib/types";
-// Class doc type
-export type ClassData = {
-  name: string;
-  initial_credits: number;
-  createdAt: FieldValue; // Server timestamp
-};
-
-// Student enrollment doc type
-export type StudentEnrollment = {
-  uid: string;
-  credits: number;
-  admin: boolean;
-  createdAt: FieldValue; // Server timestamp
-};
+import { ClassData, StudentEnrollment } from "../schema.db";
+import {
+  ClassesTableRow,
+  MembersTableRow,
+} from "@/app/dashboard/(queryHandlers)/handlers";
 
 export const createClass = async ({
   uid,
@@ -79,8 +70,8 @@ export const getClasses = async (uid: string): Promise<NextResponse> => {
       .where("uid", "==", uid) // and that has a given uid
       .orderBy("createdAt", "desc") // order by creation timestamp, desc
       .get();
-    const enrollmentDocsData = enrollmentSnapshot.docs.map((value) =>
-      value.data()
+    const enrollmentDocsData = enrollmentSnapshot.docs.map(
+      (value) => value.data() as StudentEnrollment
     );
     // Extract the parent
     const classRefs = enrollmentSnapshot.docs
@@ -98,16 +89,21 @@ export const getClasses = async (uid: string): Promise<NextResponse> => {
     try {
       // Fetch all class documents in parallel
       const classSnapshots = await admin_firestore.getAll(...classRefs);
-
+      const classes: ClassesTableRow[] = classSnapshots.map((doc, index) => {
+        const data = doc.data() as ClassData;
+        return {
+          class_id: doc.id,
+          class_name: data.class_name,
+          members: data.members,
+          points: enrollmentDocsData[index].points,
+          credits: enrollmentDocsData[index].credits,
+          admin: enrollmentDocsData[index].admin,
+        };
+      });
       // return classes
       return NextResponse.json(
         {
-          classes: classSnapshots.map((doc, index) => ({
-            id: doc.id,
-            ...doc.data(),
-            points: enrollmentDocsData[index].points,
-            credits: enrollmentDocsData[index].credits,
-          })),
+          classes: classes,
         },
         { status: 200 }
       );
@@ -160,3 +156,83 @@ export const getClass = async (class_id: string): Promise<NextResponse> => {
     );
   }
 };
+
+export const getClassMembers = async (
+  class_id: string
+): Promise<NextResponse> => {
+  const membersEnrollmentSnapshot = await admin_firestore
+    .collection(
+      `${FirebaseCollections.CLASSES}/${class_id}/${FirebaseCollections.STUDENT_ENROLLMENTS}`
+    )
+    .orderBy("points", "desc")
+    .get();
+  const membersEnrollment = membersEnrollmentSnapshot.docs;
+
+  const getUserResult = await admin_auth.getUsers(
+    membersEnrollment.map((member) => {
+      const data: StudentEnrollment = member.data() as StudentEnrollment;
+      return { uid: data.uid };
+    })
+  );
+
+  return NextResponse.json({
+    members: getUserResult.users.map((user, index) => {
+      const member = membersEnrollment[index].data() as StudentEnrollment;
+      const classMember: MembersTableRow = {
+        display_name: user.displayName ?? "No name",
+        photo_URL: user.photoURL ?? "",
+        credits: member.credits,
+        points: member.points,
+        admin: member.admin,
+      };
+      return classMember;
+    }),
+  });
+};
+
+export const joinClass = async (class_id: string, uid: string): Promise<NextResponse> => {
+  let status = 200;
+  let message = "OK"
+  try {
+    await admin_firestore.runTransaction(async (transaction) => {
+      const newStudentEnrollmentDocRef = admin_firestore.doc(`${FirebaseCollections.CLASSES}/${class_id}/${FirebaseCollections.STUDENT_ENROLLMENTS}/${uid}`);
+      const enrollmentDoc = await transaction.get(newStudentEnrollmentDocRef)
+      if (enrollmentDoc.exists) {
+        status = 404;
+        message = `The user is already member of the class ${class_id}`
+        throw Error();
+      }
+
+      const classDocRef = admin_firestore.doc(`${FirebaseCollections.CLASSES}/${class_id}`)
+      const classDoc = await transaction.get(classDocRef);
+      if (!classDoc.exists) {
+        status = 404;
+        message = `The class ${class_id} doesn't exist`
+        throw Error();
+      }
+
+      const newStudent: StudentEnrollment = {
+        uid: uid,
+        credits: (classDoc.data() as ClassData).initial_credits,
+        admin: false,
+        createdAt: FieldValue.serverTimestamp(),
+        points: 0
+      }
+      transaction.create(newStudentEnrollmentDocRef, newStudent).update(classDocRef, {
+        members: FieldValue.increment(1)
+      })
+
+    })
+  } catch (error) {
+    return NextResponse.json({
+      message: message
+    }, {
+      status: status
+    })
+  }
+  return NextResponse.json({
+    message: message
+  }, {
+    status: status
+  })
+}

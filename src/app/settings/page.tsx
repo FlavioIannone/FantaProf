@@ -1,8 +1,8 @@
 import ThemeController from "@/components/client/Theme/ThemeController";
 import ThemeDisplayer from "@/components/client/Theme/ThemeDisplayer";
-import UserDataSettingsCard from "@/components/client/Settings/UserDataSettingsCard";
+import UserDataSettingsCard from "@/app/settings/components/UserDataSettingsCard";
 import Link from "next/link";
-import LogoutButton from "@/components/client/Settings/LogoutButton";
+import LogoutButton from "@/app/settings/components/LogoutButton";
 
 export default function SettingsPage() {
   return (

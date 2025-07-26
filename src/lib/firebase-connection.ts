@@ -1,13 +1,8 @@
-import { sign } from "crypto";
 import { getAnalytics } from "firebase/analytics";
 import { initializeApp } from "firebase/app";
-import {
-  getAuth,
-  GoogleAuthProvider,
-  signInWithPopup,
-  signInWithRedirect,
-} from "firebase/auth";
+import { getAuth, GoogleAuthProvider } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
+import { SignInData } from "./types";
 
 const firebaseConfig = {
   apiKey: "AIzaSyCa1gxQDYaBObzw711IY9KNnY2h_llDVcw",
@@ -25,20 +20,6 @@ export const client_auth = getAuth(app);
 client_auth.useDeviceLanguage(); // Set the auth language to the user's device language
 // Initialize Firestore
 export const client_firestore = getFirestore(app);
-
-//* Google Auth Provider
-const googleProvider = new GoogleAuthProvider();
-googleProvider.addScope("email"); // Ensure proper scopes are added
-googleProvider.setCustomParameters({
-  prompt: "select_account", // Ensures the account selection popup is shown
-});
-
-export const signInWithGooglePopup = () =>
-  signInWithPopup(client_auth, googleProvider);
-export const logInWithGooglePopup = () =>
-  signInWithPopup(client_auth, googleProvider);
-export const loginWithGoogleRedirect = () =>
-  signInWithRedirect(client_auth, googleProvider);
 
 export const initAnalytics = () => {
   if (typeof window !== "undefined") {

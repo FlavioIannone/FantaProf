@@ -1,7 +1,7 @@
-import OverviewTab from "./(tabs)/OverviewTab";
+import OverviewTab from "./(tabs)/OverviewTab/OverviewTab";
 import BackToPathArrow from "@/components/server/BackToPathArrow";
-import DashboardTabs from "@/components/client/Dashboard/Classes/DashboardTabs";
-import MembersTab from "./(tabs)/MembersTab";
+import DashboardTabsNavigator from "@/app/dashboard/classes/[class_id]/(tabs)/DashboardTabsNavigator";
+import ClassNameDisplayer from "./(tabs)/OverviewTab/components/ClassNameDisplayer";
 
 export default async function ClassPage({
   params,
@@ -22,7 +22,7 @@ export default async function ClassPage({
             />
             <div className="d-divider d-divider-horizontal mx-2 h-full"></div>
             <div className="flex flex-col">
-              <h1 className="sm:text-2xl text-xl">Classe 5F</h1>
+              <ClassNameDisplayer />
               <h2 className="text-md opacity-70">Gestisci la classe</h2>
             </div>
           </div>
@@ -36,9 +36,9 @@ export default async function ClassPage({
         </nav>
       </header>
 
-      <DashboardTabs />
+      <DashboardTabsNavigator />
       <main className="grow-1 d-carousel [&_.d-carousel-item]:w-full [&_.d-carousel-item]:max-h-full overflow-hidden">
-        <OverviewTab id="tab0" />
+        <OverviewTab id="tab0" class_id={class_id} />
         <div id="tab1" className="d-carousel-item"></div>
         <div id="tab2" className="d-carousel-item"></div>
       </main>

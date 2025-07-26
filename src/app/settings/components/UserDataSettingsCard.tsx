@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
-import { useUserData } from "../UserDataContext";
+import { useUserData } from "../../../components/client/UserDataContext";
 import Image from "next/image";
 import { UserData } from "@/lib/types";
 import { updateEmail, updateProfile } from "firebase/auth";

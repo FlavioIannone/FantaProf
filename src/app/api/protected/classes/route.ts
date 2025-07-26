@@ -1,10 +1,6 @@
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
-import {
-  ClassData,
-  createClass,
-  getClasses,
-} from "../../(api_lib)/classes.api.utils";
+import { createClass, getClasses } from "../../(api_lib)/api.utils/classes.api.utils";
 
 export const GET = async (req: NextRequest): Promise<NextResponse> => {
   const uid = req.headers.get("Authorization")?.replace("Bearer ", "")!;
@@ -14,9 +10,11 @@ export const GET = async (req: NextRequest): Promise<NextResponse> => {
 
 export const POST = async (req: NextRequest): Promise<NextResponse> => {
   const uid = req.headers.get("Authorization")?.replace("Bearer ", "")!;
-  console.log(uid);
 
-  const body = (await req.json()) as ClassData;
+  const body = (await req.json()) as {
+    name: string;
+    initial_credits: number;
+  };
 
   return await createClass({
     uid,

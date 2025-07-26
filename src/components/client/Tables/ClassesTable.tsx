@@ -1,49 +1,28 @@
 "use client";
 
 import { getClasses } from "@/app/dashboard/(queryHandlers)/handlers";
-import { client_auth, client_firestore } from "@/lib/firebase-connection";
-import { useQuery, isServer } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
 import ClassesTableSkeleton from "./ClassesTableSkeleton";
-import { useAuthUser } from "@/lib/useAuthUser";
-import { onSnapshot, collection } from "firebase/firestore";
-import { useEffect } from "react";
-import { FirebaseCollections } from "@/lib/types";
-import { getQueryClient } from "@/lib/getQueryClient";
+import { useIdToken } from "@/lib/hooks/useIdToken";
 
 export default function ClassesTable({ header }: { header?: React.ReactNode }) {
-  const queryClient = getQueryClient();
-  const user = useAuthUser();
+  const { token, loading: tokenLoading, error: tokenError } = useIdToken();
+
   const {
     data: rows,
     isLoading: rowsLoading,
     isError: rowsError,
   } = useQuery({
-    enabled: !!user,
-    queryKey: ["classes", client_auth.currentUser?.uid!],
+    enabled: !!token,
+    queryKey: ["classes"],
     queryFn: async () => {
-      if (isServer) return undefined;
-      return await getClasses(client_auth.currentUser?.uid!);
+      return await getClasses(token!);
     },
     refetchOnMount: true,
   });
 
-  useEffect(() => {
-    const classesUnsubscribe = onSnapshot(
-      collection(client_firestore, FirebaseCollections.CLASSES),
-      (snapshot) => {
-        queryClient.invalidateQueries({
-          queryKey: ["classes", client_auth.currentUser?.uid!],
-        });
-      }
-    );
-
-    return () => {
-      classesUnsubscribe();
-    }; // clean up the listener on unmount
-  }, []);
-
-  if (rowsLoading || !user) {
+  if (rowsLoading || tokenLoading) {
     return <ClassesTableSkeleton header={header} />;
   }
 
@@ -57,8 +36,8 @@ export default function ClassesTable({ header }: { header?: React.ReactNode }) {
             {rows &&
               rows.map((row) => (
                 <Link
-                  href={`/dashboard/classes/${row.id}`}
-                  key={row.id}
+                  href={`/dashboard/classes/${row.class_id}?class_name=${row.class_name}&admin=${row.admin}&members=${row.members}&initial_credits=${row.credits}&curuser_points=${row.points}`}
+                  key={row.class_id}
                   className="flex justify-between bg-base-200 rounded-2xl p-4"
                 >
                   <div className="flex items-center gap-2">

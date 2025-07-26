@@ -1,5 +1,6 @@
-import { admin_firestore } from "./firebase-connection";
+
 import { FirebaseCollections } from "@/lib/types";
+import { admin_firestore } from "../firebase-connection";
 
 export const getBestScore = async (
   uid: string

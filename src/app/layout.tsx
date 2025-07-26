@@ -4,9 +4,9 @@ import "./globals.css";
 import "bootstrap-icons/font/bootstrap-icons.css";
 import { ThemeProvider } from "@/components/client/Theme/ThemeContext";
 import { ModalProvider } from "@/components/client/Modal/ModalContext";
-import { UserDataProvider } from "@/components/client/UserDataContext";
 import React from "react";
 import ReactQueryProvider from "@/components/client/ReactQueryProvider";
+import { UserDataProvider } from "@/components/client/UserDataContext";
 
 const inter = Inter({
   weight: ["400"],

@@ -2,27 +2,24 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState, FormEvent, useEffect } from "react";
-import { client_auth, logInWithGooglePopup } from "@/lib/firebase-connection";
-import {
-  signInWithEmailAndPassword,
-  AuthError,
-  setPersistence,
-  browserLocalPersistence,
-  onAuthStateChanged,
-  AuthErrorCodes,
-} from "firebase/auth";
+import { client_auth } from "@/lib/firebase-connection";
+import { type LoginData } from "@/lib/types";
+
+import { onAuthStateChanged } from "firebase/auth";
 import { useModal } from "@/components/client/Modal/ModalContext";
-import { useUserData } from "@/components/client/UserDataContext";
+import {
+  logInWithLoginData,
+  signInWithGoogle,
+} from "@/lib/authenticationManager";
 
 export default function LoginForm() {
   const router = useRouter();
   const { setModal } = useModal();
-  const { setUserData: setUserDataInStorage } = useUserData();
   const [isSubmitLoading, setIsSubmitLoading] = useState(false);
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
 
   // Stato per gestire i dati dell'utente
-  const [loginData, setLoginData] = useState({
+  const [loginData, setLoginData] = useState<LoginData>({
     email: "",
     password: "",
   });
@@ -45,9 +42,6 @@ export default function LoginForm() {
     setIsSubmitLoading(true);
     const unsubscribe = onAuthStateChanged(client_auth, async (user) => {
       if (user) {
-        await setPersistence(client_auth, browserLocalPersistence);
-        setUserDataInStorage(user);
-        setIsSubmitLoading(false);
         router.replace("/dashboard");
       }
     });
@@ -62,54 +56,27 @@ export default function LoginForm() {
       showModalError("Errore", "Compila tutti i campi richiesti.");
       return;
     }
-    try {
-      setIsSubmitLoading(true);
-      await setPersistence(client_auth, browserLocalPersistence);
-      const userCredentials = await signInWithEmailAndPassword(
-        client_auth,
-        loginData.email,
-        loginData.password
-      );
-      setUserDataInStorage(userCredentials.user);
-      router.replace("/dashboard");
-    } catch (error) {
-      const authError = error as AuthError;
-      let message = "Errore durante l'accesso.";
-      if (authError.code === AuthErrorCodes.USER_DELETED) {
-        message = "Utente non trovato.";
-      } else if (authError.code === AuthErrorCodes.INVALID_PASSWORD) {
-        message = "Password errata.";
-      } else if (authError.code === AuthErrorCodes.INVALID_EMAIL) {
-        message = "Email non valida.";
-      }
 
-      showModalError("Errore autenticazione", message);
-      setIsSubmitLoading(false);
+    setIsSubmitLoading(true);
+    const result = await logInWithLoginData(loginData);
+
+    if (result.successful) {
+      router.replace("/dashboard");
+    } else {
+      showModalError("Errore autenticazione", result.errorMsg);
     }
+    setIsSubmitLoading(false);
   };
 
   // Gestione login con Google
   const onGoogleLogin = async () => {
-    try {
-      setIsGoogleLoading(true);
-      await setPersistence(client_auth, browserLocalPersistence);
-      const userCredentials = await logInWithGooglePopup();
-      console.log("Google login successful", userCredentials.user);
-      setUserDataInStorage(userCredentials.user);
+    const result = await signInWithGoogle();
+    if (result.successful) {
       router.replace("/dashboard");
-    } catch (error) {
-      const authError = error as AuthError;
-      let message = "Errore durante l'autenticazione con Google.";
-      if (authError.code === AuthErrorCodes.POPUP_CLOSED_BY_USER) {
-        message = "La finestra di autenticazione è stata chiusa.";
-      }
-      if (authError.code === AuthErrorCodes.POPUP_BLOCKED) {
-        message = "La finestra di autenticazione è stata bloccata.";
-      }
-      showModalError("Errore autenticazione", message);
-    } finally {
-      setIsGoogleLoading(false);
+    } else {
+      showModalError("Errore autenticazione", result.errorMsg);
     }
+    setIsGoogleLoading(false);
   };
 
   return (

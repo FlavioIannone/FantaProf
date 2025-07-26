@@ -1,5 +1,5 @@
 import { type NextRequest, NextResponse } from "next/server";
-import { admin_auth } from "../(api_lib)/firebase-connection";
+import { admin_auth } from "../../(api_lib)/firebase-connection";
 
 export const GET = async (req: NextRequest) => {
   // console.log("The token is being verified...");

@@ -12,7 +12,7 @@ const tabs = [
   { icon: "bi bi-activity", label: "Eventi" },
 ];
 
-export default function DashboardTabs() {
+export default function DashboardTabsNavigator() {
   const [tab, setTab] = useState(0);
   return (
     <nav className="flex d-navbar shadow border-b border-base-300 items-center">

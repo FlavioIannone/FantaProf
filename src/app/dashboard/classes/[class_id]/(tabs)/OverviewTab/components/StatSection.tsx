@@ -5,7 +5,7 @@ export default function StatSection({
   className,
 }: {
   title: string;
-  value: number;
+  value: string;
   icon: string;
   className: string;
 }) {

@@ -1,33 +1,25 @@
 "use client";
 import Link from "next/link";
-import { UserData, type FormData } from "@/lib/types";
-import { client_auth, signInWithGooglePopup } from "@/lib/firebase-connection";
-import {
-  createUserWithEmailAndPassword,
-  AuthError,
-  UserCredential,
-  setPersistence,
-  browserLocalPersistence,
-  onAuthStateChanged,
-  onIdTokenChanged,
-} from "firebase/auth";
+import { type SignInData } from "@/lib/types";
+import { client_auth } from "@/lib/firebase-connection";
+import { onAuthStateChanged } from "firebase/auth";
 import { useEffect, useState } from "react";
 import { useModal } from "@/components/client/Modal/ModalContext";
 import { useRouter } from "next/navigation";
-import { useUserData } from "@/components/client/UserDataContext";
+import {
+  createAccountWithFormData,
+  signInWithGoogle,
+} from "@/lib/authenticationManager";
 
 export default function RegistrationForm() {
   //* Router to redirect
   const router = useRouter();
   //* State to manage user input
-  const [formData, setFormData] = useState<FormData>({
+  const [formData, setFormData] = useState<SignInData>({
     username: undefined,
     email: undefined,
     password: undefined,
   });
-
-  //* Set the user data in the context
-  const { setUserData: setUserDataInStorage } = useUserData();
 
   //* Modal util
   const { setModal } = useModal();
@@ -53,8 +45,6 @@ export default function RegistrationForm() {
     setIsSubmitLoading(true);
     const unsubscribe = onAuthStateChanged(client_auth, async (user) => {
       if (user) {
-        await setPersistence(client_auth, browserLocalPersistence);
-        setUserDataInStorage(user);
         router.replace("/dashboard");
       }
     });
@@ -70,53 +60,29 @@ export default function RegistrationForm() {
       showModalError("Errore", "Compila tutti i campi richiesti.");
       return;
     }
+    setIsSubmitLoading(true);
 
-    try {
-      setIsSubmitLoading(true);
-      await setPersistence(client_auth, browserLocalPersistence);
-      const userCredentials = await createUserWithEmailAndPassword(
-        client_auth,
-        formData.email,
-        formData.password
-      );
-      setUserDataInStorage(userCredentials.user);
+    const result = await createAccountWithFormData(formData);
+    if (result.successful) {
       router.replace("/dashboard");
-    } catch (error) {
-      const authError = error as AuthError;
-      let message = "Errore durante la registrazione.";
-      if (authError.code === "auth/email-already-in-use") {
-        message = "Questa email è già registrata.";
-      } else if (authError.code === "auth/invalid-email") {
-        message = "L'email inserita non è valida.";
-      } else if (authError.code === "auth/weak-password") {
-        message = "La password è troppo debole.";
-      }
-      showModalError("Errore autenticazione", message);
-      setIsSubmitLoading(false);
+    } else {
+      showModalError("Errore autenticazione", result.errorMsg);
     }
+    setIsSubmitLoading(false);
   };
 
   //* Handling the signin by Google Popup registration
   const onGoogleSignIn = async (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
-    try {
-      setIsGoogleLoading(true);
-      await setPersistence(client_auth, browserLocalPersistence);
-      const userCredentials = await signInWithGooglePopup();
-      setUserDataInStorage(userCredentials.user);
+    setIsGoogleLoading(true);
+
+    const result = await signInWithGoogle();
+    if (result.successful) {
       router.replace("/dashboard");
-    } catch (error) {
-      const authError = error as AuthError;
-      let message = "Errore durante l'autenticazione con Google.";
-      if (authError.code === "auth/popup-closed-by-user") {
-        message = "La finestra di autenticazione è stata chiusa.";
-      }
-      if (authError.code === "auth/popup-blocked") {
-        message = "La finestra di autenticazione è stata bloccata.";
-      }
-      showModalError("Errore autenticazione", message);
-      setIsGoogleLoading(false);
+    } else {
+      showModalError("Errore autenticazione", result.errorMsg);
     }
+    setIsGoogleLoading(false);
   };
 
   return (
