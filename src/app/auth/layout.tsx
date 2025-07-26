@@ -1,5 +1,5 @@
-import Footer from "@/components/Footer";
-import ReturnToHome from "@/components/ReturnToHome";
+import Footer from "@/components/server/Footer";
+import ReturnToHome from "@/components/server/BackToPathArrow";
 import Image from "next/image";
 
 export default function AuthLayout({
@@ -22,6 +22,7 @@ export default function AuthLayout({
               width={2823}
               height={5006}
               className="shadow rounded-xl w-full h-full object-cover object-top-left"
+              priority
             />
           </div>
           <div className="sm:flex-1/2 flex flex-col justify-center items-center w-full">

@@ -1,7 +1,12 @@
 import { sign } from "crypto";
 import { getAnalytics } from "firebase/analytics";
 import { initializeApp } from "firebase/app";
-import { getAuth, GoogleAuthProvider, signInWithPopup } from "firebase/auth";
+import {
+  getAuth,
+  GoogleAuthProvider,
+  signInWithPopup,
+  signInWithRedirect,
+} from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
 
 const firebaseConfig = {
@@ -16,14 +21,26 @@ const firebaseConfig = {
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-auth.useDeviceLanguage(); // Set the auth language to the user's device language
+export const client_auth = getAuth(app);
+client_auth.useDeviceLanguage(); // Set the auth language to the user's device language
 // Initialize Firestore
-const db = getFirestore(app);
-const googleProvider = new GoogleAuthProvider();
-const signInWithGooglePopup = () => signInWithPopup(auth, googleProvider);
+export const client_firestore = getFirestore(app);
 
-const initAnalytics = () => {
+//* Google Auth Provider
+const googleProvider = new GoogleAuthProvider();
+googleProvider.addScope("email"); // Ensure proper scopes are added
+googleProvider.setCustomParameters({
+  prompt: "select_account", // Ensures the account selection popup is shown
+});
+
+export const signInWithGooglePopup = () =>
+  signInWithPopup(client_auth, googleProvider);
+export const logInWithGooglePopup = () =>
+  signInWithPopup(client_auth, googleProvider);
+export const loginWithGoogleRedirect = () =>
+  signInWithRedirect(client_auth, googleProvider);
+
+export const initAnalytics = () => {
   if (typeof window !== "undefined") {
     // Initialize Firebase Analytics
     const analytics = getAnalytics(app);
@@ -34,5 +51,3 @@ const initAnalytics = () => {
     );
   }
 };
-
-export { app, auth, db, initAnalytics, signInWithGooglePopup };

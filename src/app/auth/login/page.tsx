@@ -2,23 +2,24 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState, FormEvent, useEffect } from "react";
-import { auth } from "@/lib/firebase-connection";
+import { client_auth, logInWithGooglePopup } from "@/lib/firebase-connection";
 import {
   signInWithEmailAndPassword,
   AuthError,
   setPersistence,
   browserLocalPersistence,
-  signInWithPopup,
-  GoogleAuthProvider,
   onAuthStateChanged,
+  AuthErrorCodes,
 } from "firebase/auth";
-import { useModal } from "@/components/client/ModalContext";
+import { useModal } from "@/components/client/Modal/ModalContext";
 import { useUserData } from "@/components/client/UserDataContext";
 
 export default function LoginForm() {
   const router = useRouter();
   const { setModal } = useModal();
-  const { setUserData } = useUserData();
+  const { setUserData: setUserDataInStorage } = useUserData();
+  const [isSubmitLoading, setIsSubmitLoading] = useState(false);
+  const [isGoogleLoading, setIsGoogleLoading] = useState(false);
 
   // Stato per gestire i dati dell'utente
   const [loginData, setLoginData] = useState({
@@ -41,12 +42,16 @@ export default function LoginForm() {
 
   // Redirect se già autenticato
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
+    setIsSubmitLoading(true);
+    const unsubscribe = onAuthStateChanged(client_auth, async (user) => {
       if (user) {
+        await setPersistence(client_auth, browserLocalPersistence);
+        setUserDataInStorage(user);
+        setIsSubmitLoading(false);
         router.replace("/dashboard");
-        setUserData(user);
       }
     });
+    setIsSubmitLoading(false);
     return () => unsubscribe();
   }, [router]);
 
@@ -58,44 +63,52 @@ export default function LoginForm() {
       return;
     }
     try {
-      await setPersistence(auth, browserLocalPersistence);
-      await signInWithEmailAndPassword(
-        auth,
+      setIsSubmitLoading(true);
+      await setPersistence(client_auth, browserLocalPersistence);
+      const userCredentials = await signInWithEmailAndPassword(
+        client_auth,
         loginData.email,
         loginData.password
       );
+      setUserDataInStorage(userCredentials.user);
       router.replace("/dashboard");
     } catch (error) {
       const authError = error as AuthError;
       let message = "Errore durante l'accesso.";
-      if (authError.code === "auth/user-not-found") {
+      if (authError.code === AuthErrorCodes.USER_DELETED) {
         message = "Utente non trovato.";
-      } else if (authError.code === "auth/wrong-password") {
+      } else if (authError.code === AuthErrorCodes.INVALID_PASSWORD) {
         message = "Password errata.";
-      } else if (authError.code === "auth/invalid-email") {
+      } else if (authError.code === AuthErrorCodes.INVALID_EMAIL) {
         message = "Email non valida.";
       }
+
       showModalError("Errore autenticazione", message);
+      setIsSubmitLoading(false);
     }
   };
 
   // Gestione login con Google
   const onGoogleLogin = async () => {
     try {
-      await setPersistence(auth, browserLocalPersistence);
-      const provider = new GoogleAuthProvider();
-      await signInWithPopup(auth, provider);
+      setIsGoogleLoading(true);
+      await setPersistence(client_auth, browserLocalPersistence);
+      const userCredentials = await logInWithGooglePopup();
+      console.log("Google login successful", userCredentials.user);
+      setUserDataInStorage(userCredentials.user);
       router.replace("/dashboard");
     } catch (error) {
       const authError = error as AuthError;
       let message = "Errore durante l'autenticazione con Google.";
-      if (authError.code === "auth/popup-closed-by-user") {
+      if (authError.code === AuthErrorCodes.POPUP_CLOSED_BY_USER) {
         message = "La finestra di autenticazione è stata chiusa.";
       }
-      if (authError.code === "auth/popup-blocked") {
+      if (authError.code === AuthErrorCodes.POPUP_BLOCKED) {
         message = "La finestra di autenticazione è stata bloccata.";
       }
       showModalError("Errore autenticazione", message);
+    } finally {
+      setIsGoogleLoading(false);
     }
   };
 
@@ -169,7 +182,12 @@ export default function LoginForm() {
         <button
           type="submit"
           aria-label="Accedi"
-          className="d-btn d-btn-primary d-btn-block animate-fade-in-bottom motion-safe:opacity-0 text-lg animation-delay-400 motion-reduce:animate-none"
+          className={`d-btn d-btn-primary d-btn-block animate-fade-in-bottom text-lg motion-reduce:animate-none ${
+            isSubmitLoading
+              ? "animate-pulse"
+              : "motion-safe:opacity-0 animation-delay-400"
+          }`}
+          disabled={isSubmitLoading || isGoogleLoading}
         >
           Accedi
         </button>
@@ -190,9 +208,14 @@ export default function LoginForm() {
           type="button"
           aria-label="Accedi con google"
           onClick={onGoogleLogin}
-          className="d-btn d-btn-outline d-btn-block motion-safe:opacity-0 animate-fade-in-bottom animation-delay-600 motion-reduce:animate-none"
+          className={`d-btn d-btn-outline d-btn-block animate-fade-in-bottom motion-reduce:animate-none ${
+            isGoogleLoading
+              ? "animate-pulse"
+              : "motion-safe:opacity-0 animation-delay-600"
+          }`}
+          disabled={isGoogleLoading || isSubmitLoading}
         >
-          <i className="bi bi-google"></i>Accedi con google
+          <i className="bi bi-google" aria-hidden></i>Accedi con google
         </button>
       </form>
     </>

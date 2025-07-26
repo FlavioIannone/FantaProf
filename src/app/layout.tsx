@@ -2,9 +2,11 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import "bootstrap-icons/font/bootstrap-icons.css";
-import { ThemeProvider } from "@/components/client/ThemeContext";
-import { ModalProvider } from "@/components/client/ModalContext";
+import { ThemeProvider } from "@/components/client/Theme/ThemeContext";
+import { ModalProvider } from "@/components/client/Modal/ModalContext";
 import { UserDataProvider } from "@/components/client/UserDataContext";
+import React from "react";
+import ReactQueryProvider from "@/components/client/ReactQueryProvider";
 
 const inter = Inter({
   weight: ["400"],
@@ -70,11 +72,13 @@ export default function RootLayout({
   return (
     <html lang="it" className={`bg-base-100 ${inter.className}`}>
       <body className={`w-full overflow-x-hidden bg-base-100 m-0 antialiased`}>
-        <ThemeProvider>
-          <UserDataProvider>
-            <ModalProvider>{children}</ModalProvider>
-          </UserDataProvider>
-        </ThemeProvider>
+        <ReactQueryProvider>
+          <ThemeProvider>
+            <UserDataProvider>
+              <ModalProvider>{children}</ModalProvider>
+            </UserDataProvider>
+          </ThemeProvider>
+        </ReactQueryProvider>
       </body>
     </html>
   );

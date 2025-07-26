@@ -1,3 +1,4 @@
 {
-  "cSpell.words": ["Fanta", "Flavio", "Iannone", "Pouya"]
+  "cSpell.words": ["Fanta", "Flavio", "Iannone", "Pouya"],
+  "compile-hero.disable-compile-files-on-did-save-code": true
 }
