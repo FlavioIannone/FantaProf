@@ -1,5 +1,5 @@
 "use client";
-import { loadTheme, writeTheme } from "@/lib/themeLoader";
+import { loadThemeFromCookies, writeThemeFromCookies } from "@/lib/themeLoader";
 import {
   createContext,
   ReactNode,
@@ -16,24 +16,32 @@ type ThemeContextType = {
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 function ThemeProvider({ children }: Readonly<{ children: ReactNode }>) {
-  const [theme, setTheme] = useState(() => {
-    if (typeof document === "undefined") return "default";
-    else return loadTheme();
-  });
+  const [theme, setTheme] = useState("default");
+
+  // Load theme from cookies on initial mount
+  useEffect(() => {
+    const load = async () => {
+      const cookieTheme = loadThemeFromCookies();
+      if (cookieTheme) {
+        setTheme(cookieTheme);
+        document.documentElement.setAttribute("data-theme", cookieTheme);
+      }
+    };
+    load();
+  }, []);
+
+  // Update cookie and HTML attribute when theme changes
+  useEffect(() => {
+    writeThemeFromCookies(theme);
+    document.documentElement.setAttribute("data-theme", theme);
+  }, [theme]);
 
   const handleSetTheme = (newTheme: string) => {
-    writeTheme(newTheme);
     setTheme(newTheme);
   };
 
-  useEffect(() => {
-    const loadedTheme = loadTheme();
-
-    document.documentElement.setAttribute("data-theme", loadedTheme);
-  }, [theme]);
-
   return (
-    <ThemeContext.Provider value={{ theme: theme, setTheme: handleSetTheme }}>
+    <ThemeContext.Provider value={{ theme, setTheme: handleSetTheme }}>
       {children}
     </ThemeContext.Provider>
   );
