@@ -2,11 +2,7 @@
 
 import { useIdToken } from "@/lib/hooks/useIdToken";
 import { useQuery } from "@tanstack/react-query";
-import ClassesTableSkeleton from "./ClassesTableSkeleton";
-import {
-  getClasses,
-  getClassMembers,
-} from "@/app/dashboard/(queryHandlers)/handlers";
+import { getClassMembers } from "@/app/dashboard/(queryHandlers)/handlers";
 import MmbersTableSkeleton from "./MembersTableSkeleton";
 
 export default function MembersTable({
@@ -28,7 +24,6 @@ export default function MembersTable({
     queryFn: async () => {
       return await getClassMembers(token!, class_id);
     },
-    refetchOnMount: true,
   });
 
   if (rowsLoading || tokenLoading) {

@@ -12,7 +12,7 @@ export const POST = async (req: NextRequest): Promise<NextResponse> => {
   const uid = req.headers.get("Authorization")?.replace("Bearer ", "")!;
 
   const body = (await req.json()) as {
-    name: string;
+    class_name: string;
     initial_credits: number;
   };
 

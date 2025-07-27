@@ -22,7 +22,7 @@ export const middleware = async (req: NextRequest): Promise<NextResponse> => {
   // If the middleware is disabled, the idToken won't be verified.
   const isMiddlewareDisabled = process.env.DISABLE_MIDDLEWARE === "true";
   // !DEBUG:
-  console.log("Middleware on: " + !isMiddlewareDisabled);
+  // console.log("Middleware on: " + !isMiddlewareDisabled);
 
   if (
     !isMiddlewareDisabled &&
