@@ -26,7 +26,7 @@ export default function DashboardNavbar({
           >
           <i className="bi bi-list text-2xl" aria-hidden></i>
           </label> */}
-          <Link href="settings">
+          <Link href="/settings">
             <i className="bi bi-three-dots text-2xl" aria-hidden></i>
           </Link>
         </div>

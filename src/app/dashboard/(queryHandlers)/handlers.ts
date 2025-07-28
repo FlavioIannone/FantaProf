@@ -22,6 +22,9 @@ export async function getClasses(token: string) {
       Authorization: `Bearer ${token}`,
     },
   });
+  if (rowsRes.status === 404) {
+    return []
+  }
   if (rowsRes.status !== 200) {
     throw new Error();
   }
@@ -44,9 +47,6 @@ export async function getGlobalStats(token: string) {
     enrollmentCount: number;
   };
 
-  if (stats.bestScore.points === -1 || stats.enrollmentCount === -1) {
-    throw new Error();
-  }
   return stats;
 }
 

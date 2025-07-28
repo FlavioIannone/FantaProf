@@ -1,14 +1,14 @@
 
 const themeItemKey = "data-theme";
 
-export function loadThemeFromLocalStorage() {
-  const string = localStorage.getItem(themeItemKey) ?? "default";
-  return string;
-}
+// export function loadThemeFromLocalStorage() {
+//   const string = localStorage.getItem(themeItemKey) ?? "default";
+//   return string;
+// }
 
-export function writeThemeToLocalStorage(theme: string) {
-  localStorage.setItem(themeItemKey, theme);
-}
+// export function writeThemeToLocalStorage(theme: string) {
+//   localStorage.setItem(themeItemKey, theme);
+// }
 
 export function loadThemeFromCookies(): string {
   const cookies = document.cookie.split("; ");

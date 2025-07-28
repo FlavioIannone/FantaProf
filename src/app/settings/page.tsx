@@ -3,17 +3,14 @@ import ThemeDisplayer from "@/components/client/Theme/ThemeDisplayer";
 import UserDataSettingsCard from "@/app/settings/components/UserDataSettingsCard";
 import Link from "next/link";
 import LogoutButton from "@/app/settings/components/LogoutButton";
+import GoBackButton from "@/components/client/GoBackButton";
 
 export default function SettingsPage() {
   return (
     <div className="min-h-dvh w-full flex justify-center">
       <div className="lg:w-2/4 sm:w-3/4 w-full">
         <nav className="d-navbar rounded-sm border-b border-base-content/10">
-          <Link href="/dashboard">
-            <button type="button" className="d-btn d-btn-ghost p-0">
-              <i className="bi bi-arrow-left-short text-4xl" aria-hidden></i>
-            </button>
-          </Link>
+          <GoBackButton />
           <p className="text-2xl ms-2">Impostazioni</p>
         </nav>
         <main className="px-5 py-2.5 space-y-8 [&_.settings-card]:rounded-sm [&_.settings-card]:border-b [&_.settings-card]:border-base-content/5">

@@ -6,6 +6,7 @@ export const GET = async (req: NextRequest): Promise<NextResponse> => {
   const bestScore = await getBestScore(uid);
   const enrollmentCount = await getClassesEnrollmentCount(uid);
 
+
   return NextResponse.json({
     bestScore: bestScore,
     enrollmentCount: enrollmentCount,

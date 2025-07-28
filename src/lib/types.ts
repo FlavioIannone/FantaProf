@@ -2,58 +2,49 @@ import { UserRecord } from "firebase-admin/auth";
 import { ApiError } from "next/dist/server/api-utils";
 import { NextRequest } from "next/server";
 
-export const reqHasBodyBasedOnPath: (
+export const reqHasBodyBasedOnPath = (
   req: NextRequest,
   pathToVerify: string,
-  methodsToVerify: string[]
-) => boolean = (
-  req: NextRequest,
-  pathToVerify: string,
-  methodsToVerify: string[] = []
-) => {
-    // Lower case every element of the array
-    methodsToVerify = methodsToVerify.map((value) => value.toLowerCase());
+  methodsToVerify: string[] = [],
+  excludePaths: string[] = []
+): boolean => {
+  const methods = methodsToVerify.map((m) => m.toLowerCase());
+  const method = req.method.toLowerCase();
+  const contentLength = parseInt(req.headers.get("Content-Length") || "0", 10);
+  const path = req.nextUrl.pathname.replace("/api/protected", "");
 
-    // Obtain the path
-    const path = req.nextUrl.pathname.replace("/api/protected", "");
-
-    // Verify if the path is in this list
-    if (path.startsWith(pathToVerify)) {
-      if (methodsToVerify.length === 0) {
-        // If the methodsToVerify is empty, verify both methods
-        if (req.method === "POST" || req.method === "PUT") {
-          if (parseInt(req.headers.get("Content-Length")!) === 0) {
-            return false;
-          }
-        }
-      } else {
-        // If the methodsToVerify is not empty, verify the correct methods
-        if (methodsToVerify.includes(req.method.toLowerCase())) {
-          // Verify the content length
-          if (parseInt(req.headers.get("Content-Length")!) === 0) {
-            return false;
-          }
-        }
-      }
-    }
-    return true; //If the path doesn't include pathToVerify or the request defines a body, just return true
+  const matchesPattern = (pattern: string): boolean => {
+    const regex = new RegExp(
+      "^" + pattern.split("*").map(escapeRegex).join(".*") + "$"
+    );
+    return regex.test(path);
   };
 
-export class FirebaseCollections {
-  // *CLASSES* collections
-  static readonly CLASSES = "classes";
-  // *STUDENTS* collections
-  static readonly STUDENT_ENROLLMENTS = "students_enrollment";
-  static readonly TEAMS = "teams";
-  // *TEACHERS* collections
-  static readonly TEACHERS = "teachers";
-  static readonly TEACHER_EVENTS = "teacher_events";
-  static readonly TEACHER_ENROLLMENT = "teacher_enrollment";
-  static readonly TEACHER_TEAM_ENROLLMENT = "teacher_team_enrollment";
-  // *EVENTS* collections
-  static readonly EVENTS = "events";
-  static readonly EVENT_REGISTRATIONS = "event_registrations";
+  // ✅ Skip verification if path matches any exclusion
+  if (excludePaths.some(matchesPattern)) {
+    return true;
+  }
+
+  // ✅ Continue verification if path matches the main pattern
+  if (matchesPattern(pathToVerify)) {
+    if (
+      methods.length === 0
+        ? method === "post" || method === "put"
+        : methods.includes(method)
+    ) {
+      return contentLength > 0;
+    }
+  }
+
+  return true;
+};
+
+function escapeRegex(str: string): string {
+  return str.replace(/[-/\\^$+?.()|[\]{}]/g, "\\$&");
 }
+
+
+
 
 export type SignInData = {
   username: string | undefined;

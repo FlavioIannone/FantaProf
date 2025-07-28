@@ -24,7 +24,6 @@ function ThemeProvider({ children }: Readonly<{ children: ReactNode }>) {
       const cookieTheme = loadThemeFromCookies();
       if (cookieTheme) {
         setTheme(cookieTheme);
-        document.documentElement.setAttribute("data-theme", cookieTheme);
       }
     };
     load();

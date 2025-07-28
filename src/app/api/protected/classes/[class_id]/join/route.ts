@@ -9,3 +9,4 @@ export const PUT = async (
   const uid = req.headers.get("Authorization")?.replace("Bearer ", "")!;
   return joinClass(class_id, uid)
 };
+

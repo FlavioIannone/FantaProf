@@ -1,11 +1,11 @@
 "use client";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useState, FormEvent, useEffect } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useState, FormEvent, useEffect, useRef } from "react";
 import { client_auth } from "@/lib/firebase-connection";
 import { type LoginData } from "@/lib/types";
 
-import { onAuthStateChanged } from "firebase/auth";
+import { onAuthStateChanged, User } from "firebase/auth";
 import { useModal } from "@/components/client/Modal/ModalContext";
 import {
   logInWithLoginData,
@@ -17,6 +17,11 @@ export default function LoginForm() {
   const { setModal } = useModal();
   const [isSubmitLoading, setIsSubmitLoading] = useState(false);
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
+  const searchParams = useSearchParams();
+  const callbackUrl = decodeURI(
+    searchParams.get("callbackUrl") ?? "/dashboard"
+  );
+  const redirectFlag = useRef(false);
 
   // Stato per gestire i dati dell'utente
   const [loginData, setLoginData] = useState<LoginData>({
@@ -37,12 +42,35 @@ export default function LoginForm() {
     });
   };
 
+  const redirectUser = (user: User) => {
+    if (redirectFlag.current) return;
+
+    redirectFlag.current = true;
+    if (callbackUrl === "/dashboard") router.replace("/dashboard");
+    let token = undefined;
+    user.getIdToken(true).then((t) => {
+      token = t;
+      fetch(callbackUrl, {
+        method: "PUT",
+        cache: "no-store",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }).then((res) => {
+        if (res.status === 200) router.replace("/dashboard");
+        else {
+          setModal(true); // TODO: add checks
+        }
+      });
+    });
+  };
+
   // Redirect se già autenticato
   useEffect(() => {
     setIsSubmitLoading(true);
     const unsubscribe = onAuthStateChanged(client_auth, async (user) => {
       if (user) {
-        router.replace("/dashboard");
+        redirectUser(user);
       }
     });
     setIsSubmitLoading(false);
@@ -61,7 +89,7 @@ export default function LoginForm() {
     const result = await logInWithLoginData(loginData);
 
     if (result.successful) {
-      router.replace("/dashboard");
+      redirectUser(result.user);
     } else {
       showModalError("Errore autenticazione", result.errorMsg);
     }
@@ -70,9 +98,10 @@ export default function LoginForm() {
 
   // Gestione login con Google
   const onGoogleLogin = async () => {
+    setIsGoogleLoading(true);
     const result = await signInWithGoogle();
     if (result.successful) {
-      router.replace("/dashboard");
+      redirectUser(result.user);
     } else {
       showModalError("Errore autenticazione", result.errorMsg);
     }

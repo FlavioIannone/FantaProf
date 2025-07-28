@@ -19,12 +19,15 @@ export default function ClassesTable({ header }: { header?: React.ReactNode }) {
     queryFn: async () => {
       return await getClasses(token!);
     },
-    refetchOnMount: true,
   });
 
   if (rowsLoading || tokenLoading) {
     return <ClassesTableSkeleton header={header} />;
   }
+
+  const noDataFoundUI = (
+    <div className="italic">Non fai parte di nessuna classe</div>
+  );
 
   return (
     <div className="w-full">
@@ -32,8 +35,10 @@ export default function ClassesTable({ header }: { header?: React.ReactNode }) {
         {header}
         {!rowsError ? (
           <div className="space-y-2.5">
-            {!rows && <>Data not found</>}
-            {rows &&
+            {rows?.length === 0 ? (
+              <>{noDataFoundUI}</>
+            ) : (
+              rows &&
               rows.map((row) => (
                 <Link
                   href={`/dashboard/classes/${row.class_id}?class_name=${row.class_name}&admin=${row.admin}&members=${row.members}&initial_credits=${row.credits}&curuser_points=${row.points}`}
@@ -67,7 +72,8 @@ export default function ClassesTable({ header }: { header?: React.ReactNode }) {
                     <h2 className="opacity-70">Punti</h2>
                   </div>
                 </Link>
-              ))}
+              ))
+            )}
           </div>
         ) : (
           <>Error</>

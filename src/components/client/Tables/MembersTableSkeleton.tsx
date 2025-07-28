@@ -1,14 +1,22 @@
-import { ReactNode } from "react";
-
-export default function MmbersTableSkeleton({
-  header,
-}: {
-  header?: ReactNode;
-}) {
+export default function MmbersTableSkeleton() {
   return (
     <div className="lg:px-8 md:px-6 sm:px-5 px-4 w-full">
       <div className="py-5">
-        {header}
+        <div className="mb-4 flex justify-between items-center">
+          <h1 className="text-3xl font-extrabold">
+            <span className="bi bi-people-fill me-2" aria-disabled></span>
+            Membri
+          </h1>
+          <button
+            type="button"
+            className="d-btn d-btn-primary"
+            disabled
+            aria-disabled
+          >
+            <i className="bi bi-share"></i>
+            <p className="md:block sm:hidden hidden">Invita</p>
+          </button>
+        </div>
         <div className="space-y-2.5">
           {Array.from({ length: 10 }).map((_, index) => (
             <div

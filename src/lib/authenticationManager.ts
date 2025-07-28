@@ -6,6 +6,8 @@ import {
   GoogleAuthProvider,
   signInWithEmailAndPassword,
   AuthErrorCodes,
+
+  User,
 } from "firebase/auth";
 import { client_auth } from "./firebase-connection";
 import { SignInData, LoginData } from "./types";
@@ -25,6 +27,7 @@ const signInWithGooglePopup = () =>
 type AuthenticationFunctionsReturnType =
   | {
     successful: true;
+    user: User
   }
   | {
     successful: false;
@@ -36,6 +39,10 @@ export const signInWithGoogle =
     try {
       await client_auth.setPersistence(browserLocalPersistence);
       const userCredentials = await signInWithGooglePopup();
+      return {
+        successful: true,
+        user: userCredentials.user
+      };
     } catch (error) {
       const authError = error as AuthError;
       let message = "Errore durante l'autenticazione con Google.";
@@ -48,10 +55,6 @@ export const signInWithGoogle =
       return {
         successful: false,
         errorMsg: message,
-      };
-    } finally {
-      return {
-        successful: true,
       };
     }
   };
@@ -66,6 +69,10 @@ export const createAccountWithFormData = async (
       formData.email!,
       formData.password!
     );
+    return {
+      successful: true,
+      user: userCredentials.user
+    };
   } catch (error) {
     const authError = error as AuthError;
     let message = "Errore durante la registrazione.";
@@ -80,10 +87,6 @@ export const createAccountWithFormData = async (
       successful: false,
       errorMsg: message,
     };
-  } finally {
-    return {
-      successful: true,
-    };
   }
 };
 
@@ -97,6 +100,10 @@ export const logInWithLoginData = async (
       loginData.email!,
       loginData.password!
     );
+    return {
+      successful: true,
+      user: userCredentials.user
+    }
   } catch (error) {
     const authError = error as AuthError;
     let message = "Errore durante l'accesso.";
@@ -110,10 +117,6 @@ export const logInWithLoginData = async (
     return {
       successful: false,
       errorMsg: message,
-    };
-  } finally {
-    return {
-      successful: true,
     };
   }
 };

@@ -2,12 +2,11 @@
 import { NextResponse } from "next/server";
 import { admin_auth, admin_firestore } from "../firebase-connection";
 import { FieldValue, QueryDocumentSnapshot } from "firebase-admin/firestore";
-import { FirebaseCollections } from "@/lib/types";
+import { Class, FirebaseCollections, StudentEnrollment } from "../db.schema";
 import {
   ClassesTableRow,
   MembersTableRow,
 } from "@/app/dashboard/(queryHandlers)/handlers";
-import { studentEnrollmentConverter, classConverter } from "../schema.db";
 
 
 //======================== CREATE CLASS ========================//
@@ -29,7 +28,7 @@ export const createClass = async ({
 
   // Create a new document reference for the class
   const classDocRef = admin_firestore
-    .collection(FirebaseCollections.CLASSES)
+    .collection(Class.collection)
     .doc();
 
   // Create a document reference for the student enrollment inside the new class
@@ -40,29 +39,22 @@ export const createClass = async ({
     .doc(uid);
 
 
-  const classDocData = classConverter.toFirestore({
+  const classDocData = Class.converter.toFirestore({
     ...classData,
-    members: 1,
-    createdAt: FieldValue.serverTimestamp()
   });
   // Add the class creation to the batch
-  batch.create(classDocRef, { ...classDocData, createdAt: FieldValue.serverTimestamp() });
+  batch.create(classDocRef, classDocData);
 
 
-  const studentEnrollmentDocData = studentEnrollmentConverter.toFirestore({
+  const studentEnrollmentDocData = StudentEnrollment.converter.toFirestore({
     uid: uid,
     admin: true, // The creator is the admin
     credits: classData.initial_credits,
-    points: 0,
-    createdAt: FieldValue.serverTimestamp()
+    team: []
   });
 
   // Add the student enrollment creation to the batch
-  batch.create(studentEnrollmentDocRef, {
-    ...studentEnrollmentDocData,
-    createdAt: FieldValue.serverTimestamp(),
-
-  });
+  batch.create(studentEnrollmentDocRef, studentEnrollmentDocData);
 
   try {
     await batch.commit(); // Commit the batch
@@ -90,14 +82,13 @@ export const getClasses = async (uid: string): Promise<NextResponse> => {
     // Get all student enrollment documents across all classes for the user
     const enrollmentSnapshot = await admin_firestore
       .collectionGroup(FirebaseCollections.STUDENT_ENROLLMENTS)
-      .withConverter(studentEnrollmentConverter)
       .where("uid", "==", uid)
-      .orderBy("createdAt", "desc")
+      .orderBy("created_at", "desc")
       .get();
 
     // Map the student enrollment data
     const enrollmentDocsData = enrollmentSnapshot.docs.map(
-      (doc) => (doc.data())
+      (doc) => StudentEnrollment.schema.parse(doc.data())
     );
 
     // Get parent class document references for each enrollment
@@ -119,7 +110,7 @@ export const getClasses = async (uid: string): Promise<NextResponse> => {
 
       // Merge class data with enrollment data to build UI-friendly rows
       const classes: ClassesTableRow[] = classSnapshots.map((doc, index) => {
-        const data = classConverter.fromFirestore(doc as QueryDocumentSnapshot);
+        const data = Class.schema.parse(doc.data());
         return {
           class_id: doc.id,
           class_name: data.class_name,
@@ -142,6 +133,7 @@ export const getClasses = async (uid: string): Promise<NextResponse> => {
     }
 
   } catch (error) {
+    console.log(error);
     return NextResponse.json(
       { message: "Error while retrieving student enrollments" },
       { status: 500 }
@@ -158,7 +150,7 @@ export const getClass = async (class_id: string): Promise<NextResponse> => {
   try {
     const classDoc = await admin_firestore
       .collection(FirebaseCollections.CLASSES)
-      .withConverter(classConverter)
+      .withConverter(Class.converter)
       .doc(class_id)
       .get();
 
@@ -191,7 +183,7 @@ export const getClassMembers = async (
   const membersEnrollmentPromise = admin_firestore
     .collection(
       `${FirebaseCollections.CLASSES}/${class_id}/${FirebaseCollections.STUDENT_ENROLLMENTS}`
-    ).withConverter(studentEnrollmentConverter)
+    ).withConverter(StudentEnrollment.converter)
     .orderBy("points", "desc")
     .get();
 
@@ -213,8 +205,8 @@ export const getClassMembers = async (
         display_name: user.displayName ?? "No name",
         photo_URL: user.photoURL ?? "",
         credits: member.credits,
-        points: member.points,
-        admin: member.admin,
+        points: member.points!,
+        admin: member.admin!,
       };
       return classMember;
     }),
@@ -232,6 +224,8 @@ export const joinClass = async (
 ): Promise<NextResponse> => {
   try {
     await admin_firestore.runTransaction(async (transaction) => {
+      console.log(uid);
+
       const classRef = admin_firestore.doc(`${FirebaseCollections.CLASSES}/${class_id}`);
       const enrollmentRef = admin_firestore.doc(`${classRef.path}/${FirebaseCollections.STUDENT_ENROLLMENTS}/${uid}`);
 
@@ -257,15 +251,15 @@ export const joinClass = async (
         };
       }
 
-      const classData = classConverter.fromFirestore(classSnap as QueryDocumentSnapshot);
+      const classData = Class.converter.fromFirestore(classSnap as QueryDocumentSnapshot);
 
       // Create new student enrollment data
-      const newStudent = studentEnrollmentConverter.toFirestore({
+      const newStudent = StudentEnrollment.converter.toFirestore({
         uid,
         credits: classData.initial_credits,
         admin: false,
-        createdAt: FieldValue.serverTimestamp(),
-        points: 0
+        points: 0,
+        team: []
       });
 
       // Create enrollment doc and increment member count

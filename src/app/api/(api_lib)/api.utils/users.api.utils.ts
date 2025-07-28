@@ -1,6 +1,7 @@
 
-import { FirebaseCollections } from "@/lib/types";
+import { FieldPath } from "firebase-admin/firestore";
 import { admin_firestore } from "../firebase-connection";
+import { StudentEnrollment } from "../db.schema";
 
 export const getBestScore = async (
   uid: string
@@ -8,7 +9,7 @@ export const getBestScore = async (
   try {
     //* Retrieve the enrollment with the highest score
     const enrollmentSnapshot = await admin_firestore
-      .collectionGroup(FirebaseCollections.STUDENT_ENROLLMENTS)
+      .collectionGroup(StudentEnrollment.collection)
       .where("uid", "==", uid)
       .orderBy("points", "desc")
       .limit(1)
@@ -26,7 +27,7 @@ export const getBestScore = async (
       className: classDocData.class_name,
     };
   } catch (error) {
-    // console.error("Error fetching best score:", error);
+    console.error("Error fetching best score:", error);
     return {
       points: -1,
       className: "",
@@ -40,7 +41,8 @@ export const getClassesEnrollmentCount = async (
   try {
     const classesCount = (
       await admin_firestore
-        .collectionGroup(FirebaseCollections.STUDENT_ENROLLMENTS)
+        .collectionGroup(StudentEnrollment.collection)
+        .withConverter(StudentEnrollment.converter)
         .where("uid", "==", uid)
         .count()
         .get()

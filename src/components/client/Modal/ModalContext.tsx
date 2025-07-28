@@ -3,8 +3,9 @@
 import { createContext, useState, useRef, useEffect, useContext } from "react";
 
 type ModalProps = {
-  title: string;
-  content: string;
+  title: React.ReactNode;
+  content: React.ReactNode;
+  onCloseButtonText?: string;
   onClose?: () => void;
 };
 
@@ -56,8 +57,11 @@ function ModalProvider({ children }: Readonly<{ children: React.ReactNode }>) {
           <h3 className="font-bold text-lg">{modalProps.title}</h3>
           <p className="py-4">{modalProps.content}</p>
           <div className="d-modal-action">
-            <button className="btn" onClick={() => setIsOpen(false)}>
-              Close
+            <button
+              className="d-btn d-btn-neutral"
+              onClick={() => setIsOpen(false)}
+            >
+              {modalProps.onCloseButtonText ?? "Chiudi"}
             </button>
           </div>
         </div>

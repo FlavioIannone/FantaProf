@@ -4,6 +4,8 @@ import { reqHasBodyBasedOnPath } from "./lib/types";
 export const middleware = async (req: NextRequest): Promise<NextResponse> => {
   const classesRequestHasBody = reqHasBodyBasedOnPath(req, "/classes", [
     "POST",
+  ], [
+    "/classes/*/join"
   ]);
 
   // Verify if the reqeust has a body (applied only for certain endpoints and methods)

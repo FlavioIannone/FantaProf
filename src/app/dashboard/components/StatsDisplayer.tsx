@@ -65,12 +65,30 @@ export default function StatsDisplayer() {
     <div className="sm:mb-3.5 mb-2.5 lg:space-x-5 space-x-2.5 grid sm:grid-cols-3 grid-cols-2 md:w-full">
       <DashboardCard
         headingStat="Miglior punteggio"
-        mainStat={stats ? stats.bestScore.points : "Errore"}
-        footerStat={stats ? stats.bestScore.className : "Errore"}
+        mainStat={
+          !statsError
+            ? stats?.bestScore.points === -1
+              ? "N/D"
+              : stats?.bestScore.points
+            : "Errore"
+        }
+        footerStat={
+          !statsError
+            ? stats?.bestScore.className === ""
+              ? "N/D"
+              : stats?.bestScore.className
+            : "Errore"
+        }
       />
       <DashboardCard
         headingStat="Classi attive"
-        mainStat={stats ? stats.enrollmentCount : "Errore"}
+        mainStat={
+          !statsError
+            ? stats?.enrollmentCount === 0
+              ? "N/D"
+              : stats?.enrollmentCount
+            : "Errore"
+        }
         footerStat="Di cui fai parte"
         className="sm:block hidden"
       />
