@@ -12,19 +12,8 @@ export default function Dashboard() {
             <h1 className="text-3xl mb-2.5 font-extrabold">Bentornato!</h1>
             {/**Stats */}
             <StatsDisplayer />
-            <ClassesTable
-              header={
-                <div className="mb-4 flex justify-between items-center">
-                  <h1 className="text-3xl font-extrabold">
-                    <span
-                      className="bi bi-people-fill me-2"
-                      aria-disabled
-                    ></span>
-                    Classi
-                  </h1>
-                </div>
-              }
-            />
+            {/**Classes */}
+            <ClassesTable />
           </div>
         </div>
       </main>

@@ -5,91 +5,110 @@ import { useTheme } from "./ThemeContext";
 type Theme = {
   key: string;
   displayText: string;
+  imageUrl: string;
 };
 
-const lightThemes: Theme[] = [
+export const lightThemes: Theme[] = [
   {
     key: "fantaprof-light",
     displayText: "Chiaro",
+    imageUrl: "/auth_images/auth_image_blue.webp",
   },
   {
     key: "retro",
     displayText: "Retro",
+    imageUrl: "/auth_images/auth_image_red_300.webp",
   },
   {
     key: "valentine",
     displayText: "San Valentino",
+    imageUrl: "/auth_images/auth_image_pink_500.webp",
   },
   {
     key: "lofi",
     displayText: "Lofi",
+    imageUrl: "/auth_images/auth_image_black.webp",
   },
   {
     key: "garden",
     displayText: "Giardino",
+    imageUrl: "/auth_images/auth_image_fucsia.webp",
   },
   {
     key: "pastel",
     displayText: "Pastelli",
+    imageUrl: "/auth_images/auth_image_pink_200.webp",
   },
   {
     key: "fantasy",
     displayText: "Fantastico",
+    imageUrl: "/auth_images/auth_image_purple.webp",
   },
 ];
 
-const darkThemes: Theme[] = [
+export const darkThemes: Theme[] = [
   {
     key: "fantaprof-dark",
     displayText: "Scuro",
+    imageUrl: "/auth_images/auth_image_blue.webp",
   },
   {
     key: "dracula",
     displayText: "Dracula",
+    imageUrl: "/auth_images/auth_image_pink_500.webp",
   },
   {
     key: "synthwave",
     displayText: "Synthwave",
+    imageUrl: "/auth_images/auth_image_pink_500.webp",
   },
   {
     key: "halloween",
     displayText: "Halloween",
+    imageUrl: "/auth_images/auth_image_orange.webp",
   },
   {
     key: "forest",
     displayText: "Foresta",
+    imageUrl: "/auth_images/auth_image_green.webp",
   },
   {
     key: "luxury",
     displayText: "Luxury",
+    imageUrl: "/auth_images/auth_image_white.webp",
   },
   {
     key: "black",
     displayText: "Nero",
+    imageUrl: "/auth_images/auth_image_black.webp",
   },
   {
     key: "night",
     displayText: "Notte",
+    imageUrl: "/auth_images/auth_image_sky.webp",
   },
   {
     key: "sunset",
     displayText: "Tramonto",
+    imageUrl: "/auth_images/auth_image_orange.webp",
   },
   {
     key: "coffee",
     displayText: "Caffé",
+    imageUrl: "/auth_images/auth_image_orange.webp",
   },
 ];
 
 export default function ThemeController({
   className,
 }: Readonly<{ className?: string }>) {
-  const { setTheme } = useTheme();
+  const { theme, setTheme } = useTheme();
 
   const handleDropdownClick = (value: string) => {
     if (document.activeElement) {
       (document.activeElement as HTMLElement).blur();
     }
+    if (theme === value) return;
     setTheme(value);
   };
 

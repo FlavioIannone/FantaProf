@@ -43,7 +43,20 @@ export default function MembersTable({ class_id }: { class_id: string }) {
             className="d-btn d-btn-primary"
             onClick={() => {
               modal.setModal(true, {
-                title: "Invita i tuoi amici",
+                title: (
+                  <div className="flex justify-between">
+                    Invita un amico
+                    <button
+                      className="d-btn d-btn-ghost"
+                      type="button"
+                      onClick={() => {
+                        modal.setModal(false);
+                      }}
+                    >
+                      <i className="bi bi-x text-3xl" aria-disabled></i>
+                    </button>
+                  </div>
+                ),
                 content:
                   "Per invitare altri membri, copia il link e invialo a loro",
                 onCloseButtonText: "Copia link",

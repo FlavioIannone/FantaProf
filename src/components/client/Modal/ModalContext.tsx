@@ -2,15 +2,16 @@
 
 import { createContext, useState, useRef, useEffect, useContext } from "react";
 
-type ModalProps = {
+export type ModalProps = {
   title: React.ReactNode;
   content: React.ReactNode;
   onCloseButtonText?: string;
   onClose?: () => void;
+  onConfirm?: () => void;
 };
 
-type ModalContextType = {
-  isOpen: boolean;
+export type ModalContextType = {
+  readonly isOpen: boolean;
   setModal: (value: boolean, newModalContent?: ModalProps) => void;
   modalProps: ModalProps;
 };
@@ -54,12 +55,17 @@ function ModalProvider({ children }: Readonly<{ children: React.ReactNode }>) {
         }}
       >
         <div className="d-modal-box">
-          <h3 className="font-bold text-lg">{modalProps.title}</h3>
-          <p className="py-4">{modalProps.content}</p>
+          <div className="font-bold text-lg">{modalProps.title}</div>
+          <div className="py-4">{modalProps.content}</div>
           <div className="d-modal-action">
             <button
               className="d-btn d-btn-neutral"
-              onClick={() => setIsOpen(false)}
+              onClick={() => {
+                if (modalProps.onConfirm) {
+                  modalProps.onConfirm();
+                }
+                setIsOpen(false);
+              }}
             >
               {modalProps.onCloseButtonText ?? "Chiudi"}
             </button>

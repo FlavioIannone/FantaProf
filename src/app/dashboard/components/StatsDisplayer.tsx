@@ -4,14 +4,15 @@ import { getGlobalStats } from "@/app/dashboard/(queryHandlers)/handlers";
 import { useQuery } from "@tanstack/react-query";
 import DashboardCard from "./DashboardCard";
 import { useIdToken } from "@/lib/hooks/useIdToken";
+import ClassActionsButtons from "./ClassActionsButtons";
 
 export default function StatsDisplayer() {
   const { token, loading: tokenLoading, error: tokenError } = useIdToken();
-
   const {
     data: stats,
     isLoading: statsLoading,
     isError: statsError,
+    isFetching: statsFetching,
   } = useQuery({
     enabled: !!token,
     queryKey: ["globalStats"],
@@ -19,7 +20,7 @@ export default function StatsDisplayer() {
       return await getGlobalStats(token!);
     },
   });
-  if (statsLoading || tokenLoading) {
+  if (statsLoading || tokenLoading || statsFetching) {
     return (
       <div className="sm:mb-3.5 mb-2.5 lg:space-x-5 space-x-2.5 grid sm:grid-cols-3 grid-cols-2 md:w-full">
         <section className="d-card d-skeleton space-y-2.5 sm:px-5 sm:py-6 px-3 py-4 grow-1">
@@ -92,22 +93,7 @@ export default function StatsDisplayer() {
         footerStat="Di cui fai parte"
         className="sm:block hidden"
       />
-      <section className={`space-y-2.5 grow-1 flex flex-col justify-center`}>
-        <button
-          type="button"
-          className="d-btn d-btn-primary space-x-1 d-btn-block"
-        >
-          <i className="bi bi-plus-circle" aria-hidden></i>
-          <p className="w-max">Crea classe</p>
-        </button>
-        <button
-          type="button"
-          className="d-btn d-btn-primary space-x-1 d-btn-block d-btn-outline"
-        >
-          <i className="bi bi-building-add" aria-hidden></i>
-          <p className="w-max">Aggiungi classe</p>
-        </button>
-      </section>
+      <ClassActionsButtons />
     </div>
   );
 }

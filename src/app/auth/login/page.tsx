@@ -11,6 +11,7 @@ import {
   logInWithLoginData,
   signInWithGoogle,
 } from "@/lib/authenticationManager";
+import ThemeController from "@/components/client/Theme/ThemeController";
 
 export default function LoginForm() {
   const router = useRouter();
@@ -67,13 +68,13 @@ export default function LoginForm() {
 
   // Redirect se già autenticato
   useEffect(() => {
-    setIsSubmitLoading(true);
     const unsubscribe = onAuthStateChanged(client_auth, async (user) => {
+      setIsSubmitLoading(true);
       if (user) {
         redirectUser(user);
       }
+      setIsSubmitLoading(false);
     });
-    setIsSubmitLoading(false);
     return () => unsubscribe();
   }, [router]);
 
