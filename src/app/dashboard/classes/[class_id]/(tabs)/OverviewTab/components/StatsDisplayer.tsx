@@ -1,52 +1,66 @@
 "use client";
 
+import {
+  getClassData,
+  getClassStats,
+} from "@/app/dashboard/(queryHandlers)/handlers";
 import StatSection from "@/app/dashboard/classes/[class_id]/(tabs)/OverviewTab/components/StatSection";
-import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect } from "react";
+import { useIdToken } from "@/lib/hooks/useIdToken";
+import { useQueries } from "@tanstack/react-query";
+import StatsDisplayerSkeleton from "./StatsDisplayerSkeleton";
+import { queryKeys } from "@/lib/getQueryClient";
 
-export default function Stats() {
-  const searchParams = useSearchParams();
-  const router = useRouter();
+export default function Stats({ class_id }: { class_id: string }) {
+  const { token, loading: tokenLoading } = useIdToken();
 
-  const stats = {
-    members: searchParams.get("members"),
-    initial_credits: searchParams.get("initial_credits"),
-    curuser_points: searchParams.get("curuser_points"),
-  };
+  const [classData, classStats] = useQueries({
+    queries: [
+      {
+        queryKey: [queryKeys.classData, class_id],
+        enabled: !!token,
+        queryFn: () => getClassData(token!, class_id),
+      },
+      {
+        queryKey: [queryKeys.classStats, class_id],
+        enabled: !!token,
+        queryFn: () => getClassStats(token!, class_id),
+      },
+    ],
+  });
 
-  useEffect(() => {
-    if (!stats.members || !stats.initial_credits || !stats.curuser_points) {
-      router.replace("/dashboard");
-    }
-  }, [stats, router]);
-
-  if (!stats.members || !stats.initial_credits || !stats.curuser_points) {
-    return null;
+  if (
+    tokenLoading ||
+    classData.isLoading ||
+    classStats.isLoading ||
+    classData.isFetching ||
+    classStats.isFetching
+  ) {
+    return <StatsDisplayerSkeleton />;
   }
 
   return (
     <div className="grid md:grid-cols-4 grid-cols-2 gap-2.5 lg:px-8 md:px-6 sm:px-5 px-4 lg:py-6 md:py-5 sm:py-4 py-3 w-full">
       <StatSection
         title="Membri"
-        value={stats.members}
+        value={classData.error ? "N/D" : `${classData.data?.members ?? "?"}`}
         icon="bi-people"
         className="bg-linear-to-r from-purple-500 to-purple-600 shadow-xl shadow-purple-500/50"
       />
       <StatSection
         title="Crediti"
-        value={stats.initial_credits}
+        value={classStats.error ? "N/D" : `${classStats.data?.credits ?? "?"}`}
         icon="bi-credit-card"
         className="bg-linear-to-r from-blue-500 to-blue-600 shadow-xl shadow-blue-500/50"
       />
       <StatSection
         title="Punti"
-        value={stats.curuser_points}
+        value={classStats.error ? "N/D" : `${classStats.data?.points ?? "?"}`}
         icon="bi-trophy"
         className="bg-linear-to-r from-green-500 to-green-600 shadow-xl shadow-green-500/50"
       />
       <StatSection
         title="Professori"
-        value={stats.members}
+        value={classData.error ? "N/D" : `${classData.data?.teachers ?? "?"}`}
         icon="bi-mortarboard"
         className="bg-linear-to-r from-orange-500 to-orange-600 shadow-xl shadow-orange-500/50"
       />

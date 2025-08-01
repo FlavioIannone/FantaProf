@@ -7,6 +7,6 @@ export const PUT = async (
 ): Promise<NextResponse> => {
   const { class_id } = await params;
   const uid = req.headers.get("Authorization")?.replace("Bearer ", "")!;
-  return joinClass(class_id, uid)
+  return joinClass(uid,class_id)
 };
 

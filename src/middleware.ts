@@ -3,9 +3,10 @@ import { reqHasBodyBasedOnPath } from "./lib/types";
 
 export const middleware = async (req: NextRequest): Promise<NextResponse> => {
   const classesRequestHasBody = reqHasBodyBasedOnPath(req, "/classes", [
-    "POST",
+    "POST", "PUT"
   ], [
-    "/classes/*/join"
+    "/classes/*/join",
+    "/classes/*/leave"
   ]);
 
   // Verify if the reqeust has a body (applied only for certain endpoints and methods)
@@ -24,7 +25,7 @@ export const middleware = async (req: NextRequest): Promise<NextResponse> => {
   // If the middleware is disabled, the idToken won't be verified.
   const isMiddlewareDisabled = process.env.DISABLE_MIDDLEWARE === "true";
   // !DEBUG:
-  // console.log("Middleware on: " + !isMiddlewareDisabled);
+  console.log("Middleware on: " + !isMiddlewareDisabled);
 
   if (
     !isMiddlewareDisabled &&

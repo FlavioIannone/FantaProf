@@ -3,7 +3,7 @@
 import { createContext, useState, useRef, useEffect, useContext } from "react";
 
 export type ModalProps = {
-  title: React.ReactNode;
+  title: string;
   content: React.ReactNode;
   onCloseButtonText?: string;
   onClose?: () => void;
@@ -55,7 +55,18 @@ function ModalProvider({ children }: Readonly<{ children: React.ReactNode }>) {
         }}
       >
         <div className="d-modal-box">
-          <div className="font-bold text-lg">{modalProps.title}</div>
+          <div className="flex justify-between">
+            <h1 className="font-bold text-lg">{modalProps.title}</h1>
+            <button
+              className="d-btn d-btn-ghost"
+              type="button"
+              onClick={() => {
+                setModal(false);
+              }}
+            >
+              <i className="bi bi-x text-3xl" aria-disabled></i>
+            </button>
+          </div>
           <div className="py-4">{modalProps.content}</div>
           <div className="d-modal-action">
             <button

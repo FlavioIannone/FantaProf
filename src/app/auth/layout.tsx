@@ -13,7 +13,7 @@ export default function AuthLayout({
         <div className="w-full h-full flex sm:flex-row sm:w-auto flex-col justify-center sm:p-0 p-5">
           {/**Image */}
           <div className="sm:flex-1/2 flex-1/6 sm:h-auto h-10 sm:p-5 motion-safe:opacity-0 animate-fade-in">
-            <nav className="d-navbar absolute">
+            <nav className="d-navbar absolute z-30">
               <ReturnToHome textColor="text-primary-content" />
             </nav>
             <AuthImage />

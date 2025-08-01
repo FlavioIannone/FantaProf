@@ -5,6 +5,7 @@ import { useQuery } from "@tanstack/react-query";
 import DashboardCard from "./DashboardCard";
 import { useIdToken } from "@/lib/hooks/useIdToken";
 import ClassActionsButtons from "./ClassActionsButtons";
+import { queryKeys } from "@/lib/getQueryClient";
 
 export default function StatsDisplayer() {
   const { token, loading: tokenLoading, error: tokenError } = useIdToken();
@@ -15,7 +16,7 @@ export default function StatsDisplayer() {
     isFetching: statsFetching,
   } = useQuery({
     enabled: !!token,
-    queryKey: ["globalStats"],
+    queryKey: [queryKeys.globalStats],
     queryFn: async () => {
       return await getGlobalStats(token!);
     },
@@ -63,7 +64,7 @@ export default function StatsDisplayer() {
   }
 
   return (
-    <div className="sm:mb-3.5 mb-2.5 lg:space-x-5 space-x-2.5 grid sm:grid-cols-3 grid-cols-2 md:w-full">
+    <div className="sm:mb-3.5 mb-2.5 lg:space-x-5 space-x-2.5 grid grid-cols-2 ">
       <DashboardCard
         headingStat="Miglior punteggio"
         mainStat={
@@ -91,9 +92,7 @@ export default function StatsDisplayer() {
             : "Errore"
         }
         footerStat="Di cui fai parte"
-        className="sm:block hidden"
       />
-      <ClassActionsButtons />
     </div>
   );
 }

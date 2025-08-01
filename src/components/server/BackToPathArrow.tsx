@@ -31,7 +31,7 @@ export default function BackToPathArrow({
         <p
           className={`opacity-70 group-hover:opacity-100 ${text && "me-1.5"} ${
             textColor ?? ""
-          }`}
+          } md:block hidden`}
         >
           {text}
         </p>

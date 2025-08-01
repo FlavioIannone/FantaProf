@@ -1,6 +1,5 @@
-import StatSection from "@/app/dashboard/classes/[class_id]/(tabs)/OverviewTab/components/StatSection";
 import MembersTable from "@/components/client/Tables/MembersTable";
-import Stats from "./components/StatsDisplayer";
+import StatsDisplayer from "./components/StatsDisplayer";
 
 export default function OverviewTab({
   id,
@@ -11,7 +10,7 @@ export default function OverviewTab({
 }) {
   return (
     <div id={id} className="d-carousel-item flex flex-col overflow-y-scroll">
-      <Stats />
+      <StatsDisplayer class_id={class_id} />
       <MembersTable class_id={class_id} />
     </div>
   );

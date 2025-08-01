@@ -17,7 +17,9 @@ export default function JoinClassComponent({ class_id }: { class_id: string }) {
     if (!user || !token) {
       // Redirect to login with callback
       const encodedCallback = encodeURIComponent(joinClassEndpoint);
-      router.replace(`/auth/login?callbackUrl=${encodedCallback}`);
+      router.replace(
+        `/auth/login?callbackUrl=${encodedCallback}&reason=join-class`
+      );
     } else {
       // You can auto-join here or show a confirmation
       // Example: call join API
@@ -31,5 +33,9 @@ export default function JoinClassComponent({ class_id }: { class_id: string }) {
       });
     }
   }, [user, loading, class_id, router]);
-  return <>join</>;
+  return (
+    <main className="flex justify-center items-center size-full">
+      <span className="d-loading d-loading-ring d-loading-xl"></span>
+    </main>
+  );
 }

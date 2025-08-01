@@ -2,7 +2,7 @@ import OverviewTab from "./(tabs)/OverviewTab/OverviewTab";
 import BackToPathArrow from "@/components/server/BackToPathArrow";
 import DashboardTabsNavigator from "@/app/dashboard/classes/[class_id]/(tabs)/DashboardTabsNavigator";
 import ClassNameDisplayer from "./(tabs)/OverviewTab/components/ClassNameDisplayer";
-import Link from "next/link";
+import LeaveClassButton from "./components/LeaveClassButton";
 
 export default async function ClassPage({
   params,
@@ -27,9 +27,7 @@ export default async function ClassPage({
               <h2 className="text-md opacity-70">Gestisci la classe</h2>
             </div>
           </div>
-          <Link href="/settings">
-            <i className="bi bi-three-dots text-2xl" aria-hidden></i>
-          </Link>
+          <LeaveClassButton class_id={class_id} />
         </nav>
       </header>
 

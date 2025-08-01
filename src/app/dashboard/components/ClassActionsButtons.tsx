@@ -43,6 +43,9 @@ const createClass = async (
     await Promise.all([
       query.invalidateQueries({ queryKey: ["classes"] }),
       query.invalidateQueries({ queryKey: ["globalStats"] }),
+      query.invalidateQueries({ queryKey: ["members"] }),
+      query.invalidateQueries({ queryKey: ["classData"] }),
+      query.invalidateQueries({ queryKey: ["classStats"] }),
     ]);
   }
 };
@@ -80,13 +83,13 @@ export default function ClassActionsButtons() {
   }
 
   return (
-    <section className={`space-y-2.5 grow-1 flex flex-col justify-center`}>
+    <section className={`justify-center`}>
       <button
         type="button"
-        className="d-btn d-btn-primary space-x-1 d-btn-block"
+        className="d-btn d-btn-primary sm:space-x-1"
         onClick={() => {
           modal.setModal(true, {
-            title: <ModalHeader setModal={modal.setModal} />,
+            title: "Crea classe",
             content: (
               <ModalBody
                 classNameRef={classNameRef}
@@ -110,40 +113,11 @@ export default function ClassActionsButtons() {
         }}
       >
         <i className="bi bi-plus-circle" aria-hidden></i>
-        <p className="w-max">Crea classe</p>
-      </button>
-      <button
-        type="button"
-        className="d-btn d-btn-primary space-x-1 d-btn-block d-btn-outline"
-        onClick={() => {}}
-      >
-        <i className="bi bi-building-add" aria-hidden></i>
-        <p className="w-max">Aggiungi classe</p>
+        <p className="w-max sm:block hidden">Crea classe</p>
       </button>
     </section>
   );
 }
-
-const ModalHeader = ({
-  setModal,
-}: {
-  setModal: (value: boolean, newModalContent?: ModalProps) => void;
-}) => {
-  return (
-    <div className="flex justify-between">
-      Crea classe
-      <button
-        className="d-btn d-btn-ghost"
-        type="button"
-        onClick={() => {
-          setModal(false);
-        }}
-      >
-        <i className="bi bi-x text-3xl" aria-disabled></i>
-      </button>
-    </div>
-  );
-};
 
 const ModalBody = ({
   classNameRef,
@@ -165,9 +139,6 @@ const ModalBody = ({
           ref={classNameRef}
           required
         />
-      </fieldset>
-
-      <fieldset className="d-fieldset">
         <legend className="d-fieldset-legend">Crediti iniziali</legend>
         <input
           type="number"

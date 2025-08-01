@@ -43,7 +43,7 @@
  *            └── logical_removal: boolean
  */
 
-export class FirebaseCollections {
+class FirebaseCollections {
   // *CLASSES* collection
   static readonly CLASSES = "classes";
   // *CLASSES* sub collections
@@ -102,6 +102,7 @@ const ClassSchema = z.object({
   initial_credits: z.number().int().positive(),
   members: z.number().int().positive().optional().default(1),
   created_at: TimestampFieldType,
+  teachers: z.number().int().optional().default(0)
 });
 type ClassIn = z.input<typeof ClassSchema>
 type ClassOut = z.infer<typeof ClassSchema>;

@@ -1,5 +1,14 @@
 import { isServer, QueryClient } from "@tanstack/react-query";
 
+export const queryKeys = {
+  classes: "classes",
+  members: "members",
+  globalStats: "globalStats",
+  classStats: "classStats",
+  classData: "classData",
+} as const;
+
+
 const makeQueryClient = () => {
   return new QueryClient({
     defaultOptions: {

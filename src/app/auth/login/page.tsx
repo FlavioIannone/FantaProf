@@ -22,6 +22,7 @@ export default function LoginForm() {
   const callbackUrl = decodeURI(
     searchParams.get("callbackUrl") ?? "/dashboard"
   );
+  const reason = decodeURI(searchParams.get("reason") ?? "");
   const redirectFlag = useRef(false);
 
   // Stato per gestire i dati dell'utente
@@ -29,19 +30,6 @@ export default function LoginForm() {
     email: "",
     password: "",
   });
-
-  // Funzione helper per mostrare un errore nel modal
-  const showModalError = (
-    title: string,
-    content: string,
-    onClose?: () => void
-  ) => {
-    setModal(true, {
-      title,
-      content,
-      onClose: onClose,
-    });
-  };
 
   const redirectUser = (user: User) => {
     if (redirectFlag.current) return;
@@ -60,11 +48,30 @@ export default function LoginForm() {
       }).then((res) => {
         if (res.status === 200) router.replace("/dashboard");
         else {
-          setModal(true); // TODO: add checks
+          if (res.status === 404) {
+            setModal(true, {
+              title: "Errore",
+              content: "La classe non esiste",
+            });
+          } else if (res.status === 409) {
+            setModal(true, {
+              title: "Errore",
+              content: "Fai già parte di questa classe",
+            });
+          }
         }
       });
     });
   };
+
+  useEffect(() => {
+    if (reason === "join-class") {
+      setModal(true, {
+        title: "Avviso",
+        content: "Esegui il login per entrare nella classe",
+      });
+    }
+  }, []);
 
   // Redirect se già autenticato
   useEffect(() => {
@@ -82,7 +89,10 @@ export default function LoginForm() {
   const onSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!loginData.email || !loginData.password) {
-      showModalError("Errore", "Compila tutti i campi richiesti.");
+      setModal(true, {
+        title: "Errore autenticazione",
+        content: "Compila tutti i campi",
+      });
       return;
     }
 
@@ -92,7 +102,10 @@ export default function LoginForm() {
     if (result.successful) {
       redirectUser(result.user);
     } else {
-      showModalError("Errore autenticazione", result.errorMsg);
+      setModal(true, {
+        title: "Errore autenticazione",
+        content: result.errorMsg,
+      });
     }
     setIsSubmitLoading(false);
   };
@@ -104,7 +117,10 @@ export default function LoginForm() {
     if (result.successful) {
       redirectUser(result.user);
     } else {
-      showModalError("Errore autenticazione", result.errorMsg);
+      setModal(true, {
+        title: "Errore autenticazione",
+        content: result.errorMsg,
+      });
     }
     setIsGoogleLoading(false);
   };

@@ -5,6 +5,8 @@ import { useQuery } from "@tanstack/react-query";
 import { getClassMembers } from "@/app/dashboard/(queryHandlers)/handlers";
 import MmbersTableSkeleton from "./MembersTableSkeleton";
 import { useModal } from "../Modal/ModalContext";
+import MembersTableRow from "./MembersTableRow";
+import { queryKeys } from "@/lib/getQueryClient";
 
 export default function MembersTable({ class_id }: { class_id: string }) {
   const { token, loading: tokenLoading, error: tokenError } = useIdToken();
@@ -14,12 +16,11 @@ export default function MembersTable({ class_id }: { class_id: string }) {
     isError: rowsError,
   } = useQuery({
     enabled: !!token,
-    queryKey: ["members"],
+    queryKey: [queryKeys.members],
     queryFn: async () => {
       return await getClassMembers(token!, class_id);
     },
   });
-
   const modal = useModal();
 
   if (rowsLoading || tokenLoading) {
@@ -43,20 +44,7 @@ export default function MembersTable({ class_id }: { class_id: string }) {
             className="d-btn d-btn-primary"
             onClick={() => {
               modal.setModal(true, {
-                title: (
-                  <div className="flex justify-between">
-                    Invita un amico
-                    <button
-                      className="d-btn d-btn-ghost"
-                      type="button"
-                      onClick={() => {
-                        modal.setModal(false);
-                      }}
-                    >
-                      <i className="bi bi-x text-3xl" aria-disabled></i>
-                    </button>
-                  </div>
-                ),
+                title: "Invita un amico",
                 content:
                   "Per invitare altri membri, copia il link e invialo a loro",
                 onCloseButtonText: "Copia link",
@@ -77,26 +65,15 @@ export default function MembersTable({ class_id }: { class_id: string }) {
             <div className="space-y-2.5">
               {(!rows || rows.length === 0) && <>{noDataFoundUI}</>}
               {rows &&
-                rows.map((row, index) => (
-                  <div
-                    key={index}
-                    className="flex justify-between bg-base-200 rounded-2xl p-4"
-                  >
-                    <div className="flex items-center gap-2">
-                      <div className="d-avatar d-avatar-online size-12 bg-amber-200 rounded-full"></div>
-                      <div className="flex flex-col">
-                        <h1 className="text-2xl">{row.display_name}</h1>
-                        <h2 className="opacity-70">
-                          Crediti rimanenti: {row.credits}
-                        </h2>
-                      </div>
-                    </div>
-                    <div className="flex flex-col justify-between">
-                      <h1 className="font-bold text-2xl">{row.points}</h1>
-                      <h2 className="opacity-70">Punti</h2>
-                    </div>
-                  </div>
-                ))}
+                rows.map((row, index) => {
+                  return (
+                    <MembersTableRow
+                      row={row}
+                      key={index}
+                      class_id={class_id}
+                    />
+                  );
+                })}
             </div>
           ) : (
             <>Error</>
