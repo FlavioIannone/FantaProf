@@ -7,7 +7,6 @@ import {
 } from "@/components/client/Modal/ModalContext";
 import { getQueryClient, queryKeys } from "@/lib/getQueryClient";
 import { useIdToken } from "@/lib/hooks/useIdToken";
-import { revalidateTag } from "next/cache";
 import { RefObject, useEffect, useRef, useState } from "react";
 
 // Type for form data used in class creation
