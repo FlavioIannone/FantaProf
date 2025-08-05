@@ -19,6 +19,8 @@ src/app/api/(api_lib)/fantaprof-app-firebase-adminsdk-*.json
 # next.js
 /.next/
 /out/
+/**/dist
+
 
 # production
 /build
@@ -42,3 +44,6 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+.vscode/settings.json
+.vscode/settings.json
+/.vscode

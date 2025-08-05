@@ -1,26 +1,29 @@
 import admin from "firebase-admin";
-import fs from "fs";
 
-if (!process.env.SERVICE_ACCOUNT_KEY) {
-  throw new Error("SERVICE_ACCOUNT_KEY is not set in environment variables");
-}
-
-const firebaseKeyPath: string = process.env.SERVICE_ACCOUNT_KEY as string;
+if (process.env.SERVICE_ACCOUNT_SDK_KEY === undefined) {
+  throw new Error(
+    "process.env.SERVICE_ACCOUNT_SDK_KEY environment variable is not set."
+  );
+} //* Ensure that the SERVICE_ACCOUNT_SDK_KEY is set in your environment variables
 
 let app: admin.app.App;
 
 try {
-  app = admin.app("FantaProf-v2");
+  app = admin.app(process.env.FIREBASE_APP_NAME);
 } catch {
-  const serviceAccount = JSON.parse(fs.readFileSync(firebaseKeyPath, "utf8"));
+  if (process.env.FIREBASE_APP_NAME === undefined) {
+    throw new Error("FIREBASE_APP_NAME environment variable is not set.");
+  } //* Ensure that the FIREBASE_APP_NAME is set in your environment variables
+
+  const serviceAccount = JSON.parse(process.env.SERVICE_ACCOUNT_SDK_KEY);
+
   app = admin.initializeApp(
     {
       credential: admin.credential.cert(serviceAccount),
     },
-    "FantaProf-v2"
+    process.env.FIREBASE_APP_NAME
   );
 }
 
-const firestore = admin.firestore(app);
-const auth = admin.auth(app);
-export { admin, firestore, auth };
+export const admin_firestore = admin.firestore(app);
+export const admin_auth = admin.auth(app);

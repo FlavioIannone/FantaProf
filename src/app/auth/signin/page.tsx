@@ -1,33 +1,34 @@
 "use client";
 import Link from "next/link";
-import { type FormData } from "@/lib/types";
-import { auth, signInWithGooglePopup } from "@/lib/firebase-connection";
-import {
-  createUserWithEmailAndPassword,
-  AuthError,
-  signInWithRedirect,
-  GoogleAuthProvider,
-  getRedirectResult,
-  UserCredential,
-  onAuthStateChanged,
-} from "firebase/auth";
+import { type SignInData } from "@/lib/types";
+import { client_auth } from "@/lib/firebase-connection";
+import { onAuthStateChanged } from "firebase/auth";
 import { useEffect, useState } from "react";
-import { useModal } from "@/components/client/ModalContext";
-import router from "next/router";
-import { useUserData } from "@/components/client/UserDataContext";
+import { useModal } from "@/components/client/Modal/ModalContext";
+import { useRouter } from "next/navigation";
+import {
+  createAccountWithFormData,
+  signInWithGoogle,
+} from "@/lib/authenticationManager";
 
 export default function RegistrationForm() {
-  // Stato per gestire i dati dell'utente
-  const [formData, setFormData] = useState<FormData>({
+  //* Router to redirect
+  const router = useRouter();
+  //* State to manage user input
+  const [formData, setFormData] = useState<SignInData>({
     username: undefined,
     email: undefined,
     password: undefined,
   });
 
-  const { setUserData } = useUserData();
+  //* Modal util
   const { setModal } = useModal();
 
-  // Funzione helper per mostrare un errore nel modal
+  //* Loading state utils
+  const [isSubmitLoading, setIsSubmitLoading] = useState(false);
+  const [isGoogleLoading, setIsGoogleLoading] = useState(false);
+
+  //* Function to show a modal error
   const showModalError = (
     title: string,
     content: string,
@@ -39,18 +40,19 @@ export default function RegistrationForm() {
       onClose: onClose,
     });
   };
-  // Redirect se già autenticato
+
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
+    setIsSubmitLoading(true);
+    const unsubscribe = onAuthStateChanged(client_auth, async (user) => {
       if (user) {
         router.replace("/dashboard");
-        setUserData(user);
       }
     });
+    setIsSubmitLoading(false);
     return () => unsubscribe();
-  }, [router]);
+  }, []);
 
-  // Gestione della registrazione tramite form
+  //* Handling the signin by form registration
   const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
@@ -58,53 +60,29 @@ export default function RegistrationForm() {
       showModalError("Errore", "Compila tutti i campi richiesti.");
       return;
     }
+    setIsSubmitLoading(true);
 
-    let userCredentials;
-    try {
-      userCredentials = await createUserWithEmailAndPassword(
-        auth,
-        formData.email,
-        formData.password
-      );
-    } catch (error) {
-      const authError = error as AuthError;
-      let message = "Errore durante la registrazione.";
-      if (authError.code === "auth/email-already-in-use") {
-        message = "Questa email è già registrata.";
-      } else if (authError.code === "auth/invalid-email") {
-        message = "L'email inserita non è valida.";
-      } else if (authError.code === "auth/weak-password") {
-        message = "La password è troppo debole.";
-      }
-      showModalError("Errore autenticazione", message);
-      return;
+    const result = await createAccountWithFormData(formData);
+    if (result.successful) {
+      router.replace("/dashboard");
+    } else {
+      showModalError("Errore autenticazione", result.errorMsg);
     }
+    setIsSubmitLoading(false);
   };
 
-  // Gestione della registrazione tramite Google con popup
+  //* Handling the signin by Google Popup registration
   const onGoogleSignIn = async (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
-    let credentials: UserCredential | undefined;
-    try {
-      credentials = await signInWithGooglePopup();
-    } catch (error) {
-      const authError = error as AuthError;
-      let message = "Errore durante l'autenticazione con Google.";
-      if (authError.code === "auth/popup-closed-by-user") {
-        message = "La finestra di autenticazione è stata chiusa.";
-      }
-      if (authError.code === "auth/popup-blocked") {
-        message = "La finestra di autenticazione è stata bloccata.";
-      }
-      showModalError("Errore autenticazione", message);
+    setIsGoogleLoading(true);
+
+    const result = await signInWithGoogle();
+    if (result.successful) {
+      router.replace("/dashboard");
+    } else {
+      showModalError("Errore autenticazione", result.errorMsg);
     }
-    if (!credentials) {
-      showModalError(
-        "Errore autenticazione",
-        "Errore durante l'autenticazione."
-      );
-      return;
-    }
+    setIsGoogleLoading(false);
   };
 
   return (
@@ -210,7 +188,12 @@ export default function RegistrationForm() {
         <button
           type="submit"
           aria-label="Crea account"
-          className="d-btn d-btn-primary d-btn-block animate-fade-in-bottom motion-safe:opacity-0 text-lg animation-delay-500 motion-reduce:animate-none"
+          className={`d-btn d-btn-primary d-btn-block animate-fade-in-bottom text-lg motion-reduce:animate-none ${
+            isSubmitLoading
+              ? "animate-pulse"
+              : "motion-safe:opacity-0 animation-delay-500"
+          }`}
+          disabled={isSubmitLoading || isGoogleLoading}
         >
           Registrati
         </button>
@@ -232,10 +215,15 @@ export default function RegistrationForm() {
         <button
           type="button"
           aria-label="registrati con google"
-          className="d-btn d-btn-outline d-btn-block motion-safe:opacity-0 animate-fade-in-bottom animation-delay-700 motion-reduce:animate-none"
+          className={`d-btn d-btn-outline d-btn-block animate-fade-in-bottom motion-reduce:animate-none ${
+            isGoogleLoading
+              ? "animate-pulse"
+              : "motion-safe:opacity-0 animation-delay-700"
+          }`}
+          disabled={isGoogleLoading || isSubmitLoading}
           onClick={onGoogleSignIn}
         >
-          <i className="bi bi-google"></i> Registrazione con Google
+          <i className="bi bi-google" aria-hidden></i> Registrazione con Google
         </button>
       </form>
     </>

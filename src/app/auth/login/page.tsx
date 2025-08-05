@@ -1,51 +1,89 @@
 "use client";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useState, FormEvent, useEffect } from "react";
-import { auth } from "@/lib/firebase-connection";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useState, FormEvent, useEffect, useRef } from "react";
+import { client_auth } from "@/lib/firebase-connection";
+import { type LoginData } from "@/lib/types";
+
+import { onAuthStateChanged, User } from "firebase/auth";
+import { useModal } from "@/components/client/Modal/ModalContext";
 import {
-  signInWithEmailAndPassword,
-  AuthError,
-  setPersistence,
-  browserLocalPersistence,
-  signInWithPopup,
-  GoogleAuthProvider,
-  onAuthStateChanged,
-} from "firebase/auth";
-import { useModal } from "@/components/client/ModalContext";
-import { useUserData } from "@/components/client/UserDataContext";
+  logInWithLoginData,
+  signInWithGoogle,
+} from "@/lib/authenticationManager";
+import { useIdToken } from "@/lib/hooks/useIdToken";
 
 export default function LoginForm() {
   const router = useRouter();
   const { setModal } = useModal();
-  const { setUserData } = useUserData();
+  const [isSubmitLoading, setIsSubmitLoading] = useState(false);
+  const [isGoogleLoading, setIsGoogleLoading] = useState(false);
+  const searchParams = useSearchParams();
+  const callbackUrl = decodeURI(
+    searchParams.get("callbackUrl") ?? "/dashboard"
+  );
+  const reason = decodeURI(searchParams.get("reason") ?? "");
+  const redirectFlag = useRef(false);
 
   // Stato per gestire i dati dell'utente
-  const [loginData, setLoginData] = useState({
+  const [loginData, setLoginData] = useState<LoginData>({
     email: "",
     password: "",
   });
 
-  // Funzione helper per mostrare un errore nel modal
-  const showModalError = (
-    title: string,
-    content: string,
-    onClose?: () => void
-  ) => {
-    setModal(true, {
-      title,
-      content,
-      onClose: onClose,
+  const redirectUser = (user: User) => {
+    if (redirectFlag.current) return;
+    redirectFlag.current = true;
+
+    if (callbackUrl === "/dashboard") router.replace("/dashboard");
+
+    let token: string | undefined = undefined;
+    user.getIdToken().then((t) => {
+      token = t;
+
+      if (!token) return;
+      fetch(callbackUrl, {
+        method: "PUT",
+        cache: "no-store",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }).then((res) => {
+        if (res.status === 200) router.replace("/dashboard");
+        else {
+          if (res.status === 404) {
+            setModal(true, {
+              title: "Errore",
+              content: "La classe non esiste",
+            });
+          } else if (res.status === 409) {
+            setModal(true, {
+              title: "Errore",
+              content: "Fai già parte di questa classe",
+            });
+          }
+        }
+      });
     });
   };
 
+  useEffect(() => {
+    if (reason === "join-class") {
+      setModal(true, {
+        title: "Avviso",
+        content: "Esegui il login per entrare nella classe",
+      });
+    }
+  }, []);
+
   // Redirect se già autenticato
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
+    const unsubscribe = onAuthStateChanged(client_auth, async (user) => {
+      setIsSubmitLoading(true);
       if (user) {
-        router.replace("/dashboard");
-        setUserData(user);
+        redirectUser(user);
       }
+      setIsSubmitLoading(false);
     });
     return () => unsubscribe();
   }, [router]);
@@ -54,49 +92,40 @@ export default function LoginForm() {
   const onSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!loginData.email || !loginData.password) {
-      showModalError("Errore", "Compila tutti i campi richiesti.");
+      setModal(true, {
+        title: "Errore autenticazione",
+        content: "Compila tutti i campi",
+      });
       return;
     }
-    try {
-      await setPersistence(auth, browserLocalPersistence);
-      await signInWithEmailAndPassword(
-        auth,
-        loginData.email,
-        loginData.password
-      );
-      router.replace("/dashboard");
-    } catch (error) {
-      const authError = error as AuthError;
-      let message = "Errore durante l'accesso.";
-      if (authError.code === "auth/user-not-found") {
-        message = "Utente non trovato.";
-      } else if (authError.code === "auth/wrong-password") {
-        message = "Password errata.";
-      } else if (authError.code === "auth/invalid-email") {
-        message = "Email non valida.";
-      }
-      showModalError("Errore autenticazione", message);
+
+    setIsSubmitLoading(true);
+    const result = await logInWithLoginData(loginData);
+
+    if (result.successful) {
+      redirectUser(result.user);
+    } else {
+      setModal(true, {
+        title: "Errore autenticazione",
+        content: result.errorMsg,
+      });
     }
+    setIsSubmitLoading(false);
   };
 
   // Gestione login con Google
   const onGoogleLogin = async () => {
-    try {
-      await setPersistence(auth, browserLocalPersistence);
-      const provider = new GoogleAuthProvider();
-      await signInWithPopup(auth, provider);
-      router.replace("/dashboard");
-    } catch (error) {
-      const authError = error as AuthError;
-      let message = "Errore durante l'autenticazione con Google.";
-      if (authError.code === "auth/popup-closed-by-user") {
-        message = "La finestra di autenticazione è stata chiusa.";
-      }
-      if (authError.code === "auth/popup-blocked") {
-        message = "La finestra di autenticazione è stata bloccata.";
-      }
-      showModalError("Errore autenticazione", message);
+    setIsGoogleLoading(true);
+    const result = await signInWithGoogle();
+    if (result.successful) {
+      redirectUser(result.user);
+    } else {
+      setModal(true, {
+        title: "Errore autenticazione",
+        content: result.errorMsg,
+      });
     }
+    setIsGoogleLoading(false);
   };
 
   return (
@@ -169,7 +198,12 @@ export default function LoginForm() {
         <button
           type="submit"
           aria-label="Accedi"
-          className="d-btn d-btn-primary d-btn-block animate-fade-in-bottom motion-safe:opacity-0 text-lg animation-delay-400 motion-reduce:animate-none"
+          className={`d-btn d-btn-primary d-btn-block animate-fade-in-bottom text-lg motion-reduce:animate-none ${
+            isSubmitLoading
+              ? "animate-pulse"
+              : "motion-safe:opacity-0 animation-delay-400"
+          }`}
+          disabled={isSubmitLoading || isGoogleLoading}
         >
           Accedi
         </button>
@@ -190,9 +224,14 @@ export default function LoginForm() {
           type="button"
           aria-label="Accedi con google"
           onClick={onGoogleLogin}
-          className="d-btn d-btn-outline d-btn-block motion-safe:opacity-0 animate-fade-in-bottom animation-delay-600 motion-reduce:animate-none"
+          className={`d-btn d-btn-outline d-btn-block animate-fade-in-bottom motion-reduce:animate-none ${
+            isGoogleLoading
+              ? "animate-pulse"
+              : "motion-safe:opacity-0 animation-delay-600"
+          }`}
+          disabled={isGoogleLoading || isSubmitLoading}
         >
-          <i className="bi bi-google"></i>Accedi con google
+          <i className="bi bi-google" aria-hidden></i>Accedi con google
         </button>
       </form>
     </>
