@@ -18,7 +18,7 @@ export default function DashboardCard({
       <div className="lg:text-2xl md:text-xl sm:text-md text-md">
         {headingStat}
       </div>
-      <div className="text-primary lg:text-4xl md:text-xl text-2xl">
+      <div className="text-primary lg:text-4xl md:text-3xl text-2xl">
         {mainStat}
       </div>
       <div className="lg:text-xl md:text-lg sm:text-lg text-sm opacity-70">

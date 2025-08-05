@@ -2,9 +2,9 @@
 
 import {
   getClassData,
-  getClassStats,
+  getStudentEnrollmentData,
 } from "@/app/dashboard/(queryHandlers)/handlers";
-import StatSection from "@/app/dashboard/classes/[class_id]/(tabs)/OverviewTab/components/StatSection";
+import StatSection from "./StatSection";
 import { useIdToken } from "@/lib/hooks/useIdToken";
 import { useQueries } from "@tanstack/react-query";
 import StatsDisplayerSkeleton from "./StatsDisplayerSkeleton";
@@ -17,13 +17,13 @@ export default function Stats({ class_id }: { class_id: string }) {
     queries: [
       {
         queryKey: [queryKeys.classData, class_id],
-        enabled: !!token,
+        enabled: token !== null,
         queryFn: () => getClassData(token!, class_id),
       },
       {
-        queryKey: [queryKeys.classStats, class_id],
-        enabled: !!token,
-        queryFn: () => getClassStats(token!, class_id),
+        queryKey: [queryKeys.studentEnrollment, class_id],
+        enabled: token !== null,
+        queryFn: () => getStudentEnrollmentData(token!, class_id),
       },
     ],
   });
@@ -39,7 +39,7 @@ export default function Stats({ class_id }: { class_id: string }) {
   }
 
   return (
-    <div className="grid md:grid-cols-4 grid-cols-2 gap-2.5 lg:px-8 md:px-6 sm:px-5 px-4 lg:py-6 md:py-5 sm:py-4 py-3 w-full">
+    <div className="grid md:grid-cols-4 grid-cols-2 gap-2.5 w-full">
       <StatSection
         title="Membri"
         value={classData.error ? "N/D" : `${classData.data?.members ?? "?"}`}

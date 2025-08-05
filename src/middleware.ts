@@ -25,7 +25,7 @@ export const middleware = async (req: NextRequest): Promise<NextResponse> => {
   // If the middleware is disabled, the idToken won't be verified.
   const isMiddlewareDisabled = process.env.DISABLE_MIDDLEWARE === "true";
   // !DEBUG:
-  console.log("Middleware on: " + !isMiddlewareDisabled);
+  // console.log("Middleware on: " + !isMiddlewareDisabled);
 
   if (
     !isMiddlewareDisabled &&
@@ -53,6 +53,7 @@ export const middleware = async (req: NextRequest): Promise<NextResponse> => {
     const verifyTokenRes = await fetch(
       `${process.env.BASE_URL}/api/auth/verify-token`,
       {
+        cache: "no-store",
         method: "GET",
         headers: {
           Authorization: `Bearer ${token}`,

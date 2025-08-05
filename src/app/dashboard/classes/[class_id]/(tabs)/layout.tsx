@@ -1,18 +1,20 @@
-import OverviewTab from "./(tabs)/OverviewTab/OverviewTab";
 import BackToPathArrow from "@/components/server/BackToPathArrow";
-import DashboardTabsNavigator from "@/app/dashboard/classes/[class_id]/(tabs)/DashboardTabsNavigator";
-import ClassNameDisplayer from "./(tabs)/OverviewTab/components/ClassNameDisplayer";
-import LeaveClassButton from "./components/LeaveClassButton";
+import { ReactNode } from "react";
+import ClassNameDisplayer from "./overview/components/ClassNameDisplayer";
+import DashboardTabsNavigator from "../components/DashboardTabsNavigator";
+import LeaveClassButton from "../components/LeaveClassButton";
 
-export default async function ClassPage({
+export default async function ClassLayout({
+  children,
   params,
 }: {
+  children: Readonly<ReactNode>;
   params: Promise<{ class_id: string }>;
 }) {
   const { class_id } = await params;
 
   return (
-    <div className="w-full h-dvh flex flex-col">
+    <div className="w-full max-h-dvh flex flex-col overflow-hidden">
       <header>
         <nav className="d-navbar border-b border-base-300 flex justify-between items-center">
           <div className="flex">
@@ -31,12 +33,11 @@ export default async function ClassPage({
         </nav>
       </header>
 
-      <DashboardTabsNavigator />
-      <main className="grow-1 d-carousel [&_.d-carousel-item]:w-full [&_.d-carousel-item]:max-h-full overflow-hidden">
-        <OverviewTab id="tab0" class_id={class_id} />
-        <div id="tab1" className="d-carousel-item"></div>
-        <div id="tab2" className="d-carousel-item"></div>
+      <DashboardTabsNavigator className="md:block hidden" />
+      <main className="grow-1 [&_.tab]:w-full [&_.tab]:max-h-full lg:px-8 md:px-6 sm:px-5 px-4 lg:py-6 md:py-5 sm:py-4 py-3 overflow-auto hide-scrollbar">
+        {children}
       </main>
+      <DashboardTabsNavigator className="md:hidden block" />
     </div>
   );
 }

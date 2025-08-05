@@ -8,7 +8,6 @@ export default function ThemeDisplayer({ className }: { className?: string }) {
   const [isClient, setIsClient] = useState(false);
 
   useEffect(() => {
-    console.log(theme);
     setIsClient(true);
   }, []);
 

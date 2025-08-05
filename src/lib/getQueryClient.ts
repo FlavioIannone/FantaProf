@@ -4,10 +4,17 @@ export const queryKeys = {
   classes: "classes",
   members: "members",
   globalStats: "globalStats",
-  classStats: "classStats",
+  studentEnrollment: "studentEnrollment",
   classData: "classData",
-} as const;
+  classTeachers: "classTeachers"
+};
 
+
+export const invalidateEveryQuery = async (queryClient: QueryClient) => {
+  await Promise.all(Object.values(queryKeys).map((queryKey) =>
+    queryClient.invalidateQueries({ queryKey: [queryKey], exact: false })
+  ))
+}
 
 const makeQueryClient = () => {
   return new QueryClient({

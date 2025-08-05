@@ -8,6 +8,7 @@ import {
   AuthErrorCodes,
 
   User,
+  updateProfile,
 } from "firebase/auth";
 import { client_auth } from "./firebase-connection";
 import { SignInData, LoginData } from "./types";
@@ -69,6 +70,9 @@ export const createAccountWithFormData = async (
       formData.email!,
       formData.password!
     );
+    updateProfile(userCredentials.user, {
+      displayName: formData.username
+    })
     return {
       successful: true,
       user: userCredentials.user
@@ -105,8 +109,13 @@ export const logInWithLoginData = async (
       user: userCredentials.user
     }
   } catch (error) {
+    console.log(error);
+
     const authError = error as AuthError;
     let message = "Errore durante l'accesso.";
+    if (authError.code === AuthErrorCodes.INVALID_LOGIN_CREDENTIALS) {
+      message = "Credenziali non valide."
+    }
     if (authError.code === AuthErrorCodes.USER_DELETED) {
       message = "Utente non trovato.";
     } else if (authError.code === AuthErrorCodes.INVALID_PASSWORD) {

@@ -1,7 +1,10 @@
 "use client";
 
 import { client_auth } from "@/lib/firebase-connection";
+import { getQueryClient, invalidateEveryQuery } from "@/lib/getQueryClient";
 import Link from "next/link";
+
+const queryClient = getQueryClient();
 
 export default function LogoutButton() {
   return (
@@ -9,6 +12,7 @@ export default function LogoutButton() {
       href="/"
       className="not-hover:text-error"
       onClick={async () => {
+        await invalidateEveryQuery(queryClient);
         await client_auth.signOut();
       }}
     >

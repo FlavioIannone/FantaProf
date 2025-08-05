@@ -4,18 +4,17 @@ import { getGlobalStats } from "@/app/dashboard/(queryHandlers)/handlers";
 import { useQuery } from "@tanstack/react-query";
 import DashboardCard from "./DashboardCard";
 import { useIdToken } from "@/lib/hooks/useIdToken";
-import ClassActionsButtons from "./ClassActionsButtons";
 import { queryKeys } from "@/lib/getQueryClient";
 
 export default function StatsDisplayer() {
-  const { token, loading: tokenLoading, error: tokenError } = useIdToken();
+  const { token, loading: tokenLoading } = useIdToken();
   const {
     data: stats,
     isLoading: statsLoading,
     isError: statsError,
     isFetching: statsFetching,
   } = useQuery({
-    enabled: !!token,
+    enabled: token !== null,
     queryKey: [queryKeys.globalStats],
     queryFn: async () => {
       return await getGlobalStats(token!);

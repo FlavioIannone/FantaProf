@@ -4,7 +4,6 @@ import { client_auth } from "../firebase-connection";
 export const useIdToken = () => {
   const [token, setToken] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<Error | null>(null);
 
   useEffect(() => {
     const fetchToken = async () => {
@@ -12,10 +11,10 @@ export const useIdToken = () => {
         const user = client_auth.currentUser;
         if (!user) throw new Error("User not logged in");
 
-        const idToken = await user.getIdToken(true);
+        const idToken = await user.getIdToken();
         setToken(idToken);
       } catch (err) {
-        setError(err as Error);
+
       } finally {
         setLoading(false);
       }
@@ -28,12 +27,12 @@ export const useIdToken = () => {
         setToken(null);
         return;
       }
-      const idToken = await user.getIdToken(true);
+      const idToken = await user.getIdToken();
       setToken(idToken);
     });
 
     return () => unsubscribe();
   }, []);
 
-  return { token, loading, error };
+  return { token, loading };
 };

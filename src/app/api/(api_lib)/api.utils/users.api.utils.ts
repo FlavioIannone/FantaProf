@@ -1,9 +1,15 @@
 
-import { FieldPath } from "firebase-admin/firestore";
 import { admin_firestore } from "../firebase-connection";
 import { Class, StudentEnrollment } from "../db.schema";
 import { NextResponse } from "next/server";
 
+/**
+ * Searches all the user's classes to find the one with the best score.
+ * If the query throws an error, -1 is returned as the score,
+ * abling the API endpoint "global-stats" to retrieve this data and the classes count at once.
+ * @param uid string representing the user identifier
+ * @returns a promise to return the best score and the class name with the appropriate error handling
+ */
 export const getBestScore = async (
   uid: string
 ): Promise<{ points: number; className: string }> => {
@@ -36,6 +42,13 @@ export const getBestScore = async (
   }
 };
 
+/**
+ * Counts the classes the user is enrolled in.
+ * If the query throws an error, -1 is returned as the count,
+ * abling the API endpoint "global-stats" to retrieve this data and the user best score at once.
+ * @param uid string representing the user identifier
+ * @returns a promise to return the class count with the appropriate error handling
+ */
 export const getClassesEnrollmentCount = async (
   uid: string
 ): Promise<number> => {
@@ -56,16 +69,4 @@ export const getClassesEnrollmentCount = async (
   }
 };
 
-export const getClassStats = async (class_id: string, uid: string): Promise<NextResponse> => {
-  try {
-    const studentDocSnap = await admin_firestore.collection(Class.collection).doc(class_id).collection(StudentEnrollment.collection).doc(uid).get();
-    if (!studentDocSnap.exists) {
-      return NextResponse.json({ message: "Student not found" }, { status: 404 })
-    }
-    const data = StudentEnrollment.schema.parse(studentDocSnap.data())
-    return NextResponse.json(data, { status: 200 })
-  } catch (error: any) {
-    console.log(error);
-    return NextResponse.json({ message: `Error while retrieving data for student ${uid} from class ${class_id}` }, { status: error?.code || 500 })
-  }
-}
+

@@ -11,7 +11,7 @@ import {
   logInWithLoginData,
   signInWithGoogle,
 } from "@/lib/authenticationManager";
-import ThemeController from "@/components/client/Theme/ThemeController";
+import { useIdToken } from "@/lib/hooks/useIdToken";
 
 export default function LoginForm() {
   const router = useRouter();
@@ -33,12 +33,15 @@ export default function LoginForm() {
 
   const redirectUser = (user: User) => {
     if (redirectFlag.current) return;
-
     redirectFlag.current = true;
+
     if (callbackUrl === "/dashboard") router.replace("/dashboard");
-    let token = undefined;
-    user.getIdToken(true).then((t) => {
+
+    let token: string | undefined = undefined;
+    user.getIdToken().then((t) => {
       token = t;
+
+      if (!token) return;
       fetch(callbackUrl, {
         method: "PUT",
         cache: "no-store",

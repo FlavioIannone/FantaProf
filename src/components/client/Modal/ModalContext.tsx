@@ -5,14 +5,15 @@ import { createContext, useState, useRef, useEffect, useContext } from "react";
 export type ModalProps = {
   title: string;
   content: React.ReactNode;
-  onCloseButtonText?: string;
+  confirmButtonText?: string;
   onClose?: () => void;
-  onConfirm?: () => void;
+  onConfirm?: () => void | boolean | Promise<void | boolean>;
 };
 
 export type ModalContextType = {
   readonly isOpen: boolean;
   setModal: (value: boolean, newModalContent?: ModalProps) => void;
+  setConfirmButtonDisabled: (value: boolean) => void;
   modalProps: ModalProps;
 };
 
@@ -24,6 +25,7 @@ function ModalProvider({ children }: Readonly<{ children: React.ReactNode }>) {
     title: "Hello!",
     content: "Press ESC key or click the button below to close",
   });
+  const [disabled, setDisabled] = useState(false);
   const dialogRef = useRef<HTMLDialogElement>(null);
 
   const setModal = (value: boolean, newModalContent?: ModalProps) => {
@@ -43,7 +45,14 @@ function ModalProvider({ children }: Readonly<{ children: React.ReactNode }>) {
   }, [isOpen]);
 
   return (
-    <ModalContext.Provider value={{ isOpen, setModal, modalProps }}>
+    <ModalContext.Provider
+      value={{
+        isOpen,
+        setModal,
+        modalProps,
+        setConfirmButtonDisabled: setDisabled,
+      }}
+    >
       <dialog
         ref={dialogRef}
         className="d-modal"
@@ -58,27 +67,31 @@ function ModalProvider({ children }: Readonly<{ children: React.ReactNode }>) {
           <div className="flex justify-between">
             <h1 className="font-bold text-lg">{modalProps.title}</h1>
             <button
+              disabled={disabled}
               className="d-btn d-btn-ghost"
               type="button"
               onClick={() => {
                 setModal(false);
               }}
             >
-              <i className="bi bi-x text-3xl" aria-disabled></i>
+              <i className="bi bi-x text-3xl" aria-hidden></i>
             </button>
           </div>
           <div className="py-4">{modalProps.content}</div>
           <div className="d-modal-action">
             <button
               className="d-btn d-btn-neutral"
-              onClick={() => {
-                if (modalProps.onConfirm) {
-                  modalProps.onConfirm();
+              type={"button"}
+              disabled={disabled}
+              onClick={async () => {
+                const res = await modalProps.onConfirm?.();
+                if (res === false) {
+                  return;
                 }
                 setIsOpen(false);
               }}
             >
-              {modalProps.onCloseButtonText ?? "Chiudi"}
+              {modalProps.confirmButtonText ?? "Chiudi"}
             </button>
           </div>
         </div>

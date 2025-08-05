@@ -12,9 +12,9 @@ export default function Footer({
         <p className="lg:text-xl md:text-lg">
           Sito sviluppato con amore dal team di Fanta Prof
         </p>
-        <p className="lg:text-xl md:text-lg bi bi-c-circle">
+        <i className="lg:text-xl md:text-lg bi bi-c-circle">
           Copyright 2024-2025
-        </p>
+        </i>
       </aside>
       <div className="md:ms-5 ms-0">
         <p className="d-footer-title lg:text-2xl md:text-xl sm:text-lg">
