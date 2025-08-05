@@ -49,7 +49,7 @@ export default function AuthImage() {
           }`}
           priority
           loading="eager"
-          onLoadingComplete={() => setIsLoading(false)}
+          onLoad={() => setIsLoading(false)}
         />
       )}
     </div>

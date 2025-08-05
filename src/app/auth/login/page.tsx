@@ -19,10 +19,17 @@ export default function LoginForm() {
   const [isSubmitLoading, setIsSubmitLoading] = useState(false);
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
   const searchParams = useSearchParams();
-  const callbackUrl = decodeURI(
-    searchParams.get("callbackUrl") ?? "/dashboard"
-  );
-  const reason = decodeURI(searchParams.get("reason") ?? "");
+  const safeDecode = (value: string | null): string => {
+    try {
+      return decodeURIComponent(value ?? "");
+    } catch {
+      return "";
+    }
+  };
+
+  const callbackUrl =
+    safeDecode(searchParams.get("callbackUrl")) || "/dashboard";
+  const reason = safeDecode(searchParams.get("reason"));
   const redirectFlag = useRef(false);
 
   // Stato per gestire i dati dell'utente
@@ -31,40 +38,44 @@ export default function LoginForm() {
     password: "",
   });
 
-  const redirectUser = (user: User) => {
+  const redirectUser = async (user: User) => {
     if (redirectFlag.current) return;
     redirectFlag.current = true;
 
-    if (callbackUrl === "/dashboard") router.replace("/dashboard");
+    const token = await user.getIdToken();
+    if (!token) return;
 
-    let token: string | undefined = undefined;
-    user.getIdToken().then((t) => {
-      token = t;
+    // 1. Refresh session cookie
+    await fetch("/api/session", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
 
-      if (!token) return;
-      fetch(callbackUrl, {
+    // 2. Redirect back to callbackUrl
+    if (callbackUrl === "/dashboard") {
+      router.replace("/dashboard");
+    } else {
+      const res = await fetch(callbackUrl, {
         method: "PUT",
         cache: "no-store",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      }).then((res) => {
-        if (res.status === 200) router.replace("/dashboard");
-        else {
-          if (res.status === 404) {
-            setModal(true, {
-              title: "Errore",
-              content: "La classe non esiste",
-            });
-          } else if (res.status === 409) {
-            setModal(true, {
-              title: "Errore",
-              content: "Fai già parte di questa classe",
-            });
-          }
-        }
+        credentials: "include",
       });
-    });
+
+      if (res.status === 200) router.replace("/dashboard");
+      else if (res.status === 404) {
+        setModal(true, {
+          title: "Errore",
+          content: "La classe non esiste",
+        });
+      } else if (res.status === 409) {
+        setModal(true, {
+          title: "Errore",
+          content: "Fai già parte di questa classe",
+        });
+      }
+    }
   };
 
   useEffect(() => {
@@ -72,6 +83,11 @@ export default function LoginForm() {
       setModal(true, {
         title: "Avviso",
         content: "Esegui il login per entrare nella classe",
+      });
+    } else if (reason === "session-expired") {
+      setModal(true, {
+        title: "Sessione scaduta",
+        content: "Effettua di nuovo il login per continuare",
       });
     }
   }, []);

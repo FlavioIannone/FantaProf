@@ -1,8 +1,10 @@
 import DashboardNavbar from "@/app/dashboard/components/DashboardNavbar";
 import ClassesTable from "./components/ClassTable/ClassesTable";
 import StatsDisplayer from "./components/DashboardStats/StatsDisplayer";
+import { getClassesAction } from "@/lib/data/classes/classes.data";
 
-export default function Dashboard() {
+export default async function Dashboard() {
+  const classes = await getClassesAction();
   return (
     <>
       <main className="w-full md:h-dvh flex flex-col justify-between">
@@ -13,7 +15,7 @@ export default function Dashboard() {
             {/**Stats */}
             <StatsDisplayer />
             {/**Classes */}
-            <ClassesTable />
+            <ClassesTable classes={classes} />
           </div>
         </div>
       </main>

@@ -3,7 +3,7 @@
 import {
   getClassTeachers,
   getStudentEnrollmentData,
-} from "@/app/dashboard/(queryHandlers)/handlers";
+} from "@/lib/data/handlers";
 import TeacherCard from "./TeacherCard";
 import { getQueryClient, queryKeys } from "@/lib/getQueryClient";
 import { useIdToken } from "@/lib/hooks/useIdToken";

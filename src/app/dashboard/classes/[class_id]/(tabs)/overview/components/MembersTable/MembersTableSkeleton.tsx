@@ -1,4 +1,4 @@
-export default function MmbersTableSkeleton() {
+export default function MembersTableSkeleton() {
   return (
     <div className="py-5">
       <div className="mb-4 flex justify-between items-center">

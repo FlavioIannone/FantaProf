@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
-import { act, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 
 const tabs = [
   {

@@ -1,53 +1,13 @@
-import { queryKeys } from "@/lib/getQueryClient";
+import { ClassesTableRowType, MembersTableRowType, TeacherTableRowType, FilteredClassData, FilteredStudentEnrollmentData } from "@/lib/data/types.data-layer";
 
-// TYPES
-export type ClassesTableRowType = {
-  class_name: string;
-  members: number;
-  teachers: number;
-  credits: number;
-  points: number;
-  class_id: string;
-  admin: boolean;
-};
-
-export type MembersTableRowType = {
-  display_name: string;
-  credits: number;
-  points: number;
-  admin: boolean;
-  photo_URL: string;
-  email: string;
-  uid: string;
-};
-
-export type TeacherTableRowType = {
-  name: string;
-  surname: string;
-  price: number;
-  description: string;
-  teacher_id: string;
-};
-
-export type FilteredClassData = {
-  members: number;
-  teachers: number;
-};
-
-export type FilteredStudentEnrollmentData = {
-  credits: number;
-  points: number;
-  admin: boolean
-};
 
 // ─────────────────────────────────────────────────────────────────────────────
 // 🔁 Shared helper to handle authenticated fetch requests with error handling
 /**
+ * @deprecated
  * Fetches an url using the fetch API and including the Authorization header.
  * @param url url to fetch
  * @param token user token, for authorization
- * @param duration duration of the cache, used for revalidation
- * @param tags tags to attach to the cache
  * @returns The T generic type passed, undefined if T is not given
  */
 async function fetchWithAuth<T>(url: string, token: string): Promise<T> {
@@ -79,18 +39,35 @@ async function fetchWithAuth<T>(url: string, token: string): Promise<T> {
 
 // ─────────────────────────────────────────────────────────────────────────────
 // 📚 Fetch list of all classes the user is enrolled in
+/**
+ * @deprecated
+ * 
+ * @param token 
+ * @returns 
+ */
 export const getClasses = async (token: string): Promise<ClassesTableRowType[]> => await fetchWithAuth<ClassesTableRowType[]>(
   "/api/protected/classes",
   token,
 
 );
-
+/**
+ * 
+ * @deprecated
+ * @param token 
+ * @returns 
+ */
 // 🧠 Fetch global stats for the user (best score & class count)
 export const getGlobalStats = async (token: string): Promise<{
   bestScore: { points: number; className: string };
   enrollmentCount: number;
 }> => fetchWithAuth("/api/protected/users/global-stats", token,);
 
+/**
+ * 
+ * @deprecated
+ * @param token 
+ * @returns 
+ */
 // 👥 Fetch members of a specific class
 export const getClassMembers = async (
   token: string,
@@ -100,6 +77,12 @@ export const getClassMembers = async (
   token,
 );
 
+/**
+ * 
+ * @deprecated
+ * @param token 
+ * @returns 
+ */
 // 📊 Fetch class metadata (total members and teachers)
 export const getClassData = async (
   token: string,
@@ -107,13 +90,24 @@ export const getClassData = async (
 ): Promise<FilteredClassData> => fetchWithAuth(`/api/protected/classes/${class_id}`, token,);
 
 
+/**
+ * 
+ * @deprecated
+ * @param token 
+ * @returns 
+ */
 // 🏅 Fetch class performance stats (total credits and points)
 export const getStudentEnrollmentData = (
   token: string,
   class_id: string
 ): Promise<FilteredStudentEnrollmentData> => fetchWithAuth<FilteredStudentEnrollmentData>(`/api/protected/classes/${class_id}/get-student-data`, token,);
 
-
+/**
+ * 
+ * @deprecated
+ * @param token 
+ * @returns 
+ */
 // Fetch class teachers
 export const getClassTeachers = async (token: string, class_id: string) =>
   await fetchWithAuth<TeacherTableRowType[]>(`/api/protected/classes/${class_id}/teachers`, token,);

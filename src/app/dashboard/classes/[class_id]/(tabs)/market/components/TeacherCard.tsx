@@ -3,7 +3,7 @@
 // React and utility imports
 import { useState, useRef, useEffect } from "react";
 import { useModal } from "@/components/client/Modal/ModalContext";
-import { TeacherTableRowType } from "@/app/dashboard/(queryHandlers)/handlers";
+import { TeacherTableRowType } from "@/lib/data/types.data-layer";
 import { useIdToken } from "@/lib/hooks/useIdToken";
 import { getQueryClient, queryKeys } from "@/lib/getQueryClient";
 

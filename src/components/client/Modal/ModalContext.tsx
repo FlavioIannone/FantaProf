@@ -8,6 +8,7 @@ export type ModalProps = {
   confirmButtonText?: string;
   onClose?: () => void;
   onConfirm?: () => void | boolean | Promise<void | boolean>;
+  action?: (formData: FormData) => Promise<void>;
 };
 
 export type ModalContextType = {
@@ -77,23 +78,25 @@ function ModalProvider({ children }: Readonly<{ children: React.ReactNode }>) {
               <i className="bi bi-x text-3xl" aria-hidden></i>
             </button>
           </div>
-          <div className="py-4">{modalProps.content}</div>
-          <div className="d-modal-action">
-            <button
-              className="d-btn d-btn-neutral"
-              type={"button"}
-              disabled={disabled}
-              onClick={async () => {
-                const res = await modalProps.onConfirm?.();
-                if (res === false) {
-                  return;
-                }
-                setIsOpen(false);
-              }}
-            >
-              {modalProps.confirmButtonText ?? "Chiudi"}
-            </button>
-          </div>
+          <form action={modalProps.action}>
+            <div className="py-4">{modalProps.content}</div>
+            <div className="d-modal-action">
+              <button
+                className="d-btn d-btn-neutral"
+                type={modalProps.action ? "submit" : "button"}
+                disabled={disabled}
+                onClick={async () => {
+                  const res = await modalProps.onConfirm?.();
+                  if (res === false) {
+                    return;
+                  }
+                  setIsOpen(false);
+                }}
+              >
+                {modalProps.confirmButtonText ?? "Chiudi"}
+              </button>
+            </div>
+          </form>
         </div>
       </dialog>
       {children}

@@ -1,6 +1,7 @@
 "use client";
 import Link from "next/link";
-import { ClassesTableRowType } from "../../(queryHandlers)/handlers";
+import { ClassesTableRowType } from "@/lib/data/types.data-layer";
+
 import { useState } from "react";
 
 export default function ClassesTableRow({

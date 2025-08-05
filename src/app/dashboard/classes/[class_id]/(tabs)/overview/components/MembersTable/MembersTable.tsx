@@ -1,57 +1,16 @@
-"use client";
-
-import { useIdToken } from "@/lib/hooks/useIdToken";
-import { useQuery } from "@tanstack/react-query";
-import {
-  getClassMembers,
-  getStudentEnrollmentData,
-} from "@/app/dashboard/(queryHandlers)/handlers";
-import MmbersTableSkeleton from "./MembersTableSkeleton";
-import { useModal } from "@/components/client/Modal/ModalContext";
+import { getClassMembersAction } from "@/lib/data/classes/classes.data";
+import MembersTableHeader from "./MembersTableHeader";
 import MembersTableRow from "./MembersTableRow";
-import { queryKeys } from "@/lib/getQueryClient";
+import { FilteredStudentEnrollmentData } from "@/lib/data/types.data-layer";
 
-export default function MembersTable({ class_id }: { class_id: string }) {
-  // Get user token and loading state
-  const { token, loading: tokenLoading } = useIdToken();
-
-  // Query to fetch class members data
-  const {
-    data: rows,
-    isLoading: rowsLoading,
-    isError: rowsError,
-  } = useQuery({
-    enabled: token !== null,
-    queryKey: [queryKeys.members, class_id],
-    queryFn: async () => {
-      return await getClassMembers(token!, class_id);
-    },
-  });
-
-  // Query to fetch student's enrollment data (includes admin status)
-  const {
-    data: enrollmentData,
-    isLoading: enrollmentLoading,
-    isError: enrollmentError,
-  } = useQuery({
-    queryKey: [queryKeys.studentEnrollment, class_id],
-    enabled: token !== null,
-    queryFn: async () => await getStudentEnrollmentData(token!, class_id),
-  });
-
-  // Modal context for showing modals
-  const modal = useModal();
-
-  // While loading any data or token, show a skeleton loader
-  if (
-    rowsLoading ||
-    tokenLoading ||
-    enrollmentLoading ||
-    !rows ||
-    !enrollmentData
-  ) {
-    return <MmbersTableSkeleton />;
-  }
+export default async function MembersTable({
+  class_id,
+  studentEnrollment,
+}: {
+  class_id: string;
+  studentEnrollment: FilteredStudentEnrollmentData | undefined;
+}) {
+  const members = await getClassMembersAction(class_id);
 
   // UI to show if no user belongs to this class
   const noDataUI = (
@@ -76,66 +35,31 @@ export default function MembersTable({ class_id }: { class_id: string }) {
   return (
     <div className="w-full">
       <div className="py-5">
-        <div className="mb-4 flex justify-between items-center">
-          <h1 className="text-3xl font-extrabold">
-            <span className="bi bi-people-fill me-2" aria-hidden></span>
-            Membri
-          </h1>
-          <button
-            type="button"
-            className="d-btn d-btn-primary"
-            onClick={() => {
-              // Open modal on button click, using a separate ModalContent component
-              modal.setModal(true, {
-                title: "Invita un amico",
-                content: <ModalContent class_id={class_id} />,
-                confirmButtonText: "Copia link",
-                onClose: () => {
-                  // Copy invite link to clipboard on modal close
-                  navigator.clipboard.writeText(
-                    `${process.env.NEXT_PUBLIC_BASE_URL}/dashboard/classes/${class_id}/join`
-                  );
-                },
-              });
-            }}
-          >
-            <p className="md:block sm:hidden hidden">Invita</p>
-            <i className="bi bi-share" aria-hidden></i>
-          </button>
-        </div>
+        <MembersTableHeader class_id={class_id} />
         <div className="space-y-2.5">
           {/* Show members list or error */}
-          {!rowsError && !enrollmentError ? (
-            <div className="space-y-2.5">
-              {(!rows || rows.length === 0) && <>{noDataUI}</>}
-              {rows &&
-                rows.map((row) => (
+          <div className="space-y-2.5">
+            {members ? (
+              members.length === 0 ? (
+                <>{noDataUI}</>
+              ) : (
+                members.map((row) => (
                   <MembersTableRow
                     row={row}
                     key={row.uid}
                     class_id={class_id}
-                    isAdmin={enrollmentData?.admin!}
+                    isAdmin={
+                      studentEnrollment ? studentEnrollment.admin : false
+                    }
                   />
-                ))}
-            </div>
-          ) : (
-            <>Error</>
-          )}
+                ))
+              )
+            ) : (
+              <>Error</>
+            )}
+          </div>
         </div>
       </div>
     </div>
   );
 }
-
-// Separate component for the modal content shown when inviting a friend
-const ModalContent = ({ class_id }: { class_id: string }) => {
-  return (
-    <p>
-      Per invitare altri membri, copia il link e invialo a loro:
-      <br />
-      <code className="break-all">
-        {`${process.env.NEXT_PUBLIC_BASE_URL}/dashboard/classes/${class_id}/join`}
-      </code>
-    </p>
-  );
-};

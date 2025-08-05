@@ -19,9 +19,7 @@ export default function LeaveClassButton({ class_id }: { class_id: string }) {
     const res = await fetch(`/api/protected/classes/${class_id}/leave`, {
       method: "PUT",
       cache: "no-store",
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
+      credentials: "include",
     });
     if (res.status === 200) {
       router.replace("/dashboard");

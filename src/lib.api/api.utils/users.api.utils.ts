@@ -1,7 +1,7 @@
 
+import { cache } from "react";
 import { admin_firestore } from "../firebase-connection";
-import { Class, StudentEnrollment } from "../db.schema";
-import { NextResponse } from "next/server";
+import { StudentEnrollment } from "../schema.db";
 
 /**
  * Searches all the user's classes to find the one with the best score.
@@ -10,7 +10,7 @@ import { NextResponse } from "next/server";
  * @param uid string representing the user identifier
  * @returns a promise to return the best score and the class name with the appropriate error handling
  */
-export const getBestScore = async (
+export const getBestScoreFromFirestore = cache(async (
   uid: string
 ): Promise<{ points: number; className: string }> => {
   try {
@@ -25,8 +25,9 @@ export const getBestScore = async (
     const enrollmentDoc = enrollmentSnapshot.docs[0];
     const enrollmentDocData = enrollmentDoc.data();
 
+    const classDocRef = enrollmentDoc.ref.parent.parent!;
     const classDocData =
-      (await enrollmentDoc.ref.parent.parent?.get())!.data()!;
+      (await classDocRef.get()).data()!;
 
     const points = enrollmentDocData.points ?? 0;
     return {
@@ -40,7 +41,7 @@ export const getBestScore = async (
       className: "",
     };
   }
-};
+});
 
 /**
  * Counts the classes the user is enrolled in.
@@ -49,7 +50,7 @@ export const getBestScore = async (
  * @param uid string representing the user identifier
  * @returns a promise to return the class count with the appropriate error handling
  */
-export const getClassesEnrollmentCount = async (
+export const getClassesEnrollmentCountFromFirestore = cache(async (
   uid: string
 ): Promise<number> => {
   try {
@@ -67,6 +68,6 @@ export const getClassesEnrollmentCount = async (
     console.error("Error fetching best score:", error);
     return -1;
   }
-};
+});
 
 

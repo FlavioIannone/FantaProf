@@ -1,28 +1,12 @@
-"use client";
-
-import { getClasses } from "@/app/dashboard/(queryHandlers)/handlers";
-import { useQuery } from "@tanstack/react-query";
-import Link from "next/link";
-import ClassesTableSkeleton from "./ClassesTableSkeleton";
-import { useIdToken } from "@/lib/hooks/useIdToken";
+import { ClassesTableRowType } from "@/lib/data/types.data-layer";
 import AddClassButton from "@/app/dashboard/components/ClassTable/AddClassButton";
-import { queryKeys } from "@/lib/getQueryClient";
 import ClassesTableRow from "./ClassesTableRow";
 
-export default function ClassesTable() {
-  const { token, loading: tokenLoading } = useIdToken();
-
-  const {
-    data: rows,
-    isLoading: rowsLoading,
-    isError: rowsError,
-    isFetching: rowsFetching,
-  } = useQuery({
-    enabled: token !== null,
-    queryKey: [queryKeys.classes],
-    queryFn: async () => await getClasses(token!),
-  });
-
+export default function ClassesTable({
+  classes,
+}: {
+  classes: ClassesTableRowType[] | undefined;
+}) {
   // UI when no classes are found
   const noDataUI = (
     <div className="flex flex-col justify-center items-center">
@@ -43,18 +27,13 @@ export default function ClassesTable() {
     </div>
   );
 
-  // Show skeleton while loading or fetching
-  if (tokenLoading || rowsLoading || rowsFetching || !rows) {
-    return <ClassesTableSkeleton />;
+  if (classes && classes.length === 0) {
+    return noDataUI;
   }
 
-  // Render error fallback
-  if (rowsError) {
-    console.log(rowsError);
-
-    return (
-      <div className="text-error">Errore nel caricamento delle classi</div>
-    );
+  // Show skeleton while loading or fetching
+  if (!classes) {
+    return null;
   }
 
   return (
@@ -67,11 +46,11 @@ export default function ClassesTable() {
         <AddClassButton />
       </div>
 
-      {rows.length === 0 ? (
+      {classes.length === 0 ? (
         noDataUI
       ) : (
         <div className="space-y-2.5">
-          {rows.map((row) => (
+          {classes.map((row) => (
             <ClassesTableRow key={row.class_id} classData={row} />
           ))}
         </div>

@@ -2,19 +2,21 @@
 import { NextResponse } from "next/server";
 import { admin_auth, admin_firestore } from "../firebase-connection";
 import { FieldPath, FieldValue, QueryDocumentSnapshot } from "firebase-admin/firestore";
-import { Class, StudentEnrollment, Teacher } from "../db.schema";
-import {
-  ClassesTableRowType,
-  MembersTableRowType,
-  TeacherTableRowType,
-} from "@/app/dashboard/(queryHandlers)/handlers";
-import { revalidateTag } from "next/cache";
-import { queryKeys } from "@/lib/getQueryClient";
+import { Class, StudentEnrollment, Teacher } from "../schema.db";
+import { ClassesTableRowType, MembersTableRowType, TeacherTableRowType } from "@/lib/data/types.data-layer";
 import z from "zod";
+import { cache } from "react";
 
 
 export type TeacherDataInput = { name: string, surname: string, description?: string, price: number }
 
+type WriteOperationResult = {
+  successful: true
+} | {
+  successful: false,
+  message: string,
+  status: number
+}
 
 /**
  * Creates a class with it's corresponding data
@@ -22,16 +24,7 @@ export type TeacherDataInput = { name: string, surname: string, description?: st
  * @param classData the class data to register the class with
  * @returns a promise to return a NextResponse with the appropriate error handling
  */
-export const createClass = async ({
-  uid,
-  classData,
-}: {
-  uid: string;
-  classData: {
-    class_name: string;
-    initial_credits: number;
-  };
-}): Promise<NextResponse> => {
+export const createClassInFirestore = async (uid: string, classData: { class_name: string; initial_credits: number; }): Promise<boolean> => {
   const batch = admin_firestore.batch(); // Start a batch write for atomic operation
 
   // Create a new document reference for the class
@@ -66,15 +59,10 @@ export const createClass = async ({
 
     await batch.commit(); // Commit the batch
     // Redirect the user to the new class dashboard
-    return NextResponse.redirect(
-      new URL(`${process.env.BASE_URL}/dashboard/classes/${classDocRef.id}/overview?class_name=${encodeURI(classData.class_name)}`, process.env.BASE_URL)
-    );
+    return true
   } catch (error) {
     console.log(error);
-    return NextResponse.json(
-      { error: "Failed to create class" },
-      { status: 500 }
-    );
+    return false
   }
 };
 
@@ -83,8 +71,9 @@ export const createClass = async ({
  * @param uid string representing the user identifier
  * @returns a promise to return a NextResponse with the appropriate error handling
  */
-export const getClasses = async (uid: string): Promise<NextResponse> => {
+export const getClassesFromFirestore = cache(async (uid: string): Promise<ClassesTableRowType[] | undefined> => {
   try {
+
     // Get all student enrollment documents across all classes for the user
     const enrollmentSnapshot = await admin_firestore
       .collectionGroup(StudentEnrollment.collection)
@@ -102,58 +91,44 @@ export const getClasses = async (uid: string): Promise<NextResponse> => {
       .map((doc) => doc.ref.parent.parent)
       .filter((ref) => ref !== null);
 
-    // Return 404 if no classes are found
     if (classRefs.length === 0) {
-      return NextResponse.json(
-        { message: `No classes found for this user ${uid}` },
-        { status: 404 }
-      );
+      return []
     }
 
-    try {
-      // Fetch all class documents in parallel
-      const classSnapshots = await admin_firestore.getAll(...classRefs);
+    // Fetch all class documents in parallel
+    const classSnapshots = await admin_firestore.getAll(...classRefs);
 
-      // Merge class data with enrollment data to build UI-friendly rows
-      const classes: ClassesTableRowType[] = classSnapshots.map((doc, index) => {
-        const data = Class.schema.parse(doc.data());
-        return {
-          class_id: doc.id,
-          class_name: data.class_name,
-          members: data.members,
-          points: enrollmentDocsData[index].points,
-          credits: enrollmentDocsData[index].credits,
-          admin: enrollmentDocsData[index].admin,
-          teachers: data.teachers
-        };
-      });
+    // Merge class data with enrollment data to build UI-friendly rows
+    const classes: ClassesTableRowType[] = classSnapshots.map((doc, index) => {
+      const data = Class.schema.parse(doc.data());
+      return {
+        class_id: doc.id,
+        class_name: data.class_name,
+        members: data.members,
+        points: enrollmentDocsData[index].points,
+        credits: enrollmentDocsData[index].credits,
+        admin: enrollmentDocsData[index].admin,
+        teachers: data.teachers
+      };
+    });
 
-      return NextResponse.json([...classes], { status: 200 });
+    return classes;
 
-    } catch (error) {
-      console.log(error);
+  } catch (err) {
+    console.log(err);
 
-      return NextResponse.json(
-        { message: "Error while retrieving classes" },
-        { status: 500 }
-      );
-    }
-
-  } catch (error) {
-    console.log(error);
-    return NextResponse.json(
-      { message: "Error while retrieving student enrollments" },
-      { status: 500 }
-    );
+    return undefined
   }
-};
+})
+
+
 
 /**
  * Retrieves the class data of a specified class
  * @param class_id string representing the class identifier
  * @returns a promise to return a NextResponse with the appropriate error handling
  */
-export const getClass = async (class_id: string): Promise<NextResponse> => {
+export const getClassFromFirestore = cache(async (class_id: string) => {
   try {
     const classDoc = await admin_firestore
       .collection(Class.collection)
@@ -161,27 +136,20 @@ export const getClass = async (class_id: string): Promise<NextResponse> => {
       .get();
 
     if (!classDoc.exists) {
-      throw new Error(`NOT_FOUND:Class ${class_id} not found`)
+      throw new Error(`NOT_FOUND:Class ${class_id} not found`);
     }
 
-    return NextResponse.json(classDoc.data(), { status: 200 });
+    return Class.schema.parse(classDoc.data());
 
   } catch (error: any) {
-
+    console.log(error);
     if (error.message.startsWith("NOT_FOUND")) {
-
-      return NextResponse.json(
-        { message: error.message.split(":")[1] },
-        { status: 404 }
-      );
+      return undefined
     }
 
-    return NextResponse.json(
-      { message: "Error while retrieving the class" },
-      { status: 500 }
-    );
+    return undefined;
   }
-};
+});
 
 /**
  * Retrieves every member of an existing class.
@@ -189,35 +157,42 @@ export const getClass = async (class_id: string): Promise<NextResponse> => {
  * @param class_id string representing the class identifier
  * @returns a promise to return a NextResponse with the appropriate error handling
  */
-export const getClassMembers = async (
+export const getClassMembersFromFirestore = cache(async (
   class_id: string
-): Promise<NextResponse> => {
-  // Get all student enrollment docs for the class, ordered by points
-  const membersEnrollmentPromise = admin_firestore
-    .collection(Class.collection)
-    .doc(class_id)
-    .collection(StudentEnrollment.collection)
-    .orderBy("points", "desc")
-    .get();
+): Promise<MembersTableRowType[] | undefined> => {
+  try {
+    // Get all student enrollment docs for the class, ordered by points
+    const membersEnrollmentPromise = admin_firestore
+      .collection(Class.collection)
+      .doc(class_id)
+      .collection(StudentEnrollment.collection)
+      .orderBy("points", "desc")
+      .get();
 
 
-  // Get user account info from Firebase Auth based on UIDs
-  const authPromise = membersEnrollmentPromise.then(snapshot =>
-    admin_auth.getUsers(snapshot.docs.map(doc => { const data = StudentEnrollment.schema.parse(doc.data()); return ({ uid: data.uid }) }))
-  );
+    // Get user account info from Firebase Auth based on UIDs
+    const authPromise = membersEnrollmentPromise.then(snapshot =>
+      admin_auth.getUsers(
+        snapshot.docs.map(
+          doc => {
+            const data = StudentEnrollment.schema.parse(doc.data());
+            return ({ uid: data.uid })
+          }
+        )
+      )
+    );
 
-  // Fetch in parallel
-  const [membersEnrollmentSnapshot, getUserResult] = await Promise.all([membersEnrollmentPromise, authPromise])
+    // Fetch in parallel
+    const [membersEnrollmentSnapshot, getUserResult] = await Promise.all([membersEnrollmentPromise, authPromise])
 
-  if (membersEnrollmentSnapshot.empty) {
-    return NextResponse.json({ message: "This class has no members" }, { status: 404 })
-  }
+    if (membersEnrollmentSnapshot.empty) {
+      return []
+    }
 
-  const membersEnrollment = membersEnrollmentSnapshot.docs;
+    const membersEnrollment = membersEnrollmentSnapshot.docs;
 
-  // Combine Firestore data with Auth user data
-  return NextResponse.json([
-    ...getUserResult.users.map((user, index) => {
+    // Combine Firestore data with Auth user data
+    return getUserResult.users.map((user, index) => {
       const member = (membersEnrollment[index].data());
       const classMember: MembersTableRowType = {
         display_name: user.displayName ?? "No name",
@@ -229,11 +204,13 @@ export const getClassMembers = async (
         uid: user.uid
       };
       return classMember;
-    }),
-  ], {
-    status: 200
-  });
-};
+    });
+  } catch (err) {
+    console.log(err);
+
+    return undefined
+  }
+});
 
 /**
  * Enrolls a student from a class.
@@ -241,7 +218,7 @@ export const getClassMembers = async (
  * @param class_id string representing the class identifier
  * @returns a promise to return a NextResponse with the appropriate error handling
  */
-export const joinClass = async (
+export const joinClassInFirestore = async (
   uid: string,
   class_id: string
 ): Promise<NextResponse> => {
@@ -300,13 +277,7 @@ export const joinClass = async (
   }
 };
 
-/**
- * Removes a student from a class.
- * @param uid string representing the user identifier
- * @param class_id string representing the class identifier
- * @returns a promise to return a NextResponse with the appropriate error handling
- */
-export const leaveClass = async (uid: string, class_id: string): Promise<NextResponse> => {
+export const leaveClassInFirestore = async (uid: string, class_id: string): Promise<NextResponse> => {
   const classDocRef = admin_firestore.collection(Class.collection).doc(class_id);
   const studentDocRef = classDocRef.collection(StudentEnrollment.collection).doc(uid);
   try {
@@ -375,30 +346,30 @@ export const leaveClass = async (uid: string, class_id: string): Promise<NextRes
   }
 };
 
+
 /**
  * Makes a member of an existing class admin
  * @param uid string representing the user identifier
  * @param class_id string representing the class identifier
  * @returns a promise to return a NextResponse with the appropriate error handling
  */
-export const makeUserAdmin = async (uid: string, class_id: string): Promise<NextResponse> => {
+export const makeUserAdmin = async (uid: string, class_id: string): Promise<boolean> => {
   try {
     admin_firestore.collection(Class.collection).doc(class_id).collection(StudentEnrollment.collection).withConverter(StudentEnrollment.converter).doc(uid).update({
       admin: true
     })
-    return NextResponse.json({ message: `The user ${uid} is now admin` }, { status: 200 })
+    return true
   } catch (err) {
-    return NextResponse.json({ message: `There was a problem during the operation` }, { status: 500 })
+    return false
   }
 }
 
 /**
  * Retrieves all the teachers of an existing class
- * @param uid string representing the user identifier
  * @param class_id string representing the class identifier
  * @returns a promise to return a NextResponse with the appropriate error handling
  */
-export const getTeachers = async (uid: string, class_id: string): Promise<NextResponse> => {
+export const getTeachersFromFirestore = cache(async (class_id: string): Promise<TeacherTableRowType[] | undefined> => {
   try {
     // Get the class document ref
     const classDocRef = admin_firestore.collection(Class.collection).doc(class_id);
@@ -410,11 +381,11 @@ export const getTeachers = async (uid: string, class_id: string): Promise<NextRe
     const teachersCollectionSnap = await teachersCollectionRef.get()
     if (!classDocSnap.exists) {
       // If the class doesn't exist
-      throw new Error("NOT_FOUND:The class doesn't exist")
+      return []
     }
     if (teachersCollectionSnap.empty) {
       // If the teachers collection is empty
-      throw new Error("NOT_FOUND:No teachers for the given class")
+      return []
     }
     // Map the teachers collection to retrieve the teachers data
     const teachers: TeacherTableRowType[] = teachersCollectionSnap.docs.map((teacher) => {
@@ -422,27 +393,11 @@ export const getTeachers = async (uid: string, class_id: string): Promise<NextRe
       return { ...Teacher.schema.parse(teacher.data()), teacher_id: teacher.id };
     })
 
-    return NextResponse.json([
-      ...teachers
-    ], {
-      status: 200
-    })
+    return teachers;
   } catch (err: any) {
-    const errConverted = err as Error;
-    let message: string | undefined = undefined;
-    let statusCode = 500;
-
-    if (errConverted.message.startsWith("NOT_FOUND")) {
-      message = errConverted.message.split(":")[1];
-      statusCode = 404
-    }
-    return NextResponse.json({
-      message: message ?? "Error while retrieving the teachers data"
-    }, {
-      status: statusCode
-    })
+    return undefined
   }
-}
+});
 
 /**
  * Adds a teacher to an existing class
@@ -450,7 +405,7 @@ export const getTeachers = async (uid: string, class_id: string): Promise<NextRe
  * @param teacherData the input data representing the teacher to be parsed by the collection converter
  * @returns a promise to return a NextResponse with the appropriate error handling
  */
-export const addTeacher = async (class_id: string, teacherData: TeacherDataInput): Promise<NextResponse> => {
+export const addTeacherInFirestore = async (class_id: string, teacherData: TeacherDataInput): Promise<boolean> => {
 
   try {
     const classDocRef = admin_firestore.collection(Class.collection).doc(class_id);
@@ -463,20 +418,10 @@ export const addTeacher = async (class_id: string, teacherData: TeacherDataInput
       teachers: FieldValue.increment(1)
     })
     batch.commit();
-    return NextResponse.json({
-      message: `Teacher ${teacherDocRef.id} created in class ${class_id}`
-    }, {
-      status: 200
-    })
+    return true
   } catch (err) {
     console.log(err);
-
-    return NextResponse.json({
-      message: `The teacher could not be created for class ${class_id}`
-    }, {
-      status: 500
-    })
-
+    return false;
   }
 }
 
@@ -487,17 +432,19 @@ export const addTeacher = async (class_id: string, teacherData: TeacherDataInput
  * @param class_id string representing the class identifier
  * @returns a promise to return a NextResponse with the appropriate error handling
  */
-export const getStudentEnrollmentData = async (class_id: string, uid: string): Promise<NextResponse> => {
+type StudentEnrollmentType = z.infer<typeof StudentEnrollment.schema>;
+export const getStudentEnrollmentDataFromFirestore = async (class_id: string, uid: string): Promise<StudentEnrollmentType | undefined> => {
   try {
-    const studentDocSnap = await admin_firestore.collection(Class.collection).doc(class_id).collection(StudentEnrollment.collection).doc(uid).get();
+    const studentDocRef = admin_firestore.collection(Class.collection).doc(class_id).collection(StudentEnrollment.collection).doc(uid);
+    const studentDocSnap = await studentDocRef.get();
     if (!studentDocSnap.exists) {
-      return NextResponse.json({ message: "Student not found" }, { status: 404 })
+      return undefined
     }
     const data = StudentEnrollment.schema.parse(studentDocSnap.data())
-    return NextResponse.json(data, { status: 200 })
+    return data
   } catch (error: any) {
     console.log(error);
-    return NextResponse.json({ message: `Error while retrieving data for student ${uid} from class ${class_id}` }, { status: error?.code || 500 })
+    return undefined;
   }
 }
 
@@ -507,7 +454,7 @@ export const getStudentEnrollmentData = async (class_id: string, uid: string): P
  * @param class_id string representing the class identifier
  * @returns a promise to return a NextResponse with the appropriate error handling
  */
-export const deleteTeacher = async (teacher_id: string, class_id: string): Promise<NextResponse> => {
+export const deleteTeacherInFirestore = async (teacher_id: string, class_id: string): Promise<WriteOperationResult> => {
   const teacherDocRef = admin_firestore.collection(Class.collection).doc(class_id).collection(Teacher.collection).doc(teacher_id);
   const classDocRef = admin_firestore.collection(Class.collection).doc(class_id);
   try {
@@ -526,9 +473,7 @@ export const deleteTeacher = async (teacher_id: string, class_id: string): Promi
         teachers: FieldValue.increment(-1)
       });
     })
-    return NextResponse.json({
-      message: `Teacher ${teacher_id} deleted from class ${class_id}`
-    }, { status: 200 });
+    return { successful: true };
   } catch (err: any) {
     const error = err as Error;
     let message = "Errore durante lo svolgimento dell'operazione";
@@ -537,13 +482,14 @@ export const deleteTeacher = async (teacher_id: string, class_id: string): Promi
       message = error.message.split(":")[1];
       status = 404;
     }
-    return NextResponse.json({
+    return {
+      successful: false,
+      status,
       message
-    }, { status });
+    }
+
   }
-
 }
-
 
 /**
  * Modifies a teacher from an existing class
@@ -557,7 +503,7 @@ const teacherDataToChange = Teacher.schema
 
 type TeacherDataToChangeInput = z.input<typeof teacherDataToChange>
 
-export const modifyTeacher = async (teacher_id: string, class_id: string, teacherData: TeacherDataToChangeInput): Promise<NextResponse> => {
+export const modifyTeacher = async (teacher_id: string, class_id: string, teacherData: TeacherDataToChangeInput): Promise<WriteOperationResult> => {
 
   try {
     const teacherDocRef = admin_firestore.collection(Class.collection).doc(class_id).collection(Teacher.collection).doc(teacher_id);
@@ -566,9 +512,7 @@ export const modifyTeacher = async (teacher_id: string, class_id: string, teache
       throw new Error(`NOT_FOUND:Teacher ${teacher_id} not found`);
     }
     teacherDocRef.update(teacherData);
-    return NextResponse.json({
-      message: `Teacher ${teacher_id} modified in class ${class_id}`
-    }, { status: 200 });
+    return { successful: true }
   } catch (err: any) {
     const error = err as Error;
     let message = "Errore durante lo svolgimento dell'operazione";
@@ -577,8 +521,11 @@ export const modifyTeacher = async (teacher_id: string, class_id: string, teache
       message = error.message.split(":")[1];
       status = 404;
     }
-    return NextResponse.json({
+    return {
+      successful: false,
+      status,
       message
-    }, { status });
+    }
+
   }
 }

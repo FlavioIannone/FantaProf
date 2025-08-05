@@ -1,62 +1,27 @@
 import { UserRecord } from "firebase-admin/auth";
 import { ApiError } from "next/dist/server/api-utils";
-import { NextRequest } from "next/server";
 
-export const reqHasBodyBasedOnPath = (
-  req: NextRequest,
-  pathToVerify: string,
-  methodsToVerify: string[] = [],
-  excludePaths: string[] = []
-): boolean => {
-  const methods = methodsToVerify.map((m) => m.toLowerCase());
-  const method = req.method.toLowerCase();
-  const contentLength = parseInt(req.headers.get("Content-Length") || "0", 10);
-  const path = req.nextUrl.pathname.replace("/api/protected", "");
-
-  const matchesPattern = (pattern: string): boolean => {
-    const regex = new RegExp(
-      "^" + pattern.split("*").map(escapeRegex).join(".*") + "$"
-    );
-    return regex.test(path);
-  };
-
-  // ✅ Skip verification if path matches any exclusion
-  if (excludePaths.some(matchesPattern)) {
-    return true;
-  }
-
-  // ✅ Continue verification if path matches the main pattern
-  if (matchesPattern(pathToVerify)) {
-    if (
-      methods.length === 0
-        ? method === "post" || method === "put"
-        : methods.includes(method)
-    ) {
-      return contentLength > 0;
-    }
-  }
-
-  return true;
-};
-
-function escapeRegex(str: string): string {
-  return str.replace(/[-/\\^$+?.()|[\]{}]/g, "\\$&");
-}
-
-
-
-
+/**
+ * Form data filled by the user on signin
+ */
 export type SignInData = {
   username: string | undefined;
   email: string | undefined;
   password: string | undefined;
 };
 
+/**
+ * Form data filled by the user on login
+ */
 export type LoginData = {
   email: string | undefined;
   password: string | undefined;
 };
 
+
+/**
+ * User profile data
+ */
 export type UserData = {
   displayName?: string;
   email?: string;

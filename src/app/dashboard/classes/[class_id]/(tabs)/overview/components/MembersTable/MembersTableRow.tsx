@@ -2,7 +2,7 @@
 
 import { useUserData } from "@/components/client/UserDataContext";
 import Image from "next/image";
-import { MembersTableRowType } from "@/app/dashboard/(queryHandlers)/handlers";
+import { MembersTableRowType } from "@/lib/data/types.data-layer";
 import { useState } from "react";
 import { useIdToken } from "@/lib/hooks/useIdToken";
 import { getQueryClient, queryKeys } from "@/lib/getQueryClient";
