@@ -30,9 +30,7 @@ export default function ClassesTableRow({
   return (
     <Link
       key={classData.class_id}
-      href={`/dashboard/classes/${
-        classData.class_id
-      }/overview?class_name=${encodeURIComponent(classData.class_name)}`}
+      href={`/dashboard/classes/${classData.class_id}/overview`}
       className={`flex justify-between bg-base-200 rounded-2xl p-4 ${
         loading && "animate-pulse"
       }`}

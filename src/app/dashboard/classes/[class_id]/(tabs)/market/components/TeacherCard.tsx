@@ -4,24 +4,17 @@
 import { useState, useRef, useEffect } from "react";
 import { useModal } from "@/components/client/Modal/ModalContext";
 import { TeacherTableRowType } from "@/lib/data/types.data-layer";
-import { useIdToken } from "@/lib/hooks/useIdToken";
-import { getQueryClient, queryKeys } from "@/lib/getQueryClient";
-
-// Set up the query client instance
-const queryClient = getQueryClient();
+import {
+  TeacherDataEditForm,
+  modifyTeacherAction,
+  deleteTeacherAction,
+} from "@/lib/data/teachers.data-layer";
 
 // Inner component: Modal content for editing a teacher
 function TeacherEditForm({
   initialData,
-  refs,
 }: {
   initialData: TeacherTableRowType;
-  refs: {
-    nameRef: React.RefObject<HTMLInputElement | null>;
-    surnameRef: React.RefObject<HTMLInputElement | null>;
-    descriptionRef: React.RefObject<HTMLTextAreaElement | null>;
-    priceRef: React.RefObject<HTMLInputElement | null>;
-  };
 }) {
   return (
     <fieldset className="space-y-3">
@@ -29,24 +22,24 @@ function TeacherEditForm({
         <legend className="d-fieldset-legend">Nome</legend>
         <input
           className="d-input w-full"
+          name="teacher_name"
           placeholder={initialData.name}
-          ref={refs.nameRef}
         />
       </div>
       <div>
         <legend className="d-fieldset-legend">Cognome</legend>
         <input
           className="d-input w-full"
+          name="teacher_surname"
           placeholder={initialData.surname}
-          ref={refs.surnameRef}
         />
       </div>
       <div>
         <legend className="d-fieldset-legend">Descrizione</legend>
         <textarea
           className="d-textarea w-full h-24"
+          name="teacher_description"
           placeholder={initialData.description}
-          ref={refs.descriptionRef}
         />
         <div className="d-label">Facoltativo</div>
       </div>
@@ -54,9 +47,9 @@ function TeacherEditForm({
         <legend className="d-fieldset-legend">Prezzo</legend>
         <input
           className="d-input w-full"
+          name="teacher_price"
           placeholder={initialData.price.toString()}
           type="number"
-          ref={refs.priceRef}
         />
       </div>
     </fieldset>
@@ -73,18 +66,12 @@ export default function TeacherCard({
   isAdmin: boolean;
   class_id: string;
 }) {
-  const { token } = useIdToken(); // Auth token for API requests
-  const { setModal, setConfirmButtonDisabled } = useModal(); // Modal controls
+  const { setModal } = useModal(); // Modal controls
 
   // State for truncating the description
   const [expanded, setExpanded] = useState(false);
   const [isTruncated, setIsTruncated] = useState(false);
 
-  // Refs for editable input fields
-  const nameRef = useRef<HTMLInputElement>(null);
-  const surnameRef = useRef<HTMLInputElement>(null);
-  const descriptionRef = useRef<HTMLTextAreaElement>(null);
-  const priceRef = useRef<HTMLInputElement>(null);
   const descRef = useRef<HTMLParagraphElement>(null);
 
   // Check if description overflows and needs truncation
@@ -93,112 +80,33 @@ export default function TeacherCard({
     if (el) setIsTruncated(el.scrollHeight > el.clientHeight);
   }, [teacherData.description]);
 
-  // Refresh teacher-related queries
-  const refreshQueries = async () => {
-    await Promise.all([
-      queryClient.invalidateQueries({ queryKey: [queryKeys.classData] }),
-      queryClient.invalidateQueries({ queryKey: [queryKeys.classTeachers] }),
-    ]);
-  };
-
-  // Delete teacher API call
-  const handleDelete = async () => {
-    try {
-      const res = await fetch(
-        `/api/protected/classes/${class_id}/teachers/${teacherData.teacher_id}`,
-        {
-          method: "DELETE",
-          headers: { Authorization: `Bearer ${token!}` },
-        }
-      );
-
-      if (res.status === 404) {
-        setModal(true, {
-          title: "Errore",
-          content: "Il professore specificato non fa parte della classe",
-        });
-      }
-    } catch {
-      setModal(true, {
-        title: "Errore",
-        content: "Errore durante la rimozione dei dati",
-        onConfirm: handleDelete,
-        confirmButtonText: "Riprova",
-      });
-    } finally {
-      refreshQueries();
-    }
-  };
-
-  // Update teacher API call
-  const handleUpdate = async (data: Partial<TeacherTableRowType>) => {
-    try {
-      const res = await fetch(
-        `/api/protected/classes/${class_id}/teachers/${teacherData.teacher_id}`,
-        {
-          method: "PUT",
-          headers: { Authorization: `Bearer ${token!}` },
-          body: JSON.stringify(data),
-        }
-      );
-
-      if (res.status === 404) {
-        setModal(true, {
-          title: "Errore",
-          content: "Il professore specificato non fa parte della classe",
-        });
-      }
-    } catch {
-      setModal(true, {
-        title: "Errore",
-        content: "Errore durante la modifica dei dati",
-        onConfirm: () => handleUpdate(data),
-        confirmButtonText: "Riprova",
-      });
-    } finally {
-      refreshQueries();
-    }
-  };
-
   // Open edit modal with pre-filled form
   const openEditModal = () => {
     setModal(true, {
       title: "Modifica professore",
       confirmButtonText: "Modifica",
-      content: (
-        <TeacherEditForm
-          initialData={teacherData}
-          refs={{ nameRef, surnameRef, descriptionRef, priceRef }}
-        />
-      ),
-      onConfirm: async () => {
-        setConfirmButtonDisabled(true);
+      content: <TeacherEditForm initialData={teacherData} />,
+      closeOnSubmit: false,
+      onConfirm: async (formData) => {
+        if (!formData) return;
+        const name = formData.get("teacher_name")! as string;
+        const surname = formData.get("teacher_surname")! as string;
+        const description = formData.get("teacher_description")! as string;
+        const price = formData.get("teacher_price")! as string;
 
-        const trimmedName = nameRef.current?.value.trim() ?? "";
-        const trimmedSurname = surnameRef.current?.value.trim() ?? "";
-        const trimmedDescription = descriptionRef.current?.value.trim() ?? "";
-        const parsedPrice = priceRef.current?.value
-          ? Number(priceRef.current.value)
-          : NaN;
+        const newTeacherData: TeacherDataEditForm = {
+          name: name === "" ? undefined : name.trim(),
+          surname: surname === "" ? undefined : surname.trim(),
+          description: description === "" ? undefined : description.trim(),
+          price: price === "" ? undefined : parseInt(price),
+        };
 
-        // No changes were made, do nothing
-        if (
-          !trimmedName &&
-          !trimmedSurname &&
-          !trimmedDescription &&
-          isNaN(parsedPrice)
-        ) {
-          return false;
-        }
-
-        const data: Partial<TeacherTableRowType> = {};
-        if (trimmedName) data.name = trimmedName;
-        if (trimmedSurname) data.surname = trimmedSurname;
-        if (trimmedDescription) data.description = trimmedDescription;
-        if (!isNaN(parsedPrice)) data.price = parsedPrice;
-
-        await handleUpdate(data);
-        setConfirmButtonDisabled(false);
+        await modifyTeacherAction(
+          class_id,
+          teacherData.teacher_id,
+          newTeacherData
+        );
+        setModal(false);
       },
     });
   };
@@ -262,14 +170,21 @@ export default function TeacherCard({
                 </li>
                 <li>
                   <button
-                    className="bg-error text-red-800 font-bold"
+                    className="bg-error text-error-content font-bold"
                     onClick={() => {
                       setModal(true, {
                         title: "Eliminare il professore?",
                         content:
                           "Confermi di voler eliminare questo professore?",
                         confirmButtonText: "Conferma",
-                        onConfirm: handleDelete,
+                        closeOnSubmit: false,
+                        onConfirm: async () => {
+                          await deleteTeacherAction(
+                            class_id,
+                            teacherData.teacher_id
+                          );
+                          setModal(false);
+                        },
                       });
                     }}
                   >

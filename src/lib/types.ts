@@ -3,6 +3,7 @@ import { ApiError } from "next/dist/server/api-utils";
 
 /**
  * Form data filled by the user on signin
+ *  @description This type is used to represent the data that the user fills in the signin form.
  */
 export type SignInData = {
   username: string | undefined;
@@ -12,6 +13,7 @@ export type SignInData = {
 
 /**
  * Form data filled by the user on login
+ * @description This type is used to represent the data that the user fills in the login form.
  */
 export type LoginData = {
   email: string | undefined;
@@ -21,6 +23,7 @@ export type LoginData = {
 
 /**
  * User profile data
+ * @description This type is used to represent the user profile data that can be retrieved from Firebase.
  */
 export type UserData = {
   displayName?: string;
@@ -29,42 +32,32 @@ export type UserData = {
   photoURL?: string;
 };
 
-export const FirestoreCollections = {
-  usersCollection: "Users",
-};
+/**
+ * Result type for write operations in Firestore
+ * @description Used to indicate whether a write operation was successful or not.
+ */
+export type WriteOperationResult = {
+  successful: true
+} | {
+  successful: false,
+  message: string,
+  status: number
+}
 
-export const ApiFirestoreErrorCodes = {
-  NO_DATA_IN_DOC: "db/no-data-found-in-doc",
-  DOC_NOT_FOUND: "db/no-doc-found",
-  INVALID_DATA: "db/invalid-data-format",
-} as const;
+/**
+ * Result type for read operations in Firestore
+ * @description Used to indicate whether a read operation was successful or not.
+ */
+export type TeacherDataInput = { name: string, surname: string, description?: string, price: number }
 
-export const ResultType = {
-  successful: "successful",
-  unsuccessful: "unsuccessful",
-} as const; // Use `as const` to make the object read-only and infer literal types
 
-// Define a type to represent the values of ResultType
-export type ResultType = (typeof ResultType)[keyof typeof ResultType];
-
-//* Unsuccessful Result Type
-export type UnsuccessfulResult = {
-  type: typeof ResultType.unsuccessful;
-  error: ApiError;
-};
-
-//* Successful Read User Data Result Type
-export type SuccessfulUserDataReadResult = {
-  type: typeof ResultType.successful;
-  data: UserRecord;
-};
-
-//* Successful Write User Data Result Type
-export type SuccessfulUserDataWriteResult = {
-  type: typeof ResultType.successful;
-  message?: string;
-};
-
+/**
+ * Delays the execution for a specified number of seconds.
+ * @param seconds Number of seconds to delay
+ * @description Returns a promise that resolves after the specified number of seconds.
+ */
 export const delay = (seconds: number): Promise<void> => {
   return new Promise((resolve) => setTimeout(resolve, seconds * 1000));
 };
+
+

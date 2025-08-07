@@ -1,60 +1,11 @@
 "use client";
 
-import {
-  ModalContextType,
-  ModalProps,
-  useModal,
-} from "@/components/client/Modal/ModalContext";
-import { addClassAction } from "@/lib/data/classes/classes.data";
-import { getQueryClient, queryKeys } from "@/lib/getQueryClient";
-import { useIdToken } from "@/lib/hooks/useIdToken";
-import { RefObject, useEffect, useRef, useState } from "react";
-
-// Type for form data used in class creation
-type FormClassData = {
-  class_name: string;
-  initial_credits: number;
-};
-
-// Get a query client instance for cache invalidation
-const query = getQueryClient();
+import { useModal } from "@/components/client/Modal/ModalContext";
+import { addClassAction } from "@/lib/data/classes.data-layer";
 
 export default function AddClassButton() {
   // Modal context, provides methods to open/close modals
   const modal = useModal();
-
-  // Get auth token and loading state from a custom hook
-  const { token, loading } = useIdToken();
-
-  // While loading token, show disabled button with loading animation
-  if (loading) {
-    return (
-      <button
-        type="button"
-        className="d-btn d-btn-primary sm:space-x-1 animate-pulse"
-        disabled
-        aria-disabled
-      >
-        <i className="bi bi-plus-circle" aria-hidden></i>
-        <p className="w-max sm:block hidden">Crea classe</p>
-      </button>
-    );
-  }
-
-  // If no token (not logged in), show disabled button
-  if (!token) {
-    return (
-      <button
-        type="button"
-        className="d-btn d-btn-primary sm:space-x-1"
-        disabled
-        aria-disabled
-      >
-        <i className="bi bi-plus-circle" aria-hidden></i>
-        <p className="w-max sm:block hidden">Crea classe</p>
-      </button>
-    );
-  }
 
   // If user is logged in and token is available, show active button
   return (
@@ -67,15 +18,22 @@ export default function AddClassButton() {
           title: "Crea classe",
           // Modal content is a separate component declared below
           content: <ModalBody />,
+          closeOnSubmit: false,
           confirmButtonText: "Crea",
-          action: async (formData) => {
-            const className = formData.get("class_name")!.toString();
-            const initialCredits = formData.get("initial_credits")!.toString();
+          onConfirm: async (formData) => {
+            if (!formData) return;
+
+            const className = formData.get("class_name")!.toString().trim();
+            const initialCredits = formData
+              .get("initial_credits")!
+              .toString()
+              .trim();
             if (className !== "" && initialCredits !== "") {
-              addClassAction({
+              await addClassAction({
                 class_name: className,
                 initial_credits: parseInt(initialCredits),
               });
+              modal.setModal(false);
             }
           },
         });

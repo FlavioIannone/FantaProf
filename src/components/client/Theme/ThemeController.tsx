@@ -102,7 +102,7 @@ export const darkThemes: Theme[] = [
 export default function ThemeController({
   className,
 }: Readonly<{ className?: string }>) {
-  const { theme, setTheme } = useTheme();
+  const { theme, setTheme, loading } = useTheme();
 
   const handleDropdownClick = (value: string) => {
     if (document.activeElement) {
@@ -111,6 +111,20 @@ export default function ThemeController({
     if (theme === value) return;
     setTheme(value);
   };
+
+  if (loading) {
+    return (
+      <button
+        tabIndex={0}
+        type="button"
+        disabled
+        aria-disabled
+        className={`${className} d-btn d-skeleton`}
+      >
+        Tema <i className="bi bi-chevron-down" aria-hidden></i>
+      </button>
+    );
+  }
 
   return (
     <div className="d-dropdown d-dropdown-end">

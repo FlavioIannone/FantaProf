@@ -1,20 +1,19 @@
-
 import { cache } from "react";
 import { admin_firestore } from "../firebase-connection";
-import { StudentEnrollment } from "../schema.db";
+import { Class, StudentEnrollment } from "../schema.db";
+import z from "zod";
 
 /**
- * Searches all the user's classes to find the one with the best score.
- * If the query throws an error, -1 is returned as the score,
- * abling the API endpoint "global-stats" to retrieve this data and the classes count at once.
- * @param uid string representing the user identifier
- * @returns a promise to return the best score and the class name with the appropriate error handling
+ * Retrieves the class where the user has the highest score.
+ * Returns `{ points: -1, className: "" }` on error to allow combined stats fetching.
+ * @param uid - User identifier
+ * @returns Promise resolving to the highest points and class name
  */
 export const getBestScoreFromFirestore = cache(async (
   uid: string
 ): Promise<{ points: number; className: string }> => {
   try {
-    //* Retrieve the enrollment with the highest score
+    // Query enrollments for the user, ordered by points descending, limit 1
     const enrollmentSnapshot = await admin_firestore
       .collectionGroup(StudentEnrollment.collection)
       .where("uid", "==", uid)
@@ -22,20 +21,32 @@ export const getBestScoreFromFirestore = cache(async (
       .limit(1)
       .get();
 
+    if (enrollmentSnapshot.empty) {
+      return { points: 0, className: "" };
+    }
+
     const enrollmentDoc = enrollmentSnapshot.docs[0];
-    const enrollmentDocData = enrollmentDoc.data();
+    const enrollmentData = enrollmentDoc.data();
 
-    const classDocRef = enrollmentDoc.ref.parent.parent!;
-    const classDocData =
-      (await classDocRef.get()).data()!;
+    // Get the parent class document
+    const classDocRef = enrollmentDoc.ref.parent.parent;
+    if (!classDocRef) {
+      throw new Error("Parent class reference not found");
+    }
 
-    const points = enrollmentDocData.points ?? 0;
+    const classDocSnap = await classDocRef.get();
+    if (!classDocSnap.exists) {
+      throw new Error("Parent class document does not exist");
+    }
+
+    const classData = classDocSnap.data();
+
     return {
-      points: points,
-      className: classDocData.class_name,
+      points: enrollmentData.points ?? 0,
+      className: classData?.class_name ?? "",
     };
   } catch (error) {
-    console.error("Error fetching best score:", error);
+    console.error("[getBestScoreFromFirestore] Error fetching best score:", error);
     return {
       points: -1,
       className: "",
@@ -44,30 +55,56 @@ export const getBestScoreFromFirestore = cache(async (
 });
 
 /**
- * Counts the classes the user is enrolled in.
- * If the query throws an error, -1 is returned as the count,
- * abling the API endpoint "global-stats" to retrieve this data and the user best score at once.
- * @param uid string representing the user identifier
- * @returns a promise to return the class count with the appropriate error handling
+ * Counts how many classes the user is enrolled in.
+ * Returns -1 on error to allow combined stats fetching.
+ * @param uid - User identifier
+ * @returns Promise resolving to the count of classes
  */
 export const getClassesEnrollmentCountFromFirestore = cache(async (
   uid: string
 ): Promise<number> => {
   try {
-    const classesCount = (
-      await admin_firestore
-        .collectionGroup(StudentEnrollment.collection)
-        .withConverter(StudentEnrollment.converter)
-        .where("uid", "==", uid)
-        .count()
-        .get()
-    ).data().count;
+    const countSnapshot = await admin_firestore
+      .collectionGroup(StudentEnrollment.collection)
+      .where("uid", "==", uid)
+      .count()
+      .get();
 
-    return classesCount;
+    return countSnapshot.data().count ?? 0;
   } catch (error) {
-    console.error("Error fetching best score:", error);
+    console.error("[getClassesEnrollmentCountFromFirestore] Error fetching class count:", error);
     return -1;
   }
 });
 
+type StudentEnrollmentType = z.infer<typeof StudentEnrollment.schema>;
 
+/**
+ * Retrieves the student enrollment data for a user in a specific class.
+ * @param class_id - Class identifier
+ * @param uid - User identifier
+ * @returns Promise resolving to StudentEnrollment data or undefined if not found/error
+ */
+export const getStudentEnrollmentDataFromFirestore = async (
+  class_id: string,
+  uid: string
+): Promise<StudentEnrollmentType | undefined> => {
+  try {
+    const studentDocRef = admin_firestore
+      .collection(Class.collection)
+      .doc(class_id)
+      .collection(StudentEnrollment.collection)
+      .doc(uid);
+
+    const studentDocSnap = await studentDocRef.get();
+
+    if (!studentDocSnap.exists) {
+      return undefined;
+    }
+
+    return StudentEnrollment.schema.parse(studentDocSnap.data());
+  } catch (error) {
+    console.error("[getStudentEnrollmentDataFromFirestore] Error fetching enrollment data:", error);
+    return undefined;
+  }
+};

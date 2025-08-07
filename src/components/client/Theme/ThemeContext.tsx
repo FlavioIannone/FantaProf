@@ -1,5 +1,5 @@
 "use client";
-import { loadThemeFromCookies, writeThemeFromCookies } from "@/lib/themeLoader";
+import { loadThemeFromCookies, writeThemeFromCookies } from "@/lib/theme-loader";
 import {
   createContext,
   ReactNode,
@@ -11,20 +11,24 @@ import {
 type ThemeContextType = {
   theme: string;
   setTheme: (value: string) => void;
+  loading: boolean;
 };
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 function ThemeProvider({ children }: Readonly<{ children: ReactNode }>) {
   const [theme, setTheme] = useState("default");
+  const [loading, setLoading] = useState(true);
 
   // Load theme from cookies on initial mount
   useEffect(() => {
-    const load = async () => {
+    const load = () => {
+      setLoading(true);
       const cookieTheme = loadThemeFromCookies();
       if (cookieTheme) {
         setTheme(cookieTheme);
       }
+      setLoading(false);
     };
     load();
   }, []);
@@ -40,7 +44,7 @@ function ThemeProvider({ children }: Readonly<{ children: ReactNode }>) {
   };
 
   return (
-    <ThemeContext.Provider value={{ theme, setTheme: handleSetTheme }}>
+    <ThemeContext.Provider value={{ theme, setTheme: handleSetTheme, loading }}>
       {children}
     </ThemeContext.Provider>
   );

@@ -5,7 +5,7 @@ import { useModal } from "@/components/client/Modal/ModalContext";
 export default function MembersTableHeader({ class_id }: { class_id: string }) {
   const modal = useModal();
   return (
-    <div className="mb-4 flex justify-between items-center">
+    <div className="my-4 flex justify-between items-center">
       <h1 className="text-3xl font-extrabold">
         <span className="bi bi-people-fill me-2" aria-hidden></span>
         Membri

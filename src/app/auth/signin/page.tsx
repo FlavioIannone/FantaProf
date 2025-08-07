@@ -3,108 +3,114 @@
 import Link from "next/link";
 import { type SignInData } from "@/lib/types";
 import { client_auth } from "@/lib/firebase-connection";
-import { onAuthStateChanged } from "firebase/auth";
-import { useEffect, useState } from "react";
+import { onAuthStateChanged, User } from "firebase/auth";
+import { useEffect, useRef, useState } from "react";
 import { useModal } from "@/components/client/Modal/ModalContext";
 import { useRouter } from "next/navigation";
 import {
   createAccountWithFormData,
   signInWithGoogle,
-} from "@/lib/authenticationManager";
+} from "@/lib/authentication-manager";
+import { createSession } from "@/lib/data/session/session-manager.data-layer";
 
 export default function RegistrationForm() {
   const router = useRouter();
-  const [formData, setFormData] = useState<SignInData>({
-    username: undefined,
-    email: undefined,
-    password: undefined,
-  });
 
   const { setModal } = useModal();
-  const [isSubmitLoading, setIsSubmitLoading] = useState(false);
-  const [isGoogleLoading, setIsGoogleLoading] = useState(false);
+  // True when on the server, false when on the client
+  const [isPending, setIsPending] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isRedirecting, setIsRedirecting] = useState(false);
 
-  const showModalError = (
-    title: string,
-    content: string,
-    onClose?: () => void
-  ) => {
-    setModal(true, { title, content, onClose });
-  };
+  // Flag to prevent multiple redirects
+  const redirectFlag = useRef(false);
 
   useEffect(() => {
-    setIsSubmitLoading(true);
     const unsubscribe = onAuthStateChanged(client_auth, async (user) => {
+      setIsLoading(true);
       if (user) {
-        await createSession();
+        await redirectUser(user);
         router.replace("/dashboard");
       }
+
+      setIsPending(false);
+      setIsLoading(false);
     });
-    setIsSubmitLoading(false);
     return () => unsubscribe();
   }, []);
 
-  const createSession = async () => {
-    const currentUser = client_auth.currentUser;
-    if (!currentUser) return;
+  const redirectUser = async (user: User) => {
+    if (redirectFlag.current) return;
+    setIsRedirecting(true);
+    redirectFlag.current = true;
 
-    const idToken = await currentUser.getIdToken();
-    const res = await fetch("/api/session", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      credentials: "include", // Required for setting cookies
-      body: JSON.stringify({ idToken }),
-    });
+    const token = await user.getIdToken();
+    if (!token) return;
 
-    if (!res.ok) {
-      throw new Error("Impossibile creare la sessione.");
-    }
+    await createSession(token);
+
+    router.replace("/dashboard");
+    setIsRedirecting(false);
   };
 
   const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (!formData.username || !formData.email || !formData.password) {
-      showModalError("Errore", "Compila tutti i campi richiesti.");
+    const formData = new FormData(e.currentTarget);
+    const signInData: SignInData = {
+      username: formData.get("username")!.toString().trim(),
+      email: formData.get("email")!.toString().trim(),
+      password: formData.get("password")!.toString().trim(),
+    };
+    if (
+      signInData.username === "" ||
+      signInData.email === "" ||
+      signInData.password === ""
+    ) {
+      setModal(true, {
+        title: "Compila tutti i campi",
+        content: "Per favore, compila tutti i campi richiesti.",
+      });
       return;
     }
 
-    setIsSubmitLoading(true);
+    setIsLoading(true);
 
-    const result = await createAccountWithFormData(formData);
+    const result = await createAccountWithFormData(signInData);
     if (result.successful) {
-      try {
-        await createSession();
-        router.replace("/dashboard");
-      } catch (err: any) {
-        showModalError("Errore di sessione", err.message);
-      }
+      await redirectUser(result.user);
     } else {
-      showModalError("Errore autenticazione", result.errorMsg);
+      setModal(true, {
+        title: "Errore di registrazione",
+        content: "Si è verificato un errore durante la registrazione.",
+      });
     }
 
-    setIsSubmitLoading(false);
+    setIsLoading(false);
   };
 
   const onGoogleSignIn = async (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
-    setIsGoogleLoading(true);
+    setIsLoading(true);
 
     const result = await signInWithGoogle();
     if (result.successful) {
-      try {
-        await createSession();
-        router.replace("/dashboard");
-      } catch (err: any) {
-        showModalError("Errore di sessione", err.message);
-      }
+      await redirectUser(result.user);
     } else {
-      showModalError("Errore autenticazione", result.errorMsg);
+      setModal(true, {
+        title: "Errore di registrazione",
+        content: "Si è verificato un errore durante la registrazione.",
+      });
     }
-
-    setIsGoogleLoading(false);
+    setIsLoading(false);
   };
+
+  if (isLoading || isRedirecting) {
+    return (
+      <main className="flex justify-center items-center size-full">
+        <span className="d-loading d-loading-ring d-loading-xl"></span>
+      </main>
+    );
+  }
 
   return (
     <form
@@ -131,9 +137,6 @@ export default function RegistrationForm() {
             type="text"
             className="d-input d-validator w-full peer"
             placeholder="Fragolina123"
-            onChange={(e) =>
-              setFormData({ ...formData, username: e.target.value })
-            }
             required
           />
           <div className="d-validator-hint h-0 peer-user-invalid:h-auto">
@@ -150,9 +153,6 @@ export default function RegistrationForm() {
             type="email"
             className="d-input d-validator w-full peer"
             placeholder="esempio@dominio.com"
-            onChange={(e) =>
-              setFormData({ ...formData, email: e.target.value })
-            }
             required
           />
           <div className="d-validator-hint h-0 peer-user-invalid:h-auto">
@@ -173,9 +173,6 @@ export default function RegistrationForm() {
             minLength={8}
             pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}"
             title="Deve avere almeno 8 caratteri, includere numero, lettera minuscola, lettera maiuscola"
-            onChange={(e) =>
-              setFormData({ ...formData, password: e.target.value })
-            }
             required
           />
           <p className="d-validator-hint h-0 peer-user-invalid:h-auto">
@@ -193,11 +190,11 @@ export default function RegistrationForm() {
       <button
         type="submit"
         className={`d-btn d-btn-primary d-btn-block animate-fade-in-bottom text-lg motion-reduce:animate-none ${
-          isSubmitLoading
+          isLoading
             ? "animate-pulse"
             : "motion-safe:opacity-0 animation-delay-500"
         }`}
-        disabled={isSubmitLoading || isGoogleLoading}
+        disabled={isLoading || isPending}
       >
         Registrati
       </button>
@@ -215,12 +212,8 @@ export default function RegistrationForm() {
 
       <button
         type="button"
-        className={`d-btn d-btn-outline d-btn-block animate-fade-in-bottom motion-reduce:animate-none ${
-          isGoogleLoading
-            ? "animate-pulse"
-            : "motion-safe:opacity-0 animation-delay-700"
-        }`}
-        disabled={isGoogleLoading || isSubmitLoading}
+        className="d-btn d-btn-outline d-btn-block animate-fade-in-bottom motion-reduce:animate-none"
+        disabled={isLoading || isPending}
         onClick={onGoogleSignIn}
       >
         <i className="bi bi-google" aria-hidden></i> Registrazione con Google
