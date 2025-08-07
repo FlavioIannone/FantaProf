@@ -1,4 +1,4 @@
-import { getGlobalStats as getGlobalStatsAction } from "@/lib/data/user/user.data";
+import { getGlobalStatsAction } from "@/lib/data/user.data-layer";
 import DashboardCard from "./DashboardCard";
 
 export default async function StatsDisplayer() {

@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname, useSearchParams } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 
 const tabs = [
@@ -20,13 +20,7 @@ export default function DashboardTabsNavigator({
   className?: string;
 }) {
   const [activeTab, setActiveTab] = useState("");
-  const searchParams = useSearchParams();
-  const class_name = searchParams.get("class_name");
   const pathName = usePathname();
-
-  if (!class_name) {
-    return <>Nav</>;
-  }
 
   useEffect(() => {
     const splittedPath = pathName.split("/");
@@ -70,8 +64,9 @@ export default function DashboardTabsNavigator({
         {tabs.map((tabData, i) => (
           <Link
             key={i}
+            prefetch={true}
             role="tab"
-            href={`${tabData.tabName}?class_name=${encodeURI(class_name)}`}
+            href={`${tabData.tabName}`}
             className={`d-tab md:flex-0 flex-1 ${
               activeTab === tabData.tabName && "d-tab-active"
             }`}

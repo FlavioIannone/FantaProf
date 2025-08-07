@@ -134,7 +134,7 @@ const TeacherTeamEnrollmentSchema = z.object({
 const TeacherTeamEnrollmentsType = z.array(TeacherTeamEnrollmentSchema).refine(
   (data) => data.some((entry) => entry.captain) || data.length === 0,
   { message: "At least one teacher must be a captain" }
-);
+).optional().default([]);
 
 
 

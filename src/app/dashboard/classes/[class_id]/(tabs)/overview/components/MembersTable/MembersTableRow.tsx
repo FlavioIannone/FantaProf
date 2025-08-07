@@ -4,45 +4,31 @@ import { useUserData } from "@/components/client/UserDataContext";
 import Image from "next/image";
 import { MembersTableRowType } from "@/lib/data/types.data-layer";
 import { useState } from "react";
-import { useIdToken } from "@/lib/hooks/useIdToken";
-import { getQueryClient, queryKeys } from "@/lib/getQueryClient";
+import { makeUserAdminAction } from "@/lib/data/members.data-layer";
 
-const queryClient = getQueryClient();
-
-export default function MembersTableRow({
-  row,
+export default function MembersTablemember({
+  member,
   class_id,
   isAdmin,
 }: {
-  row: MembersTableRowType;
+  member: MembersTableRowType;
   class_id: string;
   isAdmin: boolean;
 }) {
-  const { token } = useIdToken();
   const { userData } = useUserData();
 
-  const [rowLoading, setRowLoading] = useState(false);
+  const [memberLoading, setMemberLoading] = useState(false);
 
   const makeAdmin = async () => {
-    const res = await fetch(`/api/protected/classes/${class_id}/make-admin`, {
-      method: "PUT",
-      cache: "no-store",
-      body: JSON.stringify({ uid: row.uid }),
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-    });
-    if (res.status === 200) {
-      await queryClient.invalidateQueries({
-        queryKey: [queryKeys.members, class_id],
-      });
-    }
+    if (member.admin) return;
+    setMemberLoading(true);
+    await makeUserAdminAction(member.uid, class_id);
+    setMemberLoading(false);
   };
 
-  if (rowLoading) {
+  if (memberLoading) {
     return (
-      <div className="flex justify-between d-skeleton rounded-2xl p-4">
+      <div className="flex justify-between d-skeleton rounded-2xl px-4">
         <div className="flex items-center gap-2">
           <div className="d-avatar md:size-18 sm:size-16 size-12 rounded-full bg-base-300 md:p-4 sm:p-2 p-2 invisible">
             <svg
@@ -78,16 +64,16 @@ export default function MembersTableRow({
     <div className="flex justify-between bg-base-200 rounded-2xl px-4 py-3">
       <div className="flex items-center gap-2">
         <div className="d-indicator d-indicator-center d-indicator-bottom">
-          {row.admin && (
-            <span className="d-indicator-item d-badge p-0.5 size-6 bg-base-100">
+          {member.admin && (
+            <span className="d-indicator-item d-badge p-0.5 size-6 bg-base-100 rounded-full">
               <i className="bi bi-person-gear" aria-hidden></i>
             </span>
           )}
           <div className="d-avatar size-14 rounded-full">
-            {row.photo_URL ? (
+            {member.photo_URL ? (
               /*Image */
               <Image
-                src={row.photo_URL}
+                src={member.photo_URL}
                 priority={false}
                 alt="Profile Picture"
                 width={96}
@@ -99,23 +85,23 @@ export default function MembersTableRow({
             ) : (
               /**Person Icon*/
               <span className="size-full flex items-center justify-center bg-base-300 rounded-full text-4xl">
-                {row.display_name.charAt(0)}
+                {member.display_name.charAt(0)}
               </span>
             )}
           </div>
         </div>
         <div className="flex flex-col">
           <h1 className="md:text-2xl text-xl">
-            {row.display_name} {row.email === userData?.email && " (tu)"}
+            {member.display_name} {member.email === userData?.email && " (tu)"}
           </h1>
           <h2 className="opacity-70 md:text-lg text-md">
-            Crediti: {row.credits}
+            Crediti: {member.credits}
           </h2>
         </div>
       </div>
       <div className="flex items-center">
         <div className="flex flex-col justify-between items-end">
-          <h1 className="font-bold text-2xl">{row.points}</h1>
+          <h1 className="font-bold text-2xl">{member.points}</h1>
           <h2 className="opacity-70">Punti</h2>
         </div>
         {isAdmin && (
@@ -138,13 +124,8 @@ export default function MembersTableRow({
               className="d-dropdown-content d-menu bg-base-100 rounded-box z-1 w-52 p-2 shadow-sm"
             >
               <li
-                onClick={async () => {
-                  if (row.admin) return;
-                  setRowLoading(true);
-                  await makeAdmin();
-                  setRowLoading(false);
-                }}
-                className={`${row.admin && "d-menu-disabled"}`}
+                onClick={makeAdmin}
+                className={`${member.admin && "d-menu-disabled"}`}
               >
                 <button type="button">
                   <i className="bi bi-person-gear" aria-hidden></i>Fai admin

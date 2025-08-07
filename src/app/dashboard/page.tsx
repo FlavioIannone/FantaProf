@@ -1,7 +1,7 @@
 import DashboardNavbar from "@/app/dashboard/components/DashboardNavbar";
 import ClassesTable from "./components/ClassTable/ClassesTable";
 import StatsDisplayer from "./components/DashboardStats/StatsDisplayer";
-import { getClassesAction } from "@/lib/data/classes/classes.data";
+import { getClassesAction } from "@/lib/data/classes.data-layer";
 
 export default async function Dashboard() {
   const classes = await getClassesAction();

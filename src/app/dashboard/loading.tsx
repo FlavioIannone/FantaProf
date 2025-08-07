@@ -1,6 +1,6 @@
 import ClassesTableSkeleton from "./components/ClassTable/ClassesTableSkeleton";
 
-export default function Loading() {
+export default function DashboardLoading() {
   return (
     <main className="w-full md:h-dvh flex flex-col justify-between">
       <div className="md:w-auto w-full">

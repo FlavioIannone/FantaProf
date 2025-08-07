@@ -5,7 +5,6 @@ import "bootstrap-icons/font/bootstrap-icons.css";
 import { ThemeProvider } from "@/components/client/Theme/ThemeContext";
 import { ModalProvider } from "@/components/client/Modal/ModalContext";
 import React from "react";
-import ReactQueryProvider from "@/components/client/ReactQueryProvider";
 import { UserDataProvider } from "@/components/client/UserDataContext";
 
 const inter = Inter({
@@ -71,14 +70,14 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="it" className={`bg-base-100 ${inter.className}`}>
-      <body className={`w-full overflow-x-hidden bg-base-100 m-0 antialiased`}>
-        <ReactQueryProvider>
-          <ThemeProvider>
-            <UserDataProvider>
-              <ModalProvider>{children}</ModalProvider>
-            </UserDataProvider>
-          </ThemeProvider>
-        </ReactQueryProvider>
+      <body
+        className={`w-full h-dvh overflow-x-hidden bg-base-100 m-0 antialiased`}
+      >
+        <ThemeProvider>
+          <UserDataProvider>
+            <ModalProvider>{children}</ModalProvider>
+          </UserDataProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

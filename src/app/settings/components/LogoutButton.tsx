@@ -1,6 +1,7 @@
 "use client";
 
 import { useModal } from "@/components/client/Modal/ModalContext";
+import { deleteSession } from "@/lib/data/session/session-manager.data-layer";
 import { client_auth } from "@/lib/firebase-connection";
 import { useRouter } from "next/navigation";
 
@@ -9,18 +10,14 @@ export default function LogoutButton() {
   const modal = useModal();
 
   const handleLogout = async () => {
+    // Delete the session
+    const sessionDeletionRes = await deleteSession();
     try {
-      // Call the API to clear server session cookie
-      await fetch("/api/session", {
-        method: "DELETE",
-        credentials: "include", // include cookies
-      });
-
-      // Sign out from Firebase client
-      await client_auth.signOut();
-
-      // Redirect after logout
-      router.push("/");
+      if (sessionDeletionRes) {
+        // Sign out from Firebase client
+        await client_auth.signOut();
+        router.replace("/");
+      }
     } catch (error) {
       console.error("Logout failed:", error);
       modal.setModal(true, {

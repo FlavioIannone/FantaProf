@@ -4,20 +4,23 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useState, FormEvent, useEffect, useRef } from "react";
 import { client_auth } from "@/lib/firebase-connection";
 import { type LoginData } from "@/lib/types";
-
 import { onAuthStateChanged, User } from "firebase/auth";
 import { useModal } from "@/components/client/Modal/ModalContext";
 import {
   logInWithLoginData,
   signInWithGoogle,
-} from "@/lib/authenticationManager";
-import { useIdToken } from "@/lib/hooks/useIdToken";
+} from "@/lib/authentication-manager";
+import { createSession } from "@/lib/data/session/session-manager.data-layer";
+import { joinClassAction } from "@/lib/data/classes.data-layer";
 
 export default function LoginForm() {
   const router = useRouter();
   const { setModal } = useModal();
-  const [isSubmitLoading, setIsSubmitLoading] = useState(false);
-  const [isGoogleLoading, setIsGoogleLoading] = useState(false);
+  // True when on the server, false when on the client
+  const [isPending, setIsPending] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isRedirecting, setIsRedirecting] = useState(false);
+
   const searchParams = useSearchParams();
   const safeDecode = (value: string | null): string => {
     try {
@@ -27,56 +30,9 @@ export default function LoginForm() {
     }
   };
 
-  const callbackUrl =
-    safeDecode(searchParams.get("callbackUrl")) || "/dashboard";
   const reason = safeDecode(searchParams.get("reason"));
+  // Flag to prevent multiple redirects
   const redirectFlag = useRef(false);
-
-  // Stato per gestire i dati dell'utente
-  const [loginData, setLoginData] = useState<LoginData>({
-    email: "",
-    password: "",
-  });
-
-  const redirectUser = async (user: User) => {
-    if (redirectFlag.current) return;
-    redirectFlag.current = true;
-
-    const token = await user.getIdToken();
-    if (!token) return;
-
-    // 1. Refresh session cookie
-    await fetch("/api/session", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
-
-    // 2. Redirect back to callbackUrl
-    if (callbackUrl === "/dashboard") {
-      router.replace("/dashboard");
-    } else {
-      const res = await fetch(callbackUrl, {
-        method: "PUT",
-        cache: "no-store",
-        credentials: "include",
-      });
-
-      if (res.status === 200) router.replace("/dashboard");
-      else if (res.status === 404) {
-        setModal(true, {
-          title: "Errore",
-          content: "La classe non esiste",
-        });
-      } else if (res.status === 409) {
-        setModal(true, {
-          title: "Errore",
-          content: "Fai già parte di questa classe",
-        });
-      }
-    }
-  };
 
   useEffect(() => {
     if (reason === "join-class") {
@@ -95,19 +51,66 @@ export default function LoginForm() {
   // Redirect se già autenticato
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(client_auth, async (user) => {
-      setIsSubmitLoading(true);
+      setIsLoading(true);
       if (user) {
-        redirectUser(user);
+        await redirectUser(user);
       }
-      setIsSubmitLoading(false);
+      setIsPending(false);
+      setIsLoading(false);
     });
     return () => unsubscribe();
   }, [router]);
 
+  const redirectUser = async (user: User) => {
+    if (redirectFlag.current) return;
+    setIsRedirecting(true);
+    redirectFlag.current = true;
+
+    const token = await user.getIdToken();
+    if (!token) return;
+
+    await createSession(token);
+
+    if (reason === "join-class") {
+      const classId = safeDecode(searchParams.get("class_id"));
+      if (classId === "") {
+        setModal(true, {
+          title: "Errore",
+          content: "ID classe non valido",
+        });
+        return;
+      }
+      const joinStatus = await joinClassAction(classId);
+      if (joinStatus === 404) {
+        setModal(true, {
+          title: "Errore",
+          content: "Classe non trovata",
+        });
+        return;
+      } else if (joinStatus === 409) {
+        setModal(true, {
+          title: "Errore",
+          content: "Sei già iscritto a questa classe",
+        });
+        return;
+      }
+    } else {
+      router.replace("/dashboard");
+    }
+    setIsRedirecting(false);
+  };
+
   // Gestione login con email e password
   const onSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (!loginData.email || !loginData.password) {
+
+    const formData = new FormData(e.currentTarget);
+    const loginData: LoginData = {
+      email: formData.get("email")!.toString().trim(),
+      password: formData.get("password")!.toString().trim(),
+    };
+
+    if (loginData.email === "" || loginData.password === "") {
       setModal(true, {
         title: "Errore autenticazione",
         content: "Compila tutti i campi",
@@ -115,34 +118,42 @@ export default function LoginForm() {
       return;
     }
 
-    setIsSubmitLoading(true);
+    setIsLoading(true);
     const result = await logInWithLoginData(loginData);
 
     if (result.successful) {
-      redirectUser(result.user);
+      await redirectUser(result.user);
     } else {
       setModal(true, {
         title: "Errore autenticazione",
         content: result.errorMsg,
       });
     }
-    setIsSubmitLoading(false);
+    setIsLoading(false);
   };
 
   // Gestione login con Google
   const onGoogleLogin = async () => {
-    setIsGoogleLoading(true);
+    setIsLoading(true);
     const result = await signInWithGoogle();
     if (result.successful) {
-      redirectUser(result.user);
+      await redirectUser(result.user);
     } else {
       setModal(true, {
         title: "Errore autenticazione",
         content: result.errorMsg,
       });
     }
-    setIsGoogleLoading(false);
+    setIsLoading(false);
   };
+
+  if (isLoading || isRedirecting) {
+    return (
+      <main className="flex justify-center items-center size-full">
+        <span className="d-loading d-loading-ring d-loading-xl"></span>
+      </main>
+    );
+  }
 
   return (
     <>
@@ -169,10 +180,6 @@ export default function LoginForm() {
               aria-label="Email"
               className="d-input d-validator w-full peer"
               placeholder="esempio@dominio.com"
-              value={loginData.email}
-              onChange={(e) =>
-                setLoginData({ ...loginData, email: e.target.value })
-              }
               required
             />
             <div className="d-validator-hint h-0 peer-user-invalid:h-auto">
@@ -193,10 +200,6 @@ export default function LoginForm() {
               minLength={8}
               pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}"
               title="Deve avere almeno 8 caratteri, includere numero, lettera minuscola, lettera maiuscola"
-              value={loginData.password}
-              onChange={(e) =>
-                setLoginData({ ...loginData, password: e.target.value })
-              }
               required
             />
             <p className="d-validator-hint h-0 peer-user-invalid:h-auto">
@@ -214,12 +217,8 @@ export default function LoginForm() {
         <button
           type="submit"
           aria-label="Accedi"
-          className={`d-btn d-btn-primary d-btn-block animate-fade-in-bottom text-lg motion-reduce:animate-none ${
-            isSubmitLoading
-              ? "animate-pulse"
-              : "motion-safe:opacity-0 animation-delay-400"
-          }`}
-          disabled={isSubmitLoading || isGoogleLoading}
+          className="d-btn d-btn-primary d-btn-block animate-fade-in-bottom text-lg motion-reduce:animate-none"
+          disabled={isLoading || isPending}
         >
           Accedi
         </button>
@@ -240,12 +239,8 @@ export default function LoginForm() {
           type="button"
           aria-label="Accedi con google"
           onClick={onGoogleLogin}
-          className={`d-btn d-btn-outline d-btn-block animate-fade-in-bottom motion-reduce:animate-none ${
-            isGoogleLoading
-              ? "animate-pulse"
-              : "motion-safe:opacity-0 animation-delay-600"
-          }`}
-          disabled={isGoogleLoading || isSubmitLoading}
+          className="d-btn d-btn-outline d-btn-block animate-fade-in-bottom motion-reduce:animate-none"
+          disabled={isLoading || isPending}
         >
           <i className="bi bi-google" aria-hidden></i>Accedi con google
         </button>

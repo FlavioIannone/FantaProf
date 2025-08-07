@@ -1,7 +1,7 @@
 export default function MembersTableSkeleton() {
   return (
-    <div className="py-5">
-      <div className="mb-4 flex justify-between items-center">
+    <>
+      <div className="my-4 flex justify-between items-center">
         <h1 className="text-3xl font-extrabold">
           <span className="bi bi-people-fill me-2" aria-hidden></span>
           Membri
@@ -51,6 +51,6 @@ export default function MembersTableSkeleton() {
           </div>
         ))}
       </div>
-    </div>
+    </>
   );
 }
