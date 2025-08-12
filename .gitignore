@@ -1,7 +1,8 @@
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
 # Firebase service account key
-src/lib/fantaprof-app-firebase-adminsdk-*.json
+**/fantaprof-app-firebase-adminsdk-*.json
+
 
 # dependencies
 /node_modules
@@ -19,6 +20,8 @@ src/lib/fantaprof-app-firebase-adminsdk-*.json
 # next.js
 /.next/
 /out/
+/**/dist
+
 
 # production
 /build
@@ -42,3 +45,6 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+.vscode/settings.json
+.vscode/settings.json
+/.vscode

@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import "bootstrap-icons/font/bootstrap-icons.css";
-import { ThemeProvider } from "@/components/client/ThemeContext";
-import { ModalProvider } from "@/components/client/ModalContext";
+import { ThemeProvider } from "@/components/client/Theme/ThemeContext";
+import { ModalProvider } from "@/components/client/Modal/ModalContext";
 import { UserDataProvider } from "@/components/client/UserDataContext";
 
 const inter = Inter({

@@ -1,9 +1,9 @@
 @import "tailwindcss";
 
 @plugin "daisyui" {
-  themes: light --default, dark --prefersdark, fantaprof-light, dracula, black,
-    synthwave, retro, valentine, halloween, business, forest, coffee, night,
-    lofi, luxury, sunset, garden, pastel, fantasy, coffee;
+  themes: light --default, dark --prefersdark, fantaprof-light, fantaprof-dark,
+    dracula, black, synthwave, retro, valentine, halloween, business, forest,
+    coffee, night, lofi, luxury, sunset, garden, pastel, fantasy, coffee;
   prefix: "d-";
 }
 
@@ -91,6 +91,7 @@
       transform: translateX(0);
     }
   }
+
   @keyframes fade-in-bottom {
     0% {
       opacity: 0;
@@ -117,20 +118,68 @@
 
 @plugin "daisyui/theme" {
   name: "fantaprof-light";
-  default: true;
-  prefersdark: false;
-  color-scheme: light;
+  color-scheme: "light";
+  --color-base-100: oklch(98% 0 0);
+  --color-base-200: oklch(97% 0 0);
+  --color-base-300: oklch(92% 0 0);
+  --color-base-content: oklch(20% 0 0);
+  --color-primary: #2217b7;
+  --color-primary-content: oklch(97% 0.014 254.604);
+  --color-secondary: oklch(87% 0.006 286.286);
+  --color-secondary-content: oklch(14% 0.005 285.823);
+  --color-accent: oklch(42% 0.199 265.638);
+  --color-accent-content: oklch(96% 0.018 272.314);
+  --color-neutral: oklch(20% 0 0);
+  --color-neutral-content: oklch(98% 0 0);
+  --color-info: oklch(58% 0.158 241.966);
+  --color-info-content: oklch(97% 0.013 236.62);
+  --color-success: oklch(59% 0.145 163.225);
+  --color-success-content: oklch(97% 0.021 166.113);
+  --color-warning: oklch(66% 0.179 58.318);
+  --color-warning-content: oklch(98% 0.022 95.277);
+  --color-error: oklch(57% 0.245 27.325);
+  --color-error-content: oklch(97% 0.013 17.38);
+  --radius-selector: 0rem;
+  --radius-field: 0rem;
+  --radius-box: 0rem;
+  --size-selector: 0.21875rem;
+  --size-field: 0.25rem;
+  --border: 1.5px;
+  --depth: 1;
+  --noise: 0;
+}
 
-  --color-base-100: var(--color-surface-100);
-  --color-base-200: var(--color-surface-200);
-  --color-base-300: var(--color-surface-500);
-  --color-base-content: var(--color-text-100);
-  --color-primary: var(--color-primary-d);
-  --color-primary-content: var(--color-surface-100);
-  --color-accent: var(--color-primary-500);
-  --color-accent-content: var(--color-surface-100);
-  --color-neutral: var(--color-surface-600);
-  --color-neutral-content: var(--color-surface-100);
+@plugin "daisyui/theme" {
+  name: "fantaprof-dark";
+  color-scheme: "dark";
+  --color-base-100: oklch(25.33% 0.016 252.42);
+  --color-base-200: oklch(23.26% 0.014 253.1);
+  --color-base-300: oklch(21.15% 0.012 254.09);
+  --color-base-content: oklch(97.807% 0.029 256.847);
+  --color-primary: #2217b7;
+  --color-primary-content: oklch(100% 0 0);
+  --color-secondary: oklch(49% 0.27 292.581);
+  --color-secondary-content: oklch(94% 0.028 342.258);
+  --color-accent: oklch(58% 0.158 241.966);
+  --color-accent-content: oklch(100% 0 0);
+  --color-neutral: oklch(14% 0.005 285.823);
+  --color-neutral-content: oklch(92% 0.004 286.32);
+  --color-info: oklch(74% 0.16 232.661);
+  --color-info-content: oklch(29% 0.066 243.157);
+  --color-success: oklch(76% 0.177 163.223);
+  --color-success-content: oklch(37% 0.077 168.94);
+  --color-warning: oklch(82% 0.189 84.429);
+  --color-warning-content: oklch(41% 0.112 45.904);
+  --color-error: oklch(71% 0.194 13.428);
+  --color-error-content: oklch(27% 0.105 12.094);
+  --radius-selector: 0rem;
+  --radius-field: 0rem;
+  --radius-box: 0rem;
+  --size-selector: 0.21875rem;
+  --size-field: 0.21875rem;
+  --border: 1.5px;
+  --depth: 1;
+  --noise: 0;
 }
 
 .animation-delay-100 {
@@ -162,4 +211,15 @@
 }
 .animation-delay-1000 {
   animation-delay: 1000ms;
+}
+
+/* Hide scrollbar - works on Chrome, Edge, Safari */
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* Hide scrollbar - Firefox */
+.hide-scrollbar {
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* Internet Explorer 10+ */
 }

@@ -1,6 +1,6 @@
-import Footer from "@/components/Footer";
-import LandingCard from "@/components/LandingCard";
-import Navbar from "@/components/Navbar";
+import Footer from "@/components/server/Footer";
+import LandingCard from "@/components/server/LandingCard";
+import Navbar from "@/components/server/Navbar";
 import Link from "next/link";
 
 export default function Home() {
@@ -24,7 +24,7 @@ export default function Home() {
             <button className="group d-btn d-btn-ghost d-btn-lg text-xl motion-safe:opacity-0 animate-fade-in-bottom animation-delay-200 motion-reduce:animate-none">
               <i
                 className="bi bi-journals group-hover:animate-bounce"
-                aria-hidden="true"
+                aria-hidden
               ></i>
               Regolamento
             </button>
@@ -35,7 +35,7 @@ export default function Home() {
             icon={
               <i
                 className="bi bi-trophy text-orange-700 lg:text-8xl md:text-7xl text-6xl"
-                aria-hidden="true"
+                aria-hidden
               ></i>
             }
             title="Crea il tuo team"
@@ -45,7 +45,7 @@ export default function Home() {
             icon={
               <i
                 className="bi bi-people text-teal-700 lg:text-8xl md:text-7xl text-6xl"
-                aria-hidden="true"
+                aria-hidden
               ></i>
             }
             title="Competi"
@@ -55,7 +55,7 @@ export default function Home() {
             icon={
               <i
                 className="bi bi-star text-yellow-400 lg:text-8xl md:text-7xl text-6xl"
-                aria-hidden="true"
+                aria-hidden
               ></i>
             }
             title="Ottieni punti"

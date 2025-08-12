@@ -1,8 +1,9 @@
-import RulesPageNavigator from "@/components/client/RulesPageNavigator";
-import Footer from "@/components/Footer";
-import Navbar from "@/components/Navbar";
-import ReturnToHome from "@/components/ReturnToHome";
+import RulesPageNavigator from "@/app/rules/components/RulesPageNavigator";
+import Footer from "@/components/server/Footer";
+import Navbar from "@/components/server/Navbar";
+import ReturnToHome from "@/components/server/BackToPathArrow";
 import { ReactNode } from "react";
+import BackToPathArrow from "@/components/server/BackToPathArrow";
 
 export default function RulesLayout({
   children,
@@ -64,13 +65,13 @@ export default function RulesLayout({
           ></label>
           <div className="bg-base-200 min-h-full w-80 p-4">
             <div className="flex justify-between items-center">
-              <ReturnToHome text="Home" />
+              <BackToPathArrow text="Home" />
               <label
                 className="d-btn d-btn-ghost"
                 htmlFor="rules-drawer"
                 aria-label="close sidebar"
               >
-                <i className="bi bi-x-lg font-bold"></i>
+                <i className="bi bi-x-lg font-bold" aria-hidden></i>
               </label>
             </div>
             <h1 className="text-4xl text-primary mb-2.5">Sezioni</h1>

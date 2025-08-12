@@ -1,7 +1,6 @@
-import { sign } from "crypto";
 import { getAnalytics } from "firebase/analytics";
 import { initializeApp } from "firebase/app";
-import { getAuth, GoogleAuthProvider, signInWithPopup } from "firebase/auth";
+import { getAuth } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
 
 const firebaseConfig = {
@@ -16,14 +15,12 @@ const firebaseConfig = {
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-auth.useDeviceLanguage(); // Set the auth language to the user's device language
+export const client_auth = getAuth(app);
+client_auth.useDeviceLanguage(); // Set the auth language to the user's device language
 // Initialize Firestore
-const db = getFirestore(app);
-const googleProvider = new GoogleAuthProvider();
-const signInWithGooglePopup = () => signInWithPopup(auth, googleProvider);
+export const client_firestore = getFirestore(app);
 
-const initAnalytics = () => {
+export const initAnalytics = () => {
   if (typeof window !== "undefined") {
     // Initialize Firebase Analytics
     const analytics = getAnalytics(app);
@@ -34,5 +31,3 @@ const initAnalytics = () => {
     );
   }
 };
-
-export { app, auth, db, initAnalytics, signInWithGooglePopup };

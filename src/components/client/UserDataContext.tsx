@@ -1,29 +1,42 @@
 "use client";
 
-import { User } from "firebase/auth";
-import { createContext, useContext, useState } from "react";
+import { client_auth } from "@/lib/firebase-connection";
+import { onAuthStateChanged, User } from "firebase/auth";
+import { createContext, useContext, useEffect, useState } from "react";
 
 type UserDataContextType = {
   userData: User | undefined;
   setUserData: (data: User) => void;
 };
 
-const ModalContext = createContext<UserDataContextType | undefined>(undefined);
+const UserDataContext = createContext<UserDataContextType | undefined>(
+  undefined
+);
 
-function UserDataProvider({
-  children,
-}: Readonly<{ children: React.ReactNode }>) {
+function UserDataProvider({ children }: { children: React.ReactNode }) {
   const [userData, setUserData] = useState<User | undefined>();
 
+  useEffect(() => {
+    const unsubscribe = client_auth.onAuthStateChanged((user) => {
+      if (user) {
+        setUserData(user);
+      } else {
+        setUserData(undefined);
+      }
+    });
+
+    return () => unsubscribe(); // Clean up the listener
+  }, []);
+
   return (
-    <ModalContext.Provider value={{ userData, setUserData }}>
+    <UserDataContext.Provider value={{ userData, setUserData }}>
       {children}
-    </ModalContext.Provider>
+    </UserDataContext.Provider>
   );
 }
 
 const useUserData = () => {
-  const context = useContext(ModalContext);
+  const context = useContext(UserDataContext);
   if (!context) {
     throw new Error("useUserData must be used within a UserDataProvider");
   }
