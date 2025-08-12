@@ -17,7 +17,7 @@ export default async function ClassLayout({
   return (
     <div className="w-full max-h-dvh flex flex-col overflow-hidden">
       <header>
-        <nav className="d-navbar border-b border-base-300 flex justify-between items-center">
+        <div className="d-navbar border-b border-base-300 flex justify-between items-center lg:px-8 md:px-6 sm:px-5 px-4">
           <div className="flex">
             <BackToPathArrow
               href={`/dashboard`}
@@ -34,7 +34,7 @@ export default async function ClassLayout({
             </div>
           </div>
           <LeaveClassButton class_id={class_id} />
-        </nav>
+        </div>
       </header>
 
       <DashboardTabsNavigator className="md:block hidden" />

@@ -19,7 +19,10 @@ export default async function TeachersTable({
           enrollmentData={studentEnrollment}
           class_id={class_id}
         />
-        <NoDataUI message="Nessun professore aggiunto in questa classe" />
+        <NoDataUI
+          message="Nessun professore aggiunto in questa classe"
+          additionalMessage="Chiedi ad un amministatore"
+        />
       </>
     );
   }

@@ -19,7 +19,7 @@ export default function DashboardTabsNavigator({
 }: {
   className?: string;
 }) {
-  const [activeTab, setActiveTab] = useState("");
+  const [activeTab, setActiveTab] = useState<string | null>(null);
   const pathName = usePathname();
 
   useEffect(() => {
@@ -28,59 +28,45 @@ export default function DashboardTabsNavigator({
     setActiveTab(activeTabName);
   }, [pathName]);
 
-  if (activeTab === "")
-    return (
-      <nav
-        className={`${className} flex d-navbar md:shadow md:border-b border-t border-base-300 items-center`}
-      >
-        <div
-          role="tablist"
-          className="d-tabs d-tabs-border md:block flex justify-around w-full"
-        >
-          {tabs.map((tabData, i) => (
-            <button
-              type="button"
-              key={i}
-              role="tab"
-              disabled
-              className={`d-tab`}
-            >
-              <i className={`text-lg ${tabData.icon} sm:me-1`} aria-hidden></i>
-              <p className="sm:block hidden text-lg">{tabData.label}</p>
-            </button>
-          ))}
-        </div>
-      </nav>
-    );
+  if (activeTab === null) {
+    return tabs.map((tabData, i) => (
+      <button type="button" key={i} role="tab" disabled className={`d-tab`}>
+        <i className={`text-lg ${tabData.icon} sm:me-1`} aria-hidden></i>
+        <p className="sm:block hidden text-lg">{tabData.label}</p>
+      </button>
+    ));
+  }
 
   return (
     <nav
-      className={`${className} flex d-navbar md:shadow md:border-b border-t border-base-300 items-center`}
+      className={`${className} flex d-navbar md:shadow md:border-b border-t border-base-300 items-center lg:px-8 md:px-6 sm:px-5 px-4`}
     >
       <div
         role="tablist"
-        className="d-tabs d-tabs-border md:block flex w-full md:px-0 px-8"
+        className="d-tabs d-tabs-border md:block md:space-x-5 space-x-0 flex w-full md:px-0 px-8"
       >
-        {tabs.map((tabData, i) => (
-          <Link
-            key={i}
-            prefetch={true}
-            role="tab"
-            href={`${tabData.tabName}`}
-            className={`d-tab md:flex-0 flex-1 ${
-              activeTab === tabData.tabName && "d-tab-active"
-            }`}
-          >
-            <i
-              className={`text-lg ${tabData.icon} ${
-                activeTab === tabData.tabName &&
-                "sm:mx-0 mx-5 transition-all text-xl"
-              } sm:me-1`}
-              aria-hidden
-            ></i>
-            <p className="sm:block hidden text-lg">{tabData.label}</p>
-          </Link>
-        ))}
+        {tabs.map((tabData, i) => {
+          return (
+            <Link
+              key={i}
+              prefetch={true}
+              role="tab"
+              href={`${tabData.tabName}`}
+              className={`d-tab md:flex-0 flex-1 ${
+                activeTab === tabData.tabName && "d-tab-active"
+              }`}
+            >
+              <i
+                className={`text-lg ${tabData.icon} ${
+                  activeTab === tabData.tabName &&
+                  "sm:mx-0 mx-5 transition-all text-xl"
+                } sm:me-1`}
+                aria-hidden
+              ></i>
+              <p className="sm:block hidden text-lg ms-1">{tabData.label}</p>
+            </Link>
+          );
+        })}
       </div>
     </nav>
   );
