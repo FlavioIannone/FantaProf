@@ -69,7 +69,7 @@ export default function DashboardTabsNavigator({
     >
       <div
         role="tablist"
-        className="d-tabs d-tabs-border flex md:flex-row md:space-x-5 space-x-0 w-full md:px-0 px-8"
+        className="d-tabs d-tabs-border h-full flex md:space-x-5 space-x-0 w-full md:px-0 px-8"
       >
         {activeTab === null ? <TabButtonsSkeleton /> : <TabButtons />}
       </div>

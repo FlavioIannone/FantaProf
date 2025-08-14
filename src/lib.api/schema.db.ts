@@ -189,7 +189,7 @@ export const EventWrapper = {
 const TeacherEventRegistrationSchema = z.object({
   event_id: z.string(),
   teacher_id: z.string(),
-  points: z.number().int(),
+  description: z.string().optional().default("Nessuna descrizione"),
   created_at: TimestampFieldType
 });
 type TeacherEventIn = z.input<typeof TeacherEventRegistrationSchema>;
