@@ -74,11 +74,11 @@ function ModalProvider({ children }: Readonly<{ children: React.ReactNode }>) {
         }}
       >
         <div className="d-modal-box">
-          <div className="flex justify-between">
+          <div className="flex justify-between items-center">
             <h1 className="font-bold text-lg">{modalProps.title}</h1>
             <button
               disabled={submitDisabled}
-              className="d-btn d-btn-ghost"
+              className="d-btn d-btn-ghost p-0"
               type="button"
               onClick={() => {
                 setModal(false);

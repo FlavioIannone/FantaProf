@@ -1,6 +1,7 @@
 @import "tailwindcss";
 
 @plugin "daisyui" {
+  exclude: rootscrollgutter;
   themes: light --default, dark --prefersdark, fantaprof-light, fantaprof-dark,
     dracula, black, synthwave, retro, valentine, halloween, business, forest,
     coffee, night, lofi, luxury, sunset, garden, pastel, fantasy, coffee;

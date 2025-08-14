@@ -158,7 +158,7 @@ export default function LoginForm() {
   return (
     <>
       <form
-        className="sm:w-lg w-full sm:h-max h-full sm:block flex flex-col items-center justify-center sm:p-4"
+        className="sm:w-lg w-full sm:h-max h-full sm:block flex flex-col items-center justify-center "
         onSubmit={onSubmit}
       >
         <div className="p-5">

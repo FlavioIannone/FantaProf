@@ -1,5 +1,8 @@
 "use client";
-import { loadThemeFromCookies, writeThemeFromCookies } from "@/lib/theme-loader";
+import {
+  loadThemeFromCookies,
+  writeThemeFromCookies,
+} from "@/lib/theme-loader";
 import {
   createContext,
   ReactNode,
@@ -58,4 +61,4 @@ const useTheme = () => {
   return context;
 };
 
-export { ThemeContext, ThemeProvider, useTheme };
+export { ThemeProvider, useTheme };

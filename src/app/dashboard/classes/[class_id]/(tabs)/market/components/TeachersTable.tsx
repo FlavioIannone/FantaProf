@@ -1,6 +1,6 @@
+import NoDataUI from "../../components/NoDataUI";
 import TeacherCard from "./TeacherCard";
 import TeachersTableHeader from "./TeachersTableHeader";
-import NoDataUI from "../../../components/NoDataUI";
 import { getClassTeachersAction } from "@/lib/data/teachers.data-layer";
 import { getStudentEnrollmentDataAction } from "@/lib/data/user.data-layer";
 

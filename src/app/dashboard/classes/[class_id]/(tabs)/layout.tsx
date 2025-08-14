@@ -1,8 +1,9 @@
 import BackToPathArrow from "@/components/server/BackToPathArrow";
 import { ReactNode } from "react";
-import DashboardTabsNavigator from "../components/DashboardTabsNavigator";
-import LeaveClassButton from "../components/LeaveClassButton";
+
 import { getClassDataAction } from "@/lib/data/classes.data-layer";
+import DashboardTabsNavigator from "./components/DashboardTabsNavigator";
+import LeaveClassButton from "./components/LeaveClassButton";
 
 export default async function ClassLayout({
   children,

@@ -69,7 +69,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="it" className={`bg-base-100 ${inter.className}`}>
-      <body className={`w-full overflow-x-hidden bg-base-100 m-0 antialiased`}>
+      <body
+        className={`w-full h-dvh overflow-x-hidden bg-base-100 m-0 antialiased`}
+      >
         <ThemeProvider>
           <UserDataProvider>
             <ModalProvider>{children}</ModalProvider>

@@ -20,13 +20,15 @@ export default function NoDtaUI({
           <path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708" />
         </svg>
       </i>
-      <p className="text-lg opacity-70 flex flex-col items-center justify-center">
-        {message ?? "Nessun dato disponibile"}
+      <div className="flex flex-col gap-0 items-center justify-center">
+        <p className="text-lg opacity-70 text-center">
+          {message ?? "Nessun dato disponibile"}
+        </p>
         <br />
         {additionalMessage && (
           <span className="text-sm opacity-50">{additionalMessage}</span>
         )}
-      </p>
+      </div>
     </div>
   );
 }

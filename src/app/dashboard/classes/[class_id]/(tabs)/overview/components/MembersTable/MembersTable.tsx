@@ -1,10 +1,10 @@
-
 import MembersTableHeader from "./MembersTableHeader";
 import MembersTableRow from "./MembersTableRow";
-import NoDataUI from "../../../../components/NoDataUI";
+
 import StatsDisplayer from "../StatsDisplayer";
 import { getClassMembersAction } from "@/lib/data/members.data-layer";
 import { getStudentEnrollmentDataAction } from "@/lib/data/user.data-layer";
+import NoDataUI from "../../../components/NoDataUI";
 
 export default async function MembersTable({ class_id }: { class_id: string }) {
   const members = await getClassMembersAction(class_id);
