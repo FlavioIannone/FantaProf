@@ -10,11 +10,6 @@ type Theme = {
 
 export const lightThemes: Theme[] = [
   {
-    key: "fantaprof-light",
-    displayText: "Chiaro",
-    imageUrl: "/auth_images/auth_image_blue.webp",
-  },
-  {
     key: "retro",
     displayText: "Retro",
     imageUrl: "/auth_images/auth_image_red_300.webp",
@@ -47,11 +42,6 @@ export const lightThemes: Theme[] = [
 ];
 
 export const darkThemes: Theme[] = [
-  {
-    key: "fantaprof-dark",
-    displayText: "Scuro",
-    imageUrl: "/auth_images/auth_image_blue.webp",
-  },
   {
     key: "dracula",
     displayText: "Dracula",
@@ -99,6 +89,17 @@ export const darkThemes: Theme[] = [
   },
 ];
 
+// Theme definitions including default
+export const themes = [
+  {
+    key: "default",
+    displayText: "Predefinito",
+    imageUrl: "/auth_images/auth_image_blue.webp",
+  },
+  ...lightThemes,
+  ...darkThemes,
+];
+
 export default function ThemeController({
   className,
 }: Readonly<{ className?: string }>) {
@@ -129,7 +130,8 @@ export default function ThemeController({
   return (
     <div className="d-dropdown d-dropdown-end">
       <div tabIndex={0} role="button" className={`${className} d-btn`}>
-        Tema <i className="bi bi-chevron-down" aria-hidden></i>
+        Tema
+        <i className="bi bi-chevron-down" aria-hidden></i>
       </div>
       <ul
         tabIndex={0}

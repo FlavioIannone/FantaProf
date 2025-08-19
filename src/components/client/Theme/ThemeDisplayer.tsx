@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useTheme } from "./ThemeContext";
+import { themes } from "./ThemeController";
 
 export default function ThemeDisplayer({ className }: { className?: string }) {
   const { theme } = useTheme();
@@ -11,52 +12,6 @@ export default function ThemeDisplayer({ className }: { className?: string }) {
     setIsClient(true);
   }, []);
 
-  // Returns the theme name expressed in a more user-friendly format
-  const themeToBetterString = (theme: string) => {
-    switch (theme) {
-      case "fantaprof-light":
-        return "Fantaprof Chiaro";
-      case "fantaprof-dark":
-        return "Fantaprof Scuro";
-      case "light":
-        return "Chiaro";
-      case "retro":
-        return "Retro";
-      case "valentine":
-        return "San Valentino";
-      case "lofi":
-        return "Lofi";
-      case "garden":
-        return "Giardino";
-      case "pastel":
-        return "Pastelli";
-      case "fantasy":
-        return "Fantastico";
-      case "dark":
-        return "Scuro";
-      case "dracula":
-        return "Dracula";
-      case "synthwave":
-        return "Synthwave";
-      case "halloween":
-        return "Halloween";
-      case "forest":
-        return "Foresta";
-      case "luxury":
-        return "Luxury";
-      case "black":
-        return "Nero";
-      case "night":
-        return "Notte";
-      case "sunset":
-        return "Tramonto";
-      case "coffee":
-        return "Caffé";
-      case "default":
-        return "Predefinito";
-    }
-  };
-
   if (!isClient)
     return (
       <div className="d-skeleton">
@@ -64,5 +19,10 @@ export default function ThemeDisplayer({ className }: { className?: string }) {
       </div>
     );
 
-  return <p className={className}>{themeToBetterString(theme)}</p>;
+  return (
+    <p className={className}>
+      {themes.find((value) => value.key === theme)?.displayText ??
+        "Tema sconosciuto"}
+    </p>
+  );
 }
