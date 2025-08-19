@@ -4,20 +4,10 @@ import { useTheme } from "@/components/client/Theme/ThemeContext";
 import {
   darkThemes,
   lightThemes,
+  themes,
 } from "@/components/client/Theme/ThemeController";
 import Image from "next/image";
 import { useEffect, useState } from "react";
-
-// Theme definitions including default
-const themes = [
-  {
-    key: "default",
-    displayText: "Predefinito",
-    imageUrl: "/auth_images/auth_image_blue.webp",
-  },
-  ...lightThemes,
-  ...darkThemes,
-];
 
 export default function AuthImage() {
   const { theme } = useTheme();
