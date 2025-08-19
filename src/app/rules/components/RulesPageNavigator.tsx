@@ -11,7 +11,7 @@ export default function RulesPageNavigator() {
   };
 
   return (
-    <ul className="d-menu space-y-2.5">
+    <ul className="d-menu">
       {/** Team Creation */}
       <li>
         <Link
