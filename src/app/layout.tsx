@@ -6,19 +6,24 @@ import { ThemeProvider } from "@/components/client/Theme/ThemeContext";
 import { ModalProvider } from "@/components/client/Modal/ModalContext";
 import { UserDataProvider } from "@/components/client/UserDataContext";
 
+const siteUrl = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
+
 const inter = Inter({
   weight: ["400"],
   subsets: ["latin"],
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.BASE_URL!),
+  metadataBase: new URL(siteUrl),
   title: { default: "FantaProf", template: "%s | FantaProf" },
   description:
     "Scopri FantaProf, la piattaforma per gestire i punti della tua classe e sfidare i tuoi amici. Crea eventi, acquista professori e costruisci il team vincente!",
   alternates: {
-    canonical: new URL(process.env.BASE_URL!),
+    canonical: new URL("/", siteUrl),
   },
+  authors: [{ name: "FantaProf Team", url: siteUrl }],
+  creator: "FantaProf Team",
+  publisher: "FantaProf",
   keywords: [
     "fantaprof",
     "fanta prof",
@@ -33,26 +38,35 @@ export const metadata: Metadata = {
   openGraph: {
     title: "FantaProf - Sfida i tuoi amici con i tuoi professori!",
     description:
-      "Scopri FantaProf, la piattaforma per gestire i punti della tua classe. Crea eventi, acquista professori e costruisci il team vincente!",
-    url: process.env.BASE_URL!,
+      "Scopri FantaProf, la piattaforma per gestire i punti della tua classe e sfidare i tuoi amici. Crea eventi, acquista professori e costruisci il team vincente!",
+    url: new URL("/", siteUrl),
     siteName: "FantaProf",
     images: [
       {
-        url: "/images/fantaprof-social.png", //TODO: Add the correct image
-        width: 1200,
-        height: 630,
-        alt: "Logo di FantaProf",
+        url: "/fantaprof_twitter_image.webp",
+        width: 3500,
+        height: 1300,
+        alt: "FantaProf Twitter Image",
       },
     ],
     locale: "it_IT",
     type: "website",
   },
   twitter: {
-    card: "summary",
+    site: "@FantaProf",
+    creator: "@FantaProf",
+    card: "summary_large_image",
     title: "FantaProf - Sfida i tuoi amici con i tuoi professori!",
     description:
-      "Sfida i tuoi amici con FantaProf, la piattaforma per gestire i punti della tua classe. Acquista professori e vinci!",
-    images: ["/images/fantaprof-social.png"], //TODO: Add the correct image
+      "Scopri FantaProf, la piattaforma per gestire i punti della tua classe e sfidare i tuoi amici. Crea eventi, acquista professori e costruisci il team vincente!",
+    images: [
+      {
+        url: "/fantaprof_twitter_image.webp",
+        width: 3500,
+        height: 1300,
+        alt: "FantaProf Twitter Image",
+      },
+    ],
   },
   robots: {
     index: true,

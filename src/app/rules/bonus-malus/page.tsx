@@ -1,109 +1,171 @@
+import { Metadata } from "next";
+import Script from "next/script";
+
+const siteUrl = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
+
+// ---------------- Metadata ----------------
+export const metadata: Metadata = {
+  title: "Bonus e Malus",
+  alternates: { canonical: `${siteUrl}/rules/bonus-malus` },
+  description: "Scopri come funzionano i bonus e malus in FantaProf.",
+  authors: [{ name: "FantaProf Team", url: siteUrl }],
+  creator: "FantaProf Team",
+  publisher: "FantaProf",
+  keywords: [
+    "FantaProf",
+    "regole FantaProf",
+    "Bonus e Malus",
+    "bonus malus FantaProf",
+    "punteggi professori FantaProf",
+    "punteggio insegnanti",
+    "punteggi scuola gioco",
+    "fantasy school game",
+    "gioco studenti e professori",
+    "classi scolastiche",
+    "gestione punti professori",
+    "regole punteggio scuola",
+    "bonus insegnanti",
+    "malus insegnanti",
+    "punteggio studenti",
+    "regole gioco FantaProf",
+    "come funzionano bonus e malus FantaProf",
+  ],
+  openGraph: {
+    title: "Bonus e Malus",
+    description: "Scopri come funzionano i bonus e malus in FantaProf.",
+    url: `${siteUrl}/rules/bonus-malus`,
+    siteName: "FantaProf",
+    images: [
+      {
+        url: "/fantaprof_twitter_image.webp",
+        width: 3500,
+        height: 1300,
+        alt: "FantaProf Twitter Image",
+      },
+    ],
+    locale: "it_IT",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Bonus e Malus",
+    description: "Scopri come funzionano i bonus e malus in FantaProf.",
+    site: "@FantaProf",
+    creator: "@FantaProf",
+    images: [
+      {
+        url: "/fantaprof_twitter_image.webp",
+        width: 3500,
+        height: 1300,
+        alt: "FantaProf Twitter Image",
+      },
+    ],
+  },
+};
+
+// ---------------- Data ----------------
+const bonusItems = [
+  { name: "Assenza (variazione orario, buco)", points: 20 },
+  { name: "Relax (no spiegazione, ripasso)", points: 15 },
+  { name: "Parolaccia (non citazione)", points: 30 },
+  { name: "Gergo giovanile", points: 15 },
+  { name: "Capriola sulla cattedra", points: 200 },
+  { name: "Si sente male in classe", points: 200 },
+  { name: "Fa un complimento", points: 10 },
+  { name: "Ci porta in gita", points: 50 },
+  { name: "Inciampa/cade", points: 20 },
+  { name: "Vediamo film/video", points: 15 },
+  { name: "Esercitazione antincendio nella sua ora", points: 20 },
+];
+
+const malusItems = [
+  { name: "Sbaglia nome/cognome", points: -10 },
+  { name: "Poco preavviso per verifiche/compiti", points: -15 },
+  { name: "Battuta da boomer", points: -15 },
+  { name: "Mette una nota", points: -30 },
+  { name: "Manca, ma c’è il supplente", points: -10 },
+  { name: "Lavoro di gruppo", points: -15 },
+  { name: "Catastrofe naturale", points: -100 },
+  { name: "Non manda in bagno", points: -15 },
+  { name: "Litiga con alunno", points: -50 },
+];
+
+// ---------------- Components ----------------
+const PointsList = ({
+  title,
+  icon,
+  items,
+  positive = true,
+}: {
+  title: string;
+  icon: string;
+  items: typeof bonusItems;
+  positive?: boolean;
+}) => (
+  <div className="mb-7">
+    <h2 className="text-xl mb-1">
+      <i className={`${icon} me-1`} aria-hidden></i>
+      {title}:
+    </h2>
+    <ul className="list-disc list-inside">
+      {items.map((item, i) => (
+        <li key={i} className="opacity-80">
+          {item.name}:{" "}
+          <span
+            className={`d-badge ${
+              positive ? "d-badge-success" : "d-badge-error"
+            }`}
+          >
+            {positive ? `+${item.points}` : item.points}
+          </span>
+        </li>
+      ))}
+    </ul>
+  </div>
+);
+
+// ---------------- Page ----------------
 export default function BonusMalusRule() {
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    name: "Bonus e Malus FantaProf",
+    itemListElement: [
+      ...bonusItems.map((item, index) => ({
+        "@type": "ListItem",
+        position: index + 1,
+        name: `${item.name} (+${item.points})`,
+      })),
+      ...malusItems.map((item, index) => ({
+        "@type": "ListItem",
+        position: bonusItems.length + index + 1,
+        name: `${item.name} (${item.points})`,
+      })),
+    ],
+  };
+
   return (
     <>
-      <h1 className="lg:text-5xl md:text-3xl sm:text-2xl text-2xl text-primary lg:mb-3 md:mb-3 sm:mb-2 mb-1 motion-safe:opacity-0 sm:animate-fade-in-top animate-fade-in-left motion-reduce:animate-none">
+      <h1 className="lg:text-5xl md:text-3xl sm:text-2xl text-2xl text-primary lg:mb-3 md:mb-3 sm:mb-2 mb-1">
         <i className="bi bi-graph-up-arrow me-1" aria-hidden></i>
         Punteggi: Bonus e Malus
       </h1>
-      <div className="mb-7">
-        <h1 className="motion-safe:opacity-0 lg:text-2xl sm:text-xl text-xl mb-0.5 sm:animate-fade-in-top animate-fade-in-left sm:animation-delay-700 animation-delay-300 motion-reduce:animate-none">
-          <i className="bi bi-check-square text-success me-1" aria-hidden></i>
-          Bonus:
-        </h1>
-        <h2 className="motion-safe:opacity-0 text-xl lg:mb-3 md:mb-3 sm:mb-2 mb-1 sm:animate-fade-in-top animate-fade-in-left sm:animation-delay-700 animation-delay-300 motion-reduce:animate-none">
-          <p className="opacity-90">
-            I punti bonus vengono assegnati ai professori che eseguono azioni
-            positive, come:
-          </p>
-        </h2>
-        <ul className="list-disc list-inside">
-          <li className="motion-safe:opacity-0 sm:animate-fade-in-top animate-fade-in-left motion-reduce:animate-none animation-delay-400">
-            <span className="opacity-80">
-              Assenza (variazione orario, buco): +20
-            </span>
-          </li>
-          <li className="motion-safe:opacity-0 sm:animate-fade-in-top animate-fade-in-left motion-reduce:animate-none animation-delay-400">
-            <span className="opacity-80">
-              Relax (no spiegazione, ripasso): +15
-            </span>
-          </li>
-          <li className="motion-safe:opacity-0 sm:animate-fade-in-top animate-fade-in-left motion-reduce:animate-none animation-delay-500">
-            <span className="opacity-80">Parolaccia (non citazione): +30</span>
-          </li>
-          <li className="motion-safe:opacity-0 sm:animate-fade-in-top animate-fade-in-left motion-reduce:animate-none animation-delay-500">
-            <span className="opacity-80">Gergo giovanile: +15</span>
-          </li>
-          <li className="motion-safe:opacity-0 sm:animate-fade-in-top animate-fade-in-left motion-reduce:animate-none animation-delay-600">
-            <span className="opacity-80">Capriola sulla cattedra: +200</span>
-          </li>
-          <li className="motion-safe:opacity-0 sm:animate-fade-in-top animate-fade-in-left motion-reduce:animate-none animation-delay-600">
-            <span className="opacity-80">Si sente male in classe: +200</span>
-          </li>
-          <li className="motion-safe:opacity-0 sm:animate-fade-in-top animate-fade-in-left motion-reduce:animate-none animation-delay-700">
-            <span className="opacity-80">Fa un complimento: +10</span>
-          </li>
-          <li className="motion-safe:opacity-0 sm:animate-fade-in-top animate-fade-in-left motion-reduce:animate-none animation-delay-700">
-            <span className="opacity-80">Ci porta in gita: +50</span>
-          </li>
-          <li className="motion-safe:opacity-0 sm:animate-fade-in-top animate-fade-in-left motion-reduce:animate-none animation-delay-800">
-            <span className="opacity-80">Inciampa/cade: +20</span>
-          </li>
-          <li className="motion-safe:opacity-0 sm:animate-fade-in-top animate-fade-in-left motion-reduce:animate-none animation-delay-800">
-            <span className="opacity-80">Vediamo film/video: +15</span>
-          </li>
-          <li className="motion-safe:opacity-0 sm:animate-fade-in-top animate-fade-in-left motion-reduce:animate-none animation-delay-900">
-            <span className="opacity-80">
-              Esercitazione antincendio nella sua ora: +20
-            </span>
-          </li>
-        </ul>
-      </div>
-      <div className="mb-7">
-        <h3 className="motion-safe:opacity-0 lg:text-2xl sm:text-xl text-xl mb-0.5 sm:animate-fade-in-top animate-fade-in-left sm:animation-delay-700 animation-delay-300 motion-reduce:animate-none">
-          <i
-            className="bi bi-x-square bi bi-x-square text-error me-1"
-            aria-hidden
-          ></i>
-          Malus:
-        </h3>
-        <h4 className="motion-safe:opacity-0 text-xl lg:mb-3 md:mb-3 sm:mb-2 mb-1 sm:animate-fade-in-top animate-fade-in-left sm:animation-delay-700 animation-delay-300 motion-reduce:animate-none">
-          <p className="opacity-90">
-            I punti malus vengono attribuiti ai professori che commettono errori
-            o si comportano in modo negativo, come:
-          </p>
-        </h4>
-        <ul className="list-disc list-inside">
-          <li className="motion-safe:opacity-0 sm:animate-fade-in-top animate-fade-in-left motion-reduce:animate-none animation-delay-400">
-            <span className="opacity-80">Sbaglia nome/cognome: -10</span>
-          </li>
-          <li className="motion-safe:opacity-0 sm:animate-fade-in-top animate-fade-in-left motion-reduce:animate-none animation-delay-400">
-            <span className="opacity-80">
-              Poco preavviso per verifiche/compiti: -15
-            </span>
-          </li>
-          <li className="motion-safe:opacity-0 sm:animate-fade-in-top animate-fade-in-left motion-reduce:animate-none animation-delay-500">
-            <span className="opacity-80">Battuta da boomer: -15</span>
-          </li>
-          <li className="motion-safe:opacity-0 sm:animate-fade-in-top animate-fade-in-left motion-reduce:animate-none animation-delay-500">
-            <span className="opacity-80">Mette una nota: -30</span>
-          </li>
-          <li className="motion-safe:opacity-0 sm:animate-fade-in-top animate-fade-in-left motion-reduce:animate-none animation-delay-600">
-            <span className="opacity-80">Manca, ma c’è il supplente: -10</span>
-          </li>
-          <li className="motion-safe:opacity-0 sm:animate-fade-in-top animate-fade-in-left motion-reduce:animate-none animation-delay-600">
-            <span className="opacity-80">Lavoro di gruppo: -15</span>
-          </li>
-          <li className="motion-safe:opacity-0 sm:animate-fade-in-top animate-fade-in-left motion-reduce:animate-none animation-delay-700">
-            <span className="opacity-80">Catastrofe naturale: -100</span>
-          </li>
-          <li className="motion-safe:opacity-0 sm:animate-fade-in-top animate-fade-in-left motion-reduce:animate-none animation-delay-700">
-            <span className="opacity-80">Non manda in bagno: -15 </span>
-          </li>
-          <li className="motion-safe:opacity-0 sm:animate-fade-in-top animate-fade-in-left motion-reduce:animate-none animation-delay-800">
-            <span className="opacity-80">Litiga con alunno: -50</span>
-          </li>
-        </ul>
-      </div>
+
+      <PointsList
+        title="Bonus"
+        icon="bi bi-check-square text-success"
+        items={bonusItems}
+      />
+      <PointsList
+        title="Malus"
+        icon="bi bi-x-square text-error"
+        items={malusItems}
+        positive={false}
+      />
+
+      <Script type="application/ld+json" id="bonus-malus-jsonld">
+        {JSON.stringify(jsonLd)}
+      </Script>
     </>
   );
 }

@@ -4,6 +4,69 @@ import Navbar from "@/components/server/Navbar";
 import ReturnToHome from "@/components/server/BackToPathArrow";
 import { ReactNode } from "react";
 import BackToPathArrow from "@/components/server/BackToPathArrow";
+import { Metadata } from "next";
+
+const siteUrl = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
+
+export const metadata: Metadata = {
+  metadataBase: new URL(siteUrl),
+  title: { default: "Regole FantaProf", template: "%s | Regole FantaProf" },
+  description: "Scopri le regole di FantaProf!",
+  alternates: {
+    canonical: new URL("/rules/team-creation", siteUrl),
+  },
+  authors: [{ name: "FantaProf Team", url: siteUrl }],
+  creator: "FantaProf Team",
+  publisher: "FantaProf",
+  keywords: [
+    "fantaprof",
+    "fanta prof",
+    "fantacalcio",
+    "classe",
+    "professori",
+    "alunni",
+    "scuola",
+    "gestione punti classe",
+    "eventi scolastici",
+  ],
+  openGraph: {
+    title: "Regole FantaProf",
+    description: "Scopri le regole di FantaProf!",
+    url: new URL("/rules/team-creation", siteUrl),
+    siteName: "FantaProf",
+    images: [
+      {
+        url: "/fantaprof_twitter_image.webp",
+        width: 3500,
+        height: 1300,
+        alt: "FantaProf Twitter Image",
+      },
+    ],
+    locale: "it_IT",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "FantaProf - Sfida i tuoi amici con i tuoi professori!",
+    description: "Scopri le regole di FantaProf!",
+    site: "@FantaProf",
+    creator: "@FantaProf",
+    images: [
+      {
+        url: "/fantaprof_twitter_image.webp",
+        width: 3500,
+        height: 1300,
+        alt: "FantaProf Twitter Image",
+      },
+    ],
+  },
+  robots: {
+    index: true,
+    follow: true,
+    nocache: false,
+    noarchive: false,
+  },
+};
 
 export default function RulesLayout({
   children,
@@ -26,7 +89,7 @@ export default function RulesLayout({
         />
         <div className="d-drawer-content flex flex-col">
           <div className="lg:px-30 md:px-20 px-1.5 lg:py-10 md:py-5 s:py-4 py-3 min-h-dvh flex">
-            <aside className="h-full sm:px-5 p-0 sm:block hidden relative">
+            <aside className="h-full sm:me-5 m-0  sm:block hidden relative">
               <div className="fixed">
                 <h1 className="text-4xl text-primary mb-2.5 motion-safe:opacity-0 motion-reduce:animate-none animate-fade-in">
                   Sezioni
