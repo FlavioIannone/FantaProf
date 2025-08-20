@@ -13,7 +13,10 @@ import { TeacherDataInput, WriteOperationResult } from "@/lib/types";
  * @param classData - Object containing class_name and initial_credits
  * @returns Promise resolving to true on success, false on failure
  */
-export const createClassInFirestore = async (uid: string, classData: { class_name: string; initial_credits: number; }): Promise<boolean> => {
+export const createClassInFirestore = async (uid: string, classData: { class_name: string; initial_credits: number; }): Promise<{
+  classData: z.infer<typeof Class.schema>,
+  class_id: string
+} | undefined> => {
   const batch = admin_firestore.batch(); // Start a batch write for atomic operation
 
   // Generate new document reference for the class (auto ID)
@@ -50,10 +53,11 @@ export const createClassInFirestore = async (uid: string, classData: { class_nam
     // Commit the batch atomically
     await batch.commit();
 
-    return true; // Success
+    const classFromFirestore = (await classDocRef.get());
+    return { classData: Class.schema.parse(classFromFirestore.data()), class_id: classFromFirestore.id }// Success
   } catch (error) {
     console.log(error);
-    return false; // Failure
+    return; // Failure
   }
 };
 

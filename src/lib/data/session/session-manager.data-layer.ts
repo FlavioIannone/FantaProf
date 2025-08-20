@@ -2,8 +2,7 @@
 import { admin_auth } from "@/lib.api/firebase-connection";
 import { DecodedIdToken, FirebaseAuthError } from "firebase-admin/auth";
 import { cookies } from "next/headers";
-import { redirect, RedirectType } from "next/navigation";
-
+import { redirect } from "next/navigation";
 
 /**
  * Creates a session for the user.
@@ -16,7 +15,9 @@ export const createSession = async (
     expiresIn: number = 60 * 60 * 1000 // 1 hour default
 ): Promise<void> => {
     try {
-        const sessionCookie = await admin_auth.createSessionCookie(idToken, { expiresIn });
+        const sessionCookie = await admin_auth.createSessionCookie(idToken, {
+            expiresIn,
+        });
         const cookiesStore = await cookies();
         cookiesStore.set("session", sessionCookie, {
             httpOnly: true,
@@ -29,18 +30,19 @@ export const createSession = async (
     }
 };
 
-
 /**
  * Verifies the user's session by checking the session cookie.
  * @returns Returns a promise that resolves to an object indicating whether the session verification was successful or not.
-*/
-type SessionVerificationResult = {
-    successful: true;
-    session: DecodedIdToken;
-} | {
-    successful: false;
-    status: number
-}
+ */
+type SessionVerificationResult =
+    | {
+        successful: true;
+        session: DecodedIdToken;
+    }
+    | {
+        successful: false;
+        status: number;
+    };
 export const verifySession = async (): Promise<SessionVerificationResult> => {
     const cookiesStore = await cookies();
     if (!cookiesStore.has("session")) {
@@ -56,7 +58,6 @@ export const verifySession = async (): Promise<SessionVerificationResult> => {
         return { successful: false, status: 401 };
     }
 };
-
 
 /**
  * Deletes the current session by revoking the refresh tokens and clearing the session cookie.
@@ -74,9 +75,10 @@ export const deleteSession = async (): Promise<boolean> => {
         // Clear the session cookie
         cookiesStore.delete("session");
         return true;
-
     } catch (error) {
         console.error("Failed to revoke session:", error);
         return false;
     }
-}
+};
+
+

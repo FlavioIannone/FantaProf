@@ -1,10 +1,9 @@
 "use server";
 
-import { verifySession } from "./session/session-manager.data-layer";
-import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { TeacherDataInput } from "../types";
 import { getClassTeachersFromFirestore, addTeacherInFirestore, modifyTeacherInFirestore, deleteTeacherFromFirestore } from "@/lib.api/api.utils/teachers.api.utils";
+import { withSession } from "./session/session-helpers.data-layer";
 
 /**
  * Represents editable teacher data for modification.
@@ -25,13 +24,10 @@ export type TeacherDataEditForm = {
  *
  * Redirects to login if session is invalid.
  */
-export const getClassTeachersAction = async (class_id: string) => {
-    const res = await verifySession();
-    if (!res.successful) {
-        redirect("/auth/login?reason=session-expired");
-    }
+export const getClassTeachersAction = withSession(async (uid: string, class_id: string) => {
+
     return await getClassTeachersFromFirestore(class_id);
-};
+});
 
 /**
  * Adds a new teacher to a class.
@@ -42,20 +38,16 @@ export const getClassTeachersAction = async (class_id: string) => {
  * Redirects to login if session is invalid.
  * Revalidates the market page after success.
  */
-export const addTeacherAction = async (
+export const addTeacherAction = withSession(async (
+    uid: string,
     class_id: string,
     teacher_data: TeacherDataInput
 ) => {
-    const res = await verifySession();
-    if (!res.successful) {
-        redirect("/auth/login?reason=session-expired");
-    }
-
     const result = await addTeacherInFirestore(class_id, teacher_data);
     if (result) {
         revalidatePath(`/dashboard/classes/${class_id}/market`);
     }
-};
+});
 
 /**
  * Modifies an existing teacher's data.
@@ -67,21 +59,17 @@ export const addTeacherAction = async (
  * Redirects to login if session is invalid.
  * Revalidates the market page after success.
  */
-export const modifyTeacherAction = async (
+export const modifyTeacherAction = withSession(async (
+    uid: string,
     class_id: string,
     teacher_id: string,
     teacher_data: TeacherDataEditForm
 ) => {
-    const res = await verifySession();
-    if (!res.successful) {
-        redirect("/auth/login?reason=session-expired");
-    }
-
     const result = await modifyTeacherInFirestore(class_id, teacher_id, teacher_data);
     if (result.successful) {
         revalidatePath(`/dashboard/classes/${class_id}/market`);
     }
-};
+});
 
 /**
  * Deletes a teacher from a class.
@@ -92,17 +80,14 @@ export const modifyTeacherAction = async (
  * Redirects to login if session is invalid.
  * Revalidates the market page after success.
  */
-export const deleteTeacherAction = async (
+export const deleteTeacherAction = withSession(async (
+    uid:string,
     class_id: string,
     teacher_id: string
 ) => {
-    const res = await verifySession();
-    if (!res.successful) {
-        redirect("/auth/login?reason=session-expired");
-    }
 
     const result = await deleteTeacherFromFirestore(class_id, teacher_id);
     if (result.successful) {
         revalidatePath(`/dashboard/classes/${class_id}/market`);
     }
-};
+});

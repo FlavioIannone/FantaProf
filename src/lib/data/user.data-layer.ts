@@ -1,11 +1,10 @@
 "use server";
-import { redirect } from "next/navigation";
-import { verifySession } from "./session/session-manager.data-layer";
 import {
   getBestScoreFromFirestore,
   getClassesEnrollmentCountFromFirestore,
   getStudentEnrollmentDataFromFirestore,
 } from "@/lib.api/api.utils/users.api.utils";
+import { withSession } from "./session/session-helpers.data-layer";
 
 
 /**
@@ -17,20 +16,15 @@ import {
  * 
  * Redirects to the login page if the session is invalid.
  */
-export const getGlobalStatsAction = async () => {
-  const res = await verifySession();
-  if (!res.successful) {
-    redirect("/auth/login?reason=session-expired");
-  }
-
-  const bestScore = await getBestScoreFromFirestore(res.session.uid);
-  const classesCount = await getClassesEnrollmentCountFromFirestore(res.session.uid);
+export const getGlobalStatsAction = withSession(async (uid: string) => {
+  const bestScore = await getBestScoreFromFirestore(uid);
+  const classesCount = await getClassesEnrollmentCountFromFirestore(uid);
 
   return {
     bestScore,
     classesCount,
   };
-};
+});
 
 /**
  * Fetches the enrollment data of the currently authenticated student
@@ -41,11 +35,8 @@ export const getGlobalStatsAction = async () => {
  * 
  * Redirects to the login page if the session is invalid.
  */
-export const getStudentEnrollmentDataAction = async (class_id: string) => {
-  const res = await verifySession();
-  if (!res.successful) {
-    redirect("/auth/login?reason=session-expired");
-  }
+export const getStudentEnrollmentDataAction = withSession(async (uid: string, class_id: string) => {
 
-  return await getStudentEnrollmentDataFromFirestore(class_id, res.session.uid);
-};
+
+  return await getStudentEnrollmentDataFromFirestore(class_id, uid);
+});
