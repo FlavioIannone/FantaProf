@@ -2,10 +2,12 @@
 
 import { useModal } from "@/components/client/Modal/ModalContext";
 import { addClassAction } from "@/lib/data/classes.data-layer";
+import { useRouter } from "next/navigation";
 
 export default function AddClassButton() {
   // Modal context, provides methods to open/close modals
   const modal = useModal();
+  const router = useRouter();
 
   // If user is logged in and token is available, show active button
   return (
@@ -29,11 +31,18 @@ export default function AddClassButton() {
               .toString()
               .trim();
             if (className !== "" && initialCredits !== "") {
-              await addClassAction({
+              const classData = await addClassAction({
                 class_name: className,
                 initial_credits: parseInt(initialCredits),
               });
               modal.setModal(false);
+              if (classData) {
+                router.push(
+                  `/dashboard/classes/${classData.class_id}/overview`
+                );
+                return;
+              }
+              // TODO: Add toast message
             }
           },
         });

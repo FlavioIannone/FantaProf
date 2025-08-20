@@ -8,10 +8,21 @@ export default function TeachersTableHeader({
   enrollmentData,
   class_id,
 }: {
-  enrollmentData: FilteredStudentEnrollmentData | undefined;
-  class_id: string;
+  enrollmentData?: FilteredStudentEnrollmentData | undefined;
+  class_id?: string | undefined;
 }) {
   const modal = useModal();
+
+  if (!enrollmentData || !class_id) {
+    return (
+      <div className="w-full flex justify-between items-center">
+        <h1 className="text-3xl font-extrabold">
+          <span className="bi bi-backpack3 me-2" aria-hidden></span>
+          Professori
+        </h1>
+      </div>
+    );
+  }
 
   const onConfirm = async (formData?: FormData) => {
     if (!formData) return;
@@ -34,17 +45,6 @@ export default function TeachersTableHeader({
     await addTeacherAction(class_id, teacherData);
     modal.setModal(false);
   };
-
-  if (!enrollmentData) {
-    return (
-      <div className="w-full flex justify-between items-center">
-        <h1 className="text-3xl font-extrabold">
-          <span className="bi bi-backpack3 me-2" aria-hidden></span>
-          Professori
-        </h1>
-      </div>
-    );
-  }
 
   return (
     <div className="w-full flex justify-between items-center">

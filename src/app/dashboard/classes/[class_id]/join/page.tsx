@@ -4,6 +4,19 @@ import {
 } from "@/lib/data/classes.data-layer";
 import { Metadata } from "next";
 
+import { Class } from "@/lib.api/schema.db";
+import { admin_firestore } from "@/lib.api/firebase-connection";
+
+export const generateStaticParams = async () => {
+  const classesRefs = await admin_firestore
+    .collection(Class.collection)
+    .withConverter(Class.converter)
+    .get();
+
+  const docs = classesRefs.docs;
+  return docs.map((classSnap) => ({ class_id: classSnap.id }));
+};
+
 const siteUrl = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
 
 export const generateMetadata = async ({

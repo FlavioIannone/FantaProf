@@ -11,6 +11,7 @@ export default async function TeachersTable({
 }) {
   const teachers = await getClassTeachersAction(class_id);
   const studentEnrollment = await getStudentEnrollmentDataAction(class_id);
+  const isAdmin = studentEnrollment?.admin ?? false;
 
   if ((teachers && teachers.length === 0) || !teachers) {
     return (
@@ -21,7 +22,7 @@ export default async function TeachersTable({
         />
         <NoDataUI
           message="Nessun professore aggiunto in questa classe"
-          additionalMessage="Chiedi ad un amministatore"
+          additionalMessage={isAdmin ? undefined : "Chiedi ad un amministatore"}
         />
       </>
     );
@@ -39,7 +40,7 @@ export default async function TeachersTable({
             <TeacherCard
               class_id={class_id}
               teacherData={teacher}
-              isAdmin={studentEnrollment ? studentEnrollment.admin : false}
+              isAdmin={isAdmin}
               key={teacher.teacher_id}
             />
           );
