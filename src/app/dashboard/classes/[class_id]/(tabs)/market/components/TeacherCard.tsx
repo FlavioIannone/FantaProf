@@ -112,7 +112,7 @@ export default function TeacherCard({
   };
 
   return (
-    <div className="d-card-md bg-base-200 shadow-sm p-0">
+    <div className="d-card-md d-rounded-box bg-base-200 shadow-sm p-0">
       <div className="d-card-body">
         {/* Header: Avatar + name + price */}
         <div className="flex gap-3 items-center">
