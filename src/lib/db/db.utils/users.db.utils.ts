@@ -1,5 +1,5 @@
 import { cache } from "react";
-import { admin_firestore } from "../firebase-connection";
+import { admin_firestore } from "../firebase-connection.server";
 import { Class, StudentEnrollment } from "../schema.db";
 import z from "zod";
 
@@ -16,6 +16,9 @@ export const getBestScoreFromFirestore = cache(async (
     // Query enrollments for the user, ordered by points descending, limit 1
     const enrollmentSnapshot = await admin_firestore
       .collectionGroup(StudentEnrollment.collection)
+      .select(
+        "points"
+      )
       .where("uid", "==", uid)
       .orderBy("points", "desc")
       .limit(1)
@@ -77,7 +80,7 @@ export const getClassesEnrollmentCountFromFirestore = cache(async (
   }
 });
 
-type StudentEnrollmentType = z.infer<typeof StudentEnrollment.schema>;
+type StudentEnrollmentType = Omit<z.infer<typeof StudentEnrollment.schema>,"team">;
 
 /**
  * Retrieves the student enrollment data for a user in a specific class.

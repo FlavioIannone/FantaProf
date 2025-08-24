@@ -8,7 +8,7 @@ export default function MembersTableSkeleton() {
         </h1>
         <button
           type="button"
-          className="d-btn d-btn-primary"
+          className="d-btn d-btn-primary  "
           disabled
           aria-disabled
         >

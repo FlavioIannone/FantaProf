@@ -1,7 +1,7 @@
 import BackToPathArrow from "@/components/server/BackToPathArrow";
 import { ReactNode } from "react";
 
-import { getClassDataAction } from "@/lib/data/classes.data-layer";
+import { getClassData } from "@/lib/data/data-layer/classes.data-layer";
 import DashboardTabsNavigator from "./components/DashboardTabsNavigator";
 import LeaveClassButton from "./components/LeaveClassButton";
 
@@ -13,7 +13,7 @@ export default async function ClassLayout({
   params: Promise<{ class_id: string }>;
 }) {
   const { class_id } = await params;
-  const classData = await getClassDataAction(class_id);
+  const classData = await getClassData(class_id);
 
   return (
     <div className="w-full max-h-dvh flex flex-col overflow-hidden">

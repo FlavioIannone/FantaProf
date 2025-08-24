@@ -3,12 +3,8 @@
 // React and utility imports
 import { useState, useRef, useEffect } from "react";
 import { useModal } from "@/components/client/Modal/ModalContext";
-import { TeacherTableRowType } from "@/lib/data/types.data-layer";
-import {
-  TeacherDataEditForm,
-  modifyTeacherAction,
-  deleteTeacherAction,
-} from "@/lib/data/teachers.data-layer";
+import { modifyTeacherAction, deleteTeacherAction } from "@/lib/data/actions/teachers.actions";
+import { TeacherTableRowType, TeacherDataEditForm } from "@/lib/data/types.data";
 
 // Inner component: Modal content for editing a teacher
 function TeacherEditForm({
@@ -112,7 +108,7 @@ export default function TeacherCard({
   };
 
   return (
-    <div className="d-card-md d-rounded-box bg-base-200 shadow-sm p-0">
+    <div className="d-card-md   bg-base-200 shadow-sm p-0">
       <div className="d-card-body">
         {/* Header: Avatar + name + price */}
         <div className="flex gap-3 items-center">
@@ -142,7 +138,7 @@ export default function TeacherCard({
           {isTruncated && (
             <button
               onClick={() => setExpanded(!expanded)}
-              className="text-sm mt-1 d-link"
+              className="text-sm mt-1 d-link  "
             >
               {expanded ? "Mostra meno" : "Mostra di più"}
             </button>
@@ -151,14 +147,14 @@ export default function TeacherCard({
 
         {/* Action buttons */}
         <div className="mt-6 flex gap-1.5">
-          <button className="d-btn d-btn-primary flex-1">Compra</button>
+          <button className="d-btn d-btn-primary flex-1  ">Compra</button>
 
           {/* Admin dropdown: edit/delete */}
           {isAdmin && (
             <div className="d-dropdown d-dropdown-top d-dropdown-end">
               <button
                 tabIndex={0}
-                className="d-btn d-btn-outline d-btn-primary"
+                className="d-btn d-btn-outline d-btn-primary  "
               >
                 ...
               </button>
@@ -170,7 +166,7 @@ export default function TeacherCard({
                 </li>
                 <li>
                   <button
-                    className="bg-error text-error-content font-bold"
+                    className="bg-error text-error-content font-bold  "
                     onClick={() => {
                       setModal(true, {
                         title: "Eliminare il professore?",

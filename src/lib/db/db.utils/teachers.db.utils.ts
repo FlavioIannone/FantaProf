@@ -1,10 +1,10 @@
-import { TeacherTableRowType } from "@/lib/data/types.data-layer";
 import { cache } from "react";
-import { admin_firestore } from "../firebase-connection";
+import { admin_firestore } from "../firebase-connection.server";
 import { Class, Teacher } from "../schema.db";
 import { FieldValue } from "firebase-admin/firestore";
 import { TeacherDataInput, WriteOperationResult } from "@/lib/types";
 import z from "zod";
+import { TeacherTableRowType } from "@/lib/data/types.data";
 
 /**
  * Retrieves all teachers of a class.
@@ -46,11 +46,13 @@ export const addTeacherInFirestore = async (
 ): Promise<WriteOperationResult> => {
     try {
         const classDocRef = admin_firestore.collection(Class.collection).doc(class_id);
-        const teacherDocRef = classDocRef.collection(Teacher.collection).withConverter(Teacher.converter).doc();
+        const teacherDocRef = classDocRef.collection(Teacher.collection).doc();
 
         const batch = admin_firestore.batch();
-        batch.create(teacherDocRef, teacherData);
-        batch.update(classDocRef, {
+        
+        batch
+        .create(teacherDocRef, Teacher.schema.parse(teacherData))
+        .update(classDocRef, {
             teachers: FieldValue.increment(1),
         });
 

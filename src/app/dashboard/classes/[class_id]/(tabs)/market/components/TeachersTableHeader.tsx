@@ -1,7 +1,7 @@
 "use client";
 import { useModal } from "@/components/client/Modal/ModalContext";
-import { addTeacherAction } from "@/lib/data/teachers.data-layer";
-import { FilteredStudentEnrollmentData } from "@/lib/data/types.data-layer";
+import { addTeacherAction } from "@/lib/data/actions/teachers.actions";
+import { FilteredStudentEnrollmentData } from "@/lib/data/types.data";
 import { TeacherDataInput } from "@/lib/types";
 
 export default function TeachersTableHeader({
@@ -55,7 +55,7 @@ export default function TeachersTableHeader({
       {enrollmentData.admin && (
         <button
           type="button"
-          className="d-btn d-btn-primary"
+          className="d-btn d-btn-primary  "
           onClick={() => {
             modal.setModal(true, {
               title: "Aggiungi un nuovo professore",

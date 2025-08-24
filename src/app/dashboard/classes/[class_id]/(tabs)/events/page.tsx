@@ -1,12 +1,11 @@
-import { admin_firestore } from "@/lib.api/firebase-connection";
-import { Class } from "@/lib.api/schema.db";
+import { admin_firestore } from "@/lib/db/firebase-connection.server";
+import { Class } from "@/lib/db/schema.db";
 import EventCard from "./components/EventCard";
 import EventsTable from "./components/EventsTable";
 
 export const generateStaticParams = async () => {
   const classesRefs = await admin_firestore
     .collection(Class.collection)
-    .withConverter(Class.converter)
     .get();
 
   const docs = classesRefs.docs;
@@ -27,11 +26,11 @@ export default async function EventsTab({
         <div className="flex md:flex-row flex-col gap-2">
           <button
             type="button"
-            className="d-btn d-btn-primary d-btn-soft d-btn-outline d-rounded-box"
+            className="d-btn d-btn-primary d-btn-soft d-btn-outline  "
           >
             Crea template evento
           </button>
-          <button type="button" className="d-btn d-btn-primary d-rounded-box">
+          <button type="button" className="d-btn d-btn-primary  ">
             Registra evento
           </button>
         </div>
@@ -63,7 +62,7 @@ export default async function EventsTab({
                 </div>
                 <button
                   type="button"
-                  className="d-btn d-btn-ghost d-rounded-box"
+                  className="d-btn d-btn-ghost  "
                 >
                   <i className="bi bi-pencil"></i>
                 </button>
@@ -103,7 +102,7 @@ export default async function EventsTab({
                 </div>
                 <button
                   type="button"
-                  className="d-btn d-btn-ghost d-rounded-box"
+                  className="d-btn d-btn-ghost  "
                 >
                   <i className="bi bi-pencil"></i>
                 </button>

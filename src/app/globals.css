@@ -118,6 +118,10 @@
   }
 }
 
+@utility d-btn {
+  @apply d-rounded-box
+}
+
 .animation-delay-100 {
   animation-delay: 100ms;
 }

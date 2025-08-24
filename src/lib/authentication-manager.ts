@@ -10,7 +10,7 @@ import {
   User,
   updateProfile,
 } from "firebase/auth";
-import { client_auth } from "./firebase-connection";
+import { client_auth } from "./firebase-connection.client";
 import { SignInData, LoginData } from "./types";
 
 //* Google Auth Provider

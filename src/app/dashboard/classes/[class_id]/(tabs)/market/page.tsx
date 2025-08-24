@@ -1,12 +1,13 @@
-import { admin_firestore } from "@/lib.api/firebase-connection";
+import { admin_firestore } from "@/lib/db/firebase-connection.server";
 import TeachersTable from "./components/TeachersTable";
 
-import { Class } from "@/lib.api/schema.db";
+import { Class } from "@/lib/db/schema.db";
+import { getClassTeachers } from "@/lib/data/data-layer/teachers.data-layer";
+import { getStudentEnrollmentData } from "@/lib/data/data-layer/user.data-layer";
 
 export const generateStaticParams = async () => {
   const classesRefs = await admin_firestore
     .collection(Class.collection)
-    .withConverter(Class.converter)
     .get();
 
   const docs = classesRefs.docs;

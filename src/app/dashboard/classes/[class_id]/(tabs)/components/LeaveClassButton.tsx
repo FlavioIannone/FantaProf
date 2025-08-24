@@ -1,7 +1,7 @@
 "use client";
 
 import { useModal } from "@/components/client/Modal/ModalContext";
-import { leaveClassAction } from "@/lib/data/classes.data-layer";
+import { leaveClassAction } from "@/lib/data/actions/classes.actions";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
@@ -12,7 +12,7 @@ export default function LeaveClassButton({ class_id }: { class_id: string }) {
 
   return (
     <button
-      className={`d-btn d-btn-ghost text-error md:p-[var(--d-btn-p)] p-0 px-1`} // md:p-[var(--d-btn-p)] -> md:(default button padding)
+      className="d-btn d-btn-ghost text-error md:p-[var(--d-btn-p)] p-0 px-1  " // md:p-[var(--d-btn-p)] -> md:(default button padding)
       type="button"
       disabled={loading}
       onClick={() => {

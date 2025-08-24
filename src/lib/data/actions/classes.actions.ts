@@ -2,36 +2,14 @@
 
 import {
     createClassInFirestore,
-    getClassesFromFirestore,
-    getClassFromFirestore,
     joinClassInFirestore,
     leaveClassInFirestore,
-} from "@/lib.api/api.utils/classes.api.utils";
+} from "@/lib/db/db.utils/classes.db.utils";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
-import { withSession } from "./session/session-helpers.data-layer";
+import { withSession } from "../session/session-helpers.data-layer";
+import { verifySession } from "../session/session-manager.data-layer";
 
-/**
- * Retrieves all classes the current user is enrolled in.
- * 
- * @returns A list of classes.
- * Redirects to login if the session is invalid.
- */
-export const getClassesAction = withSession(async (uid: string) => {
-    return await getClassesFromFirestore(uid);
-});
-
-/**
- * Retrieves the data of a specific class.
- * 
- * @param class_id - The ID of the class.
- * @returns Class data.
- * Redirects to login if the session is invalid.
- */
-export const getClassDataAction = withSession(async (uid: string, class_id: string) => {
-
-    return await getClassFromFirestore(class_id);
-});
 
 /**
  * Creates a new class for the current user.
@@ -64,15 +42,20 @@ export const addClassAction = withSession(async (uid: string, class_data: {
  * Redirects to login if the session is invalid.
  * Redirects to the class overview page on success.
  */
-export const joinClassAction = withSession(async (uid: string, class_id: string) => {
+export const joinClassAction = async ( class_id: string) => {
 
-    const joinResult = await joinClassInFirestore(uid, class_id);
+    const res = await verifySession();
+    if(!res.successful) {
+        redirect(`/auth/login?reason=join-class&class_id=${encodeURIComponent(class_id)}`)
+        
+    }
+    const joinResult = await joinClassInFirestore(res.session.uid, class_id);
     if (joinResult.successful) {
         revalidatePath("/dashboard");
         redirect(`/dashboard/classes/${class_id}/overview`);
     }
     return joinResult.status;
-});
+};
 
 /**
  * Removes the user from a class.

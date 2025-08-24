@@ -1,7 +1,7 @@
 "use client";
 
 import { useModal } from "@/components/client/Modal/ModalContext";
-import { addClassAction } from "@/lib/data/classes.data-layer";
+import { addClassAction } from "@/lib/data/actions/classes.actions";
 import { useRouter } from "next/navigation";
 
 export default function AddClassButton() {

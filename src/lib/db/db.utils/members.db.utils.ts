@@ -1,7 +1,8 @@
-import { MembersTableRowType } from "@/lib/data/types.data-layer";
 import { cache } from "react";
-import { admin_firestore, admin_auth } from "../firebase-connection";
+import { admin_firestore, admin_auth } from "../firebase-connection.server";
 import { Class, StudentEnrollment } from "../schema.db";
+import { MembersTableRowType } from "@/lib/data/types.data";
+import { FieldPath } from "firebase-admin/firestore";
 
 /**
  * Retrieves every member of an existing class from Firestore + Auth.
@@ -16,6 +17,7 @@ export const getClassMembersFromFirestore = cache(async (
             .doc(class_id)
             .collection(StudentEnrollment.collection)
             .orderBy("points", "desc")
+            // TODO: Modify logic, implement a new field in student enrollment to hold the id of the class, for faster query
             .get();
 
         if (membersEnrollmentSnapshot.empty) {
@@ -24,9 +26,8 @@ export const getClassMembersFromFirestore = cache(async (
 
         // Extract UIDs from enrollment docs
         const uids = membersEnrollmentSnapshot.docs.map(doc => {
-            const data = StudentEnrollment.schema.parse(doc.data());
-            return { uid: data.uid };
-        });
+            return { uid: doc.id };
+        })
 
         // Fetch user accounts in bulk
         const getUserResult = await admin_auth.getUsers(uids);
@@ -38,20 +39,20 @@ export const getClassMembersFromFirestore = cache(async (
         const members: MembersTableRowType[] = [];
 
         for (const enrollmentDoc of membersEnrollmentSnapshot.docs) {
-            const enrollment = StudentEnrollment.schema.parse(enrollmentDoc.data());
-            const user = userMap.get(enrollment.uid);
+            const enrollmentData = StudentEnrollment.schema.parse(enrollmentDoc.data())
+            const user = userMap.get(enrollmentDoc.id);
 
             if (!user) {
-                console.warn(`[getClassMembersFromFirestore] Missing auth user for uid ${enrollment.uid}`);
+                console.warn(`[getClassMembersFromFirestore] Missing auth user for uid ${enrollmentDoc.id}`);
                 continue;
             }
 
             members.push({
                 display_name: user.displayName ?? "No name",
                 photo_URL: user.photoURL ?? "",
-                credits: enrollment.credits ?? 0,
-                points: enrollment.points ?? 0,
-                admin: enrollment.admin ?? false,
+                credits: enrollmentData.credits ?? 0,
+                points: enrollmentData.points ?? 0,
+                admin: enrollmentData.admin ?? false,
                 email: user.email ?? "No email",
                 uid: user.uid,
             });

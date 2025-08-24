@@ -1,33 +1,14 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { TeacherDataInput } from "../types";
-import { getClassTeachersFromFirestore, addTeacherInFirestore, modifyTeacherInFirestore, deleteTeacherFromFirestore } from "@/lib.api/api.utils/teachers.api.utils";
-import { withSession } from "./session/session-helpers.data-layer";
+import { TeacherDataInput } from "../../types";
+import {  addTeacherInFirestore, modifyTeacherInFirestore, deleteTeacherFromFirestore } from "@/lib/db/db.utils/teachers.db.utils";
+import { withSession } from "../session/session-helpers.data-layer";
+import { TeacherDataEditForm } from "../types.data";
 
-/**
- * Represents editable teacher data for modification.
- * All fields are optional to allow partial updates.
- */
-export type TeacherDataEditForm = {
-    name?: string;
-    surname?: string;
-    description?: string;
-    price?: number;
-};
 
-/**
- * Retrieves all teachers for a given class.
- *
- * @param class_id - ID of the class to fetch teachers from.
- * @returns A list of teachers.
- *
- * Redirects to login if session is invalid.
- */
-export const getClassTeachersAction = withSession(async (uid: string, class_id: string) => {
 
-    return await getClassTeachersFromFirestore(class_id);
-});
+
 
 /**
  * Adds a new teacher to a class.

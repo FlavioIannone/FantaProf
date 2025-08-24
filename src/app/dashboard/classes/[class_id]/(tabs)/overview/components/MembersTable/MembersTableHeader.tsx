@@ -12,7 +12,7 @@ export default function MembersTableHeader({ class_id }: { class_id: string }) {
       </h1>
       <button
         type="button"
-        className="d-btn d-btn-primary"
+        className="d-btn d-btn-primary  "
         onClick={() => {
           // Open modal on button click, using a separate ModalContent component
           modal.setModal(true, {

@@ -1,6 +1,6 @@
 "use client";
 import Link from "next/link";
-import { client_auth } from "@/lib/firebase-connection";
+import { client_auth } from "@/lib/firebase-connection.client";
 import { useRouter } from "next/navigation";
 
 export default function DashboardAside() {

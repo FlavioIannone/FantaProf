@@ -2,7 +2,7 @@
 
 import { useModal } from "@/components/client/Modal/ModalContext";
 import { deleteSession } from "@/lib/data/session/session-manager.data-layer";
-import { client_auth } from "@/lib/firebase-connection";
+import { client_auth } from "@/lib/firebase-connection.client";
 import { useRouter } from "next/navigation";
 
 export default function LogoutButton() {

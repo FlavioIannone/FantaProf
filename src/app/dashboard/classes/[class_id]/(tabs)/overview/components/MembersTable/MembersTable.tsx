@@ -2,13 +2,13 @@ import MembersTableHeader from "./MembersTableHeader";
 import MembersTableRow from "./MembersTableRow";
 
 import StatsDisplayer from "../StatsDisplayer";
-import { getClassMembersAction } from "@/lib/data/members.data-layer";
-import { getStudentEnrollmentDataAction } from "@/lib/data/user.data-layer";
+import { getClassMembers } from "@/lib/data/data-layer/members.data-layer";
+import { getStudentEnrollmentData } from "@/lib/data/data-layer/user.data-layer";
 import NoDataUI from "../../../components/NoDataUI";
 
 export default async function MembersTable({ class_id }: { class_id: string }) {
-  const members = await getClassMembersAction(class_id);
-  const studentEnrollment = await getStudentEnrollmentDataAction(class_id);
+  const members = await getClassMembers(class_id);
+  const studentEnrollment = await getStudentEnrollmentData(class_id);
   if (!members || (members && members.length === 0)) {
     return (
       <>

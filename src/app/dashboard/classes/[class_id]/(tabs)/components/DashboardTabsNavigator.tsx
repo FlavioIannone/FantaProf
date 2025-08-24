@@ -35,7 +35,7 @@ export default function DashboardTabsNavigator({
         key={tabData.label}
         role="tab"
         disabled
-        className="d-tab md:grow-0 grow flex md:space-x-1 md:flex-row flex-col md:h-auto h-max"
+        className="d-tab md:grow-0 grow flex md:space-x-1 md:flex-row flex-col md:h-auto h-max  "
       >
         <i className={`text-lg ${tabData.icon}`} aria-hidden></i>
         <p className="md:text-lg text-md">{tabData.label}</p>

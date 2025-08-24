@@ -1,8 +1,8 @@
 "use server";
 
-import { getClassMembersFromFirestore, makeUserAdminInFirestore } from "@/lib.api/api.utils/members.api.utils";
+import {  makeUserAdminInFirestore } from "@/lib/db/db.utils/members.db.utils";
 import { revalidatePath } from "next/cache";
-import { withSession } from "./session/session-helpers.data-layer";
+import { withSession } from "../session/session-helpers.data-layer";
 
 /**
  * Makes a user an admin in a class.
@@ -21,15 +21,4 @@ export const makeUserAdminAction = withSession(async (uid: string, uidToMakeAdmi
     }
 });
 
-/**
- * Fetches the members of a class.
- * 
- * @param class_id - The ID of the class to retrieve members for.
- * @returns A list of class members.
- * 
- * Verifies the user's session before fetching.
- * Redirects to login if the session is invalid.
- */
-export const getClassMembersAction = withSession(async (uid: string, class_id: string) => {
-    return await getClassMembersFromFirestore(class_id);
-});
+

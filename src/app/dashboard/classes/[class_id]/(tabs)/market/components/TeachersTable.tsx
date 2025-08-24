@@ -1,16 +1,16 @@
+import { getClassTeachers } from "@/lib/data/data-layer/teachers.data-layer";
 import NoDataUI from "../../components/NoDataUI";
 import TeacherCard from "./TeacherCard";
 import TeachersTableHeader from "./TeachersTableHeader";
-import { getClassTeachersAction } from "@/lib/data/teachers.data-layer";
-import { getStudentEnrollmentDataAction } from "@/lib/data/user.data-layer";
+import { getStudentEnrollmentData } from "@/lib/data/data-layer/user.data-layer";
 
 export default async function TeachersTable({
   class_id,
 }: {
   class_id: string;
 }) {
-  const teachers = await getClassTeachersAction(class_id);
-  const studentEnrollment = await getStudentEnrollmentDataAction(class_id);
+  const teachers = await getClassTeachers(class_id);
+  const studentEnrollment = await getStudentEnrollmentData(class_id);
   const isAdmin = studentEnrollment?.admin ?? false;
 
   if ((teachers && teachers.length === 0) || !teachers) {

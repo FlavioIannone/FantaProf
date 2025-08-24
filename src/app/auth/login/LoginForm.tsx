@@ -2,7 +2,7 @@
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState, FormEvent, useEffect, useRef } from "react";
-import { client_auth } from "@/lib/firebase-connection";
+import { client_auth } from "@/lib/firebase-connection.client";
 import { type LoginData } from "@/lib/types";
 import { onAuthStateChanged, User } from "firebase/auth";
 import { useModal } from "@/components/client/Modal/ModalContext";
@@ -11,7 +11,7 @@ import {
   signInWithGoogle,
 } from "@/lib/authentication-manager";
 import { createSession } from "@/lib/data/session/session-manager.data-layer";
-import { joinClassAction } from "@/lib/data/classes.data-layer";
+import { joinClassAction } from "@/lib/data/actions/classes.actions";
 
 export default function LoginForm() {
   const router = useRouter();
@@ -31,6 +31,9 @@ export default function LoginForm() {
   };
 
   const reason = safeDecode(searchParams.get("reason"));
+  console.log(reason);
+
+  
   // Flag to prevent multiple redirects
   const redirectFlag = useRef(false);
 
@@ -46,7 +49,7 @@ export default function LoginForm() {
         content: "Effettua di nuovo il login per continuare",
       });
     }
-  }, []);
+  }, [reason]);
 
   // Redirect se già autenticato
   useEffect(() => {
@@ -80,20 +83,7 @@ export default function LoginForm() {
         });
         return;
       }
-      const joinStatus = await joinClassAction(classId);
-      if (joinStatus === 404) {
-        setModal(true, {
-          title: "Errore",
-          content: "Classe non trovata",
-        });
-        return;
-      } else if (joinStatus === 409) {
-        setModal(true, {
-          title: "Errore",
-          content: "Sei già iscritto a questa classe",
-        });
-        return;
-      }
+      router.replace(`/dashboard/classes/${classId}/join`);
     } else {
       router.replace("/dashboard");
     }
@@ -217,7 +207,7 @@ export default function LoginForm() {
         <button
           type="submit"
           aria-label="Accedi"
-          className="d-btn d-btn-primary d-btn-block animate-fade-in-bottom text-lg motion-reduce:animate-none"
+          className="d-btn d-btn-primary d-btn-block animate-fade-in-bottom text-lg motion-reduce:animate-none  "
           disabled={isLoading || isPending}
         >
           Accedi
@@ -239,7 +229,7 @@ export default function LoginForm() {
           type="button"
           aria-label="Accedi con google"
           onClick={onGoogleLogin}
-          className="d-btn d-btn-outline d-btn-block animate-fade-in-bottom motion-reduce:animate-none"
+          className="d-btn d-btn-outline d-btn-block animate-fade-in-bottom motion-reduce:animate-none  "
           disabled={isLoading || isPending}
         >
           <i className="bi bi-google" aria-hidden></i>Accedi con google

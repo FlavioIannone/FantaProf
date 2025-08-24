@@ -1,12 +1,15 @@
-import { ClassesTableRowType } from "@/lib/data/types.data-layer";
+
 import AddClassButton from "@/app/dashboard/components/ClassTable/AddClassButton";
 import ClassesTableRow from "./ClassesTableRow";
+import { ClassesTableRowType } from "@/lib/data/types.data";
 
 export default function ClassesTable({
   classes,
 }: {
   classes: ClassesTableRowType[] | undefined;
 }) {
+
+  
   // UI when no classes are found
   const noDataUI = (
     <div className="flex flex-col justify-center items-center">
@@ -27,12 +30,9 @@ export default function ClassesTable({
     </div>
   );
 
-  if (classes && classes.length === 0) {
-    return noDataUI;
-  }
-
-  // Show skeleton while loading or fetching
+  
   if (!classes) {
+    // TODO: add error UI
     return null;
   }
 

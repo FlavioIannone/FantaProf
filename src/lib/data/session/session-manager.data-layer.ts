@@ -1,5 +1,5 @@
 "use server";
-import { admin_auth } from "@/lib.api/firebase-connection";
+import { admin_auth } from "@/lib/db/firebase-connection.server";
 import { DecodedIdToken, FirebaseAuthError } from "firebase-admin/auth";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";

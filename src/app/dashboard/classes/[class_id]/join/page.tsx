@@ -1,16 +1,17 @@
 import {
-  getClassDataAction,
-  joinClassAction,
-} from "@/lib/data/classes.data-layer";
+  getClassData,
+} from "@/lib/data/data-layer/classes.data-layer";
 import { Metadata } from "next";
 
-import { Class } from "@/lib.api/schema.db";
-import { admin_firestore } from "@/lib.api/firebase-connection";
+import { redirect } from "next/navigation";
+import { Class } from "@/lib/db/schema.db";
+import { admin_firestore } from "@/lib/db/firebase-connection.server";
+import { joinClassAction } from "@/lib/data/actions/classes.actions";
+import JoinClassComponent from "./components/JoinClassComponent";
 
 export const generateStaticParams = async () => {
   const classesRefs = await admin_firestore
     .collection(Class.collection)
-    .withConverter(Class.converter)
     .get();
 
   const docs = classesRefs.docs;
@@ -25,7 +26,7 @@ export const generateMetadata = async ({
   params: Promise<{ class_id: string }>;
 }): Promise<Metadata> => {
   const { class_id } = await params;
-  const classData = await getClassDataAction(class_id);
+  const classData = await getClassData(class_id);
 
   if (!classData) {
     return {
@@ -156,11 +157,14 @@ export default async function JoinClassPage({
   params: Promise<{ class_id: string }>;
 }) {
   const { class_id } = await params;
-  await joinClassAction(class_id);
+  const classData = getClassData(class_id, [
+    "class_name"
+  ]);
+ 
 
   return (
     <main className="flex justify-center items-center size-full">
-      <span className="d-loading d-loading-ring d-loading-xl"></span>
+        <JoinClassComponent class_id={class_id} classData={classData}/>
     </main>
   );
 }

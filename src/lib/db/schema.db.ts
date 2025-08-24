@@ -14,13 +14,13 @@
  * │    ├── initial_credits: number
  * │    ├── members: number,
  * │    ├── created_at: Timestamp
- * │    ├── Teachers ( name, surname, description, price)
+ * │    ├── Teachers (uid, name, surname, description, price)
+ * │    │   ├── uid: string
  * │    │   ├── name: string
  * │    │   ├── surname: string
  * │    │   ├── description: string
  * │    │   └── price: number
- * │    ├── StudentEnrollments (uid, admin, credits, created_at, points, team)
- * │    │   ├── uid: string
+ * │    ├── StudentEnrollments (admin, credits, created_at, points, team)
  * │    │   ├── admin: boolean
  * │    │   ├── credits: number
  * │    │   ├── points: number
@@ -56,18 +56,14 @@ class FirebaseCollections {
   static readonly EVENTS = "events";
 }
 
-
-import { FirestoreDataConverter, QueryDocumentSnapshot, FieldValue, Timestamp } from "firebase-admin/firestore";
+import { FieldValue, Timestamp } from "firebase-admin/firestore";
 import { z } from "zod";
 
-const TimestampFieldType = z.custom<Date | FieldValue>((value) => {
-  return !value || value instanceof Timestamp;
-}, {
-  message: "Expected undefined"
-}).optional().transform((value) => {
+const TimestampFieldType = z.union([z.instanceof(Timestamp), z.undefined()]).optional().transform((value) => {
   if (value instanceof Timestamp) return value.toDate();
-  return FieldValue.serverTimestamp();
+  if(!value) return FieldValue.serverTimestamp();
 });
+
 
 //
 // ========================== Teachers ==========================
@@ -79,17 +75,12 @@ const TeacherSchema = z.object({
   price: z.number().positive(),
   created_at: TimestampFieldType,
 });
-type TeacherIn = z.input<typeof TeacherSchema>;
-type TeacherOut = z.infer<typeof TeacherSchema>;
 
-const teacherConverter: FirestoreDataConverter<TeacherIn, TeacherOut> = {
-  toFirestore: (teacher: TeacherIn) => TeacherSchema.parse(teacher),
-  fromFirestore: (snapshot: QueryDocumentSnapshot): TeacherOut => TeacherSchema.parse(snapshot.data())
-};
+
+
 
 export const Teacher = {
   schema: TeacherSchema,
-  converter: teacherConverter,
   collection: FirebaseCollections.TEACHERS
 }
 
@@ -103,17 +94,10 @@ const ClassSchema = z.object({
   created_at: TimestampFieldType,
   teachers: z.number().int().optional().default(0)
 });
-type ClassIn = z.input<typeof ClassSchema>
-type ClassOut = z.infer<typeof ClassSchema>;
 
-const classConverter: FirestoreDataConverter<ClassIn, ClassOut> = {
-  toFirestore: (classData: ClassIn) => ClassSchema.parse(classData),
-  fromFirestore: (snapshot: QueryDocumentSnapshot): ClassOut => ClassSchema.parse(snapshot.data())
-};
 
 export const Class = {
   schema: ClassSchema,
-  converter: classConverter,
   collection: FirebaseCollections.CLASSES
 }
 
@@ -145,17 +129,13 @@ const StudentEnrollmentSchema = z.object({
   points: z.number().int().default(0),
   team: TeacherTeamEnrollmentsType
 });
-type StudentEnrollmentIn = z.input<typeof StudentEnrollmentSchema>;
-type StudentEnrollmentOut = z.infer<typeof StudentEnrollmentSchema>;
 
-const studentEnrollmentConverter: FirestoreDataConverter<StudentEnrollmentIn, StudentEnrollmentOut> = {
-  toFirestore: (studentEnrollment: StudentEnrollmentIn) => StudentEnrollmentSchema.parse(studentEnrollment),
-  fromFirestore: (snapshot: QueryDocumentSnapshot): StudentEnrollmentOut => StudentEnrollmentSchema.parse(snapshot.data()),
-};
+
+
 
 export const StudentEnrollment = {
   schema: StudentEnrollmentSchema,
-  converter: studentEnrollmentConverter,
+  
   collection: FirebaseCollections.STUDENT_ENROLLMENTS
 }
 
@@ -168,17 +148,13 @@ const EventSchema = z.object({
   points: z.number().int(),
   created_at: TimestampFieldType
 });
-type EventIn = z.input<typeof EventSchema>;
-type EventOut = z.infer<typeof EventSchema>;
 
-const eventConverter: FirestoreDataConverter<EventIn, EventOut> = {
-  toFirestore: (event: EventIn) => EventSchema.parse(event),
-  fromFirestore: (snapshot: QueryDocumentSnapshot) => EventSchema.parse(snapshot.data()),
-};
+
+
 
 export const EventWrapper = {
   schema: EventSchema,
-  converter: eventConverter,
+  
   collection: FirebaseCollections.EVENTS
 }
 
@@ -192,17 +168,13 @@ const TeacherEventRegistrationSchema = z.object({
   description: z.string().optional().default("Nessuna descrizione"),
   created_at: TimestampFieldType
 });
-type TeacherEventIn = z.input<typeof TeacherEventRegistrationSchema>;
-type TeacherEventOut = z.infer<typeof TeacherEventRegistrationSchema>;
 
-const teacherEventConverter: FirestoreDataConverter<TeacherEventIn, TeacherEventOut> = {
-  toFirestore: (teacherEvent: TeacherEventIn) => TeacherEventRegistrationSchema.parse(teacherEvent),
-  fromFirestore: (snapshot: QueryDocumentSnapshot) => TeacherEventRegistrationSchema.parse(snapshot.data()),
-};
+
+
 
 export const TeacherEventRegistration = {
   schema: TeacherEventRegistrationSchema,
-  converter: teacherEventConverter,
+  
   collection: FirebaseCollections.TEACHER_EVENTS
 }
 

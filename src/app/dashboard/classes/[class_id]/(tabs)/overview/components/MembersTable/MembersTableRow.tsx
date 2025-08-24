@@ -1,10 +1,10 @@
 "use client";
 
 import { useUserData } from "@/components/client/UserDataContext";
+import { makeUserAdminAction } from "@/lib/data/actions/members.actions";
+import { MembersTableRowType } from "@/lib/data/types.data";
 import Image from "next/image";
-import { MembersTableRowType } from "@/lib/data/types.data-layer";
 import { useState } from "react";
-import { makeUserAdminAction } from "@/lib/data/members.data-layer";
 
 export default function MembersTablemember({
   member,

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { type SignInData } from "@/lib/types";
-import { client_auth } from "@/lib/firebase-connection";
+import { client_auth } from "@/lib/firebase-connection.client";
 import { onAuthStateChanged, User } from "firebase/auth";
 import { useEffect, useRef, useState } from "react";
 import { useModal } from "@/components/client/Modal/ModalContext";
@@ -189,7 +189,7 @@ export default function RegistrationForm() {
 
       <button
         type="submit"
-        className={`d-btn d-btn-primary d-btn-block animate-fade-in-bottom text-lg motion-reduce:animate-none ${
+        className={`d-btn d-btn-primary d-btn-block animate-fade-in-bottom text-lg motion-reduce:animate-none   ${
           isLoading
             ? "animate-pulse"
             : "motion-safe:opacity-0 animation-delay-500"
@@ -212,7 +212,7 @@ export default function RegistrationForm() {
 
       <button
         type="button"
-        className="d-btn d-btn-outline d-btn-block animate-fade-in-bottom motion-reduce:animate-none"
+        className="d-btn d-btn-outline d-btn-block animate-fade-in-bottom motion-reduce:animate-none  "
         disabled={isLoading || isPending}
         onClick={onGoogleSignIn}
       >

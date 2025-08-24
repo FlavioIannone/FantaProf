@@ -1,10 +1,10 @@
-import { admin_auth, admin_firestore } from "../firebase-connection";
+import {  admin_firestore } from "../firebase-connection.server";
 import { FieldPath, FieldValue, QueryDocumentSnapshot } from "firebase-admin/firestore";
-import { Class, StudentEnrollment, Teacher } from "../schema.db";
-import { ClassesTableRowType, MembersTableRowType, TeacherTableRowType } from "@/lib/data/types.data-layer";
+import { Class, StudentEnrollment } from "../schema.db";
 import z from "zod";
 import { cache } from "react";
-import { TeacherDataInput, WriteOperationResult } from "@/lib/types";
+import {  WriteOperationResult } from "@/lib/types";
+import { ClassesTableRowType } from "@/lib/data/types.data";
 
 /**
  * Creates a class along with its initial student enrollment for the creator.
@@ -13,7 +13,7 @@ import { TeacherDataInput, WriteOperationResult } from "@/lib/types";
  * @param classData - Object containing class_name and initial_credits
  * @returns Promise resolving to true on success, false on failure
  */
-export const createClassInFirestore = async (uid: string, classData: { class_name: string; initial_credits: number; }): Promise<{
+export const createClassInFirestore = async (uid: string, classData:Pick<z.infer<typeof Class.schema>, "class_name"| "initial_credits">): Promise<{
   classData: z.infer<typeof Class.schema>,
   class_id: string
 } | undefined> => {
@@ -33,15 +33,15 @@ export const createClassInFirestore = async (uid: string, classData: { class_nam
 
   try {
     // Convert class data to Firestore format using converter
-    const classDocData = Class.converter.toFirestore({
+    const classDocData = Class.schema.parse({
       ...classData,
     });
     // Add create operation for the class doc to the batch
     batch.create(classDocRef, classDocData);
 
     // Convert student enrollment data (creator is admin, gets initial credits)
-    const studentEnrollmentDocData = StudentEnrollment.converter.toFirestore({
-      uid: uid,
+    const studentEnrollmentDocData = StudentEnrollment.schema.parse({
+      uid,
       admin: true, // The creator is admin
       credits: classData.initial_credits,
       team: [] // Empty team by default
@@ -77,9 +77,15 @@ export const getClassesFromFirestore = cache(async (uid: string): Promise<Classe
       .orderBy("created_at", "desc")
       .get();
 
+      // The user is not part of any class
+      if(enrollmentSnapshot.empty) {
+        return []
+      }
+
     // Parse enrollment data from documents using Zod schema
     const enrollmentDocsData = enrollmentSnapshot.docs.map(
-      (doc) => StudentEnrollment.schema.parse(doc.data())
+      (doc) => {        
+        return StudentEnrollment.schema.parse(doc.data())}
     );
 
     // Extract parent class document references for each enrollment
@@ -101,10 +107,13 @@ export const getClassesFromFirestore = cache(async (uid: string): Promise<Classe
         class_id: doc.id,
         class_name: data.class_name,
         members: data.members,
-        points: enrollmentDocsData[index].points,
-        credits: enrollmentDocsData[index].credits,
-        admin: enrollmentDocsData[index].admin,
-        teachers: data.teachers
+        teachers: data.teachers,
+        currUserData: {
+          admin: enrollmentDocsData[index].admin,
+          credits: enrollmentDocsData[index].credits,
+          points: enrollmentDocsData[index].points,
+        }
+        
       };
     });
 
@@ -125,24 +134,20 @@ export const getClassesFromFirestore = cache(async (uid: string): Promise<Classe
 export const getClassFromFirestore = cache(async (class_id: string) => {
   try {
     // Fetch class document by ID
-    const classDoc = await admin_firestore
-      .collection(Class.collection)
-      .doc(class_id)
-      .get();
+    const classQuerySnapshot = (await admin_firestore
+      .collection(Class.collection).doc(class_id)
+      .get());
 
     // Throw error if class not found
-    if (!classDoc.exists) {
+    if (!classQuerySnapshot.exists) {
       throw new Error(`NOT_FOUND:Class ${class_id} not found`);
     }
 
     // Parse and return class data using Zod schema
-    return Class.schema.parse(classDoc.data());
+    return Class.schema.parse(classQuerySnapshot.data());
 
   } catch (error: any) {
     console.log(error);
-    if (error.message.startsWith("NOT_FOUND")) {
-      return undefined; // Return undefined if class not found
-    }
     return undefined; // Return undefined on other errors
   }
 });
@@ -150,6 +155,7 @@ export const getClassFromFirestore = cache(async (class_id: string) => {
 /**
  * Enrolls a user into a class if not already enrolled.
  * Uses Firestore transaction to ensure atomicity.
+ * If the write is unsuccessful, the two possible status are: 404, the class is not found; 409, the user is already part of the class
  * @param uid - User ID
  * @param class_id - Class document ID
  * @returns Promise resolving to WriteOperationResult indicating success or failure
@@ -166,7 +172,7 @@ export const joinClassInFirestore = async (
       // Fetch class and enrollment docs concurrently
       const [classSnap, enrollmentSnap] = await Promise.all([
         transaction.get(classRef),
-        transaction.get(enrollmentRef)
+        transaction.get(enrollmentRef) // fetch to see if the user is already part of the class
       ]);
 
       // Throw 404 if class does not exist
@@ -186,10 +192,10 @@ export const joinClassInFirestore = async (
       }
 
       // Get class data from Firestore snapshot
-      const classData = Class.converter.fromFirestore(classSnap as QueryDocumentSnapshot);
+      const classData = Class.schema.parse(classSnap.data());
 
       // Prepare new student enrollment data (not admin, zero points initially)
-      const newStudent = StudentEnrollment.converter.toFirestore({
+      const newStudent = StudentEnrollment.schema.parse({
         uid,
         credits: classData.initial_credits,
         admin: false,

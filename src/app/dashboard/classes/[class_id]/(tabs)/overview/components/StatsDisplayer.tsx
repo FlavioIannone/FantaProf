@@ -1,6 +1,6 @@
-import { getClassDataAction } from "@/lib/data/classes.data-layer";
+import { getClassData } from "@/lib/data/data-layer/classes.data-layer";
 import StatSection from "./StatSection";
-import { FilteredStudentEnrollmentData } from "@/lib/data/types.data-layer";
+import { FilteredStudentEnrollmentData } from "@/lib/data/types.data";
 
 export default async function Stats({
   class_id,
@@ -9,7 +9,7 @@ export default async function Stats({
   class_id: string;
   studentEnrollment: FilteredStudentEnrollmentData | undefined;
 }) {
-  const classRes = await getClassDataAction(class_id);
+  const classRes = await getClassData(class_id);
 
   return (
     <div className="grid md:grid-cols-4 grid-cols-2 gap-2.5 w-full">

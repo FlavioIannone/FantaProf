@@ -1,10 +1,10 @@
-"use server";
+import "server-only"
 import {
   getBestScoreFromFirestore,
   getClassesEnrollmentCountFromFirestore,
   getStudentEnrollmentDataFromFirestore,
-} from "@/lib.api/api.utils/users.api.utils";
-import { withSession } from "./session/session-helpers.data-layer";
+} from "@/lib/db/db.utils/users.db.utils";
+import { withSession } from "../session/session-helpers.data-layer";
 
 
 /**
@@ -16,7 +16,7 @@ import { withSession } from "./session/session-helpers.data-layer";
  * 
  * Redirects to the login page if the session is invalid.
  */
-export const getGlobalStatsAction = withSession(async (uid: string) => {
+export const getGlobalStats = withSession(async (uid: string) => {
   const bestScore = await getBestScoreFromFirestore(uid);
   const classesCount = await getClassesEnrollmentCountFromFirestore(uid);
 
@@ -35,7 +35,7 @@ export const getGlobalStatsAction = withSession(async (uid: string) => {
  * 
  * Redirects to the login page if the session is invalid.
  */
-export const getStudentEnrollmentDataAction = withSession(async (uid: string, class_id: string) => {
+export const getStudentEnrollmentData = withSession(async (uid: string, class_id: string) => {
 
 
   return await getStudentEnrollmentDataFromFirestore(class_id, uid);

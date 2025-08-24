@@ -4,14 +4,16 @@ export type ClassesTableRowType = {
     class_name: string;
     members: number;
     teachers: number;
-    credits: number;
-    points: number;
     class_id: string;
-    admin: boolean;
+    currUserData: {
+        points: number;
+        credits: number;
+        admin: boolean;
+    }
 };
 
 export type MembersTableRowType = {
-    display_name: string;
+    display_name: string ;
     credits: number;
     points: number;
     admin: boolean;
@@ -37,4 +39,15 @@ export type FilteredStudentEnrollmentData = {
     credits: number;
     points: number;
     admin: boolean
+};
+
+/**
+ * Represents editable teacher data for modification.
+ * All fields are optional to allow partial updates.
+ */
+export type TeacherDataEditForm = {
+    name?: string;
+    surname?: string;
+    description?: string;
+    price?: number;
 };
