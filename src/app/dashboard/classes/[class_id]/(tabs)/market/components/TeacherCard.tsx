@@ -3,8 +3,15 @@
 // React and utility imports
 import { useState, useRef, useEffect } from "react";
 import { useModal } from "@/components/client/Modal/ModalContext";
-import { modifyTeacherAction, deleteTeacherAction } from "@/lib/data/actions/teachers.actions";
-import { TeacherTableRowType, TeacherDataEditForm } from "@/lib/data/types.data";
+import {
+  modifyTeacherAction,
+  deleteTeacherAction,
+} from "@/lib/data/actions/teachers.actions";
+import {
+  TeacherTableRowType,
+  TeacherDataEditForm,
+} from "@/lib/data/types.data";
+import { addTeacherToTeam } from "@/lib/data/actions/team.actions";
 
 // Inner component: Modal content for editing a teacher
 function TeacherEditForm({
@@ -62,7 +69,7 @@ export default function TeacherCard({
   isAdmin: boolean;
   class_id: string;
 }) {
-  const { setModal } = useModal(); // Modal controls
+  const modal = useModal(); // Modal controls
 
   // State for truncating the description
   const [expanded, setExpanded] = useState(false);
@@ -78,7 +85,7 @@ export default function TeacherCard({
 
   // Open edit modal with pre-filled form
   const openEditModal = () => {
-    setModal(true, {
+    modal.setModal(true, {
       title: "Modifica professore",
       confirmButtonText: "Modifica",
       content: <TeacherEditForm initialData={teacherData} />,
@@ -102,7 +109,7 @@ export default function TeacherCard({
           teacherData.teacher_id,
           newTeacherData
         );
-        setModal(false);
+        modal.setModal(false);
       },
     });
   };
@@ -147,7 +154,23 @@ export default function TeacherCard({
 
         {/* Action buttons */}
         <div className="mt-6 flex gap-1.5">
-          <button className="d-btn d-btn-primary flex-1  ">Compra</button>
+          <button
+            className="d-btn d-btn-primary flex-1"
+            onClick={async () => {
+              modal.setModal(true, {
+                title: "Aggiungere il professore al team?",
+                content: `Vuoi davvero aggiungere ${teacherData.name} ${teacherData.surname} al tuo team?`,
+                confirmButtonText: "Aggiungi",
+                closeOnSubmit: false,
+                onConfirm: async () => {
+                  await addTeacherToTeam(class_id, teacherData.teacher_id);
+                  modal.setModal(false);
+                },
+              });
+            }}
+          >
+            Compra
+          </button>
 
           {/* Admin dropdown: edit/delete */}
           {isAdmin && (
@@ -168,7 +191,7 @@ export default function TeacherCard({
                   <button
                     className="bg-error text-error-content font-bold  "
                     onClick={() => {
-                      setModal(true, {
+                      modal.setModal(true, {
                         title: "Eliminare il professore?",
                         content:
                           "Confermi di voler eliminare questo professore?",
@@ -179,7 +202,7 @@ export default function TeacherCard({
                             class_id,
                             teacherData.teacher_id
                           );
-                          setModal(false);
+                          modal.setModal(false);
                         },
                       });
                     }}

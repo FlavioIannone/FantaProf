@@ -1,4 +1,5 @@
 import ClassesTableSkeleton from "./components/ClassTable/ClassesTableSkeleton";
+import DashboardCard from "./components/DashboardStats/DashboardCard";
 
 export default function DashboardLoading() {
   return (
@@ -30,33 +31,9 @@ export default function DashboardLoading() {
           <h1 className="text-3xl mb-2.5 font-extrabold">Bentornato!</h1>
           {/**Stats */}
 
-          <div className="sm:mb-3.5 mb-2.5 lg:space-x-5 space-x-2.5 grid grid-cols-2 ">
-            <section
-              className={`d-card space-y-2.5 sm:px-5 sm:py-6 px-3 py-4 shadow-lg border border-base-content/10 grow-1 d-skeleton`}
-            >
-              <div className="lg:text-2xl md:text-xl sm:text-md text-md d-skeleton">
-                <p className="invisible">{"<headingStat>"}</p>
-              </div>
-              <div className="text-primary lg:text-4xl md:text-3xl text-2xl d-skeleton">
-                <p className="invisible">{"<mainStat>"}</p>
-              </div>
-              <div className="lg:text-xl md:text-lg sm:text-lg text-sm opacity-70 d-skeleton">
-                <p className="invisible">{"<footerStat>"}</p>
-              </div>
-            </section>
-            <section
-              className={`d-card space-y-2.5 sm:px-5 sm:py-6 px-3 py-4 shadow-lg border border-base-content/10 grow-1 d-skeleton`}
-            >
-              <div className="lg:text-2xl md:text-xl sm:text-md text-md d-skeleton">
-                <p className="invisible">{"<headingStat>"}</p>
-              </div>
-              <div className="text-primary lg:text-4xl md:text-3xl text-2xl d-skeleton">
-                <p className="invisible">{"<mainStat>"}</p>
-              </div>
-              <div className="lg:text-xl md:text-lg sm:text-lg text-sm opacity-70 d-skeleton">
-                <p className="invisible">{"<footerStat>"}</p>
-              </div>
-            </section>
+          <div className="d-card sm:mb-3.5 mb-2.5 lg:space-x-5 space-x-2.5 grid grid-cols-2 shadow-lg d-skeleton">
+            <DashboardCard statValue="stat" description="desc" skeleton />
+            <DashboardCard statValue="stat" description="desc" skeleton />
           </div>
           {/**Classes */}
           <ClassesTableSkeleton />

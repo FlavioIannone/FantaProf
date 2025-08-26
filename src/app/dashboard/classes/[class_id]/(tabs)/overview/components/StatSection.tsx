@@ -20,7 +20,7 @@ export default function StatSection({
       <h1 className="md:text-2xl text-xl text-white opacity-80 text-center">
         {title}
       </h1>
-      <h2 className="text-4xl text-white">{value}</h2>
+      <h2 className="lg:text-4xl md:text-3xl text-2xl text-white">{value}</h2>
     </section>
   );
 }

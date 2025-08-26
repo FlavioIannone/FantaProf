@@ -115,7 +115,7 @@ function ModalProvider({ children }: Readonly<{ children: React.ReactNode }>) {
               <button
                 className="d-btn d-btn-neutral"
                 type="submit"
-                disabled={submitDisabled}
+                disabled={submitDisabled || isLoading}
               >
                 {modalProps.confirmButtonText ?? "Chiudi"}
               </button>

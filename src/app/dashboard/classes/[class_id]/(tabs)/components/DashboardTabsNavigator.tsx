@@ -12,6 +12,7 @@ const tabs = [
   },
   { icon: "bi bi-cart", label: "Market", tabName: "market" },
   { icon: "bi bi-activity", label: "Eventi", tabName: "events" },
+  { icon: "bi bi-backpack3", label: "Team", tabName: "team" },
 ];
 
 export default function DashboardTabsNavigator({

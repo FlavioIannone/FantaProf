@@ -1,13 +1,21 @@
-export default function NoDtaUI({
+export default function NoDataUI({
   message,
   additionalMessage,
+  stretch,
+  className,
 }: {
   message?: string;
   additionalMessage?: string;
+  stretch?: boolean;
+  className?: string;
 }) {
   return (
-    <div className="flex flex-col h-dvh justify-center items-center">
-      <i className="size-24" aria-disabled>
+    <div
+      className={`${className} flex flex-col ${
+        !stretch ? "h-dvh" : "mt-5"
+      } justify-center items-center`}
+    >
+      <i className="size-24" aria-hidden>
         <svg
           xmlns="http://www.w3.org/2000/svg"
           width="16"
@@ -24,7 +32,6 @@ export default function NoDtaUI({
         <p className="text-lg opacity-70 text-center">
           {message ?? "Nessun dato disponibile"}
         </p>
-        <br />
         {additionalMessage && (
           <span className="text-sm opacity-50">{additionalMessage}</span>
         )}

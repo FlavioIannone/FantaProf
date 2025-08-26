@@ -1,5 +1,3 @@
-import { ReactNode } from "react";
-
 export default function ClassesTableSkeleton() {
   return (
     <div className="w-full">

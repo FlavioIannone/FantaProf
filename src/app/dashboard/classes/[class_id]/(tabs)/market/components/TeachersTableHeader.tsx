@@ -27,13 +27,12 @@ export default function TeachersTableHeader({
   const onConfirm = async (formData?: FormData) => {
     if (!formData) return;
 
-    const name = formData.get("teacher_name")! as string;
-    const surname = formData.get("teacher_surname")! as string;
-    const description = formData.get("teacher_description")! as string;
-    const price = formData.get("teacher_price")! as string;
+    const name = formData.get("teacher_name")!.toString();
+    const surname = formData.get("teacher_surname")!.toString();
+    const description = formData.get("teacher_description")!.toString();
+    const price = formData.get("teacher_price")!.toString();
 
     if (name === "" || surname === "" || price === "") {
-      modal.setModal(false);
       return;
     }
     const teacherData: TeacherDataInput = {
@@ -76,10 +75,10 @@ export default function TeachersTableHeader({
 
 const ModalBody = () => {
   return (
-    <div>
+    <>
       <fieldset className="d-fieldset">
         <div>
-          <legend className="d-fieldset-legend">Nome classe</legend>
+          <legend className="d-fieldset-legend">Nome professore</legend>
           <input
             type="text"
             name="teacher_name"
@@ -92,7 +91,7 @@ const ModalBody = () => {
           </div>
         </div>
         <div>
-          <legend className="d-fieldset-legend">Nome classe</legend>
+          <legend className="d-fieldset-legend">Cognome professore</legend>
           <input
             type="text"
             name="teacher_surname"
@@ -127,6 +126,6 @@ const ModalBody = () => {
           </div>
         </div>
       </fieldset>
-    </div>
+    </>
   );
 };

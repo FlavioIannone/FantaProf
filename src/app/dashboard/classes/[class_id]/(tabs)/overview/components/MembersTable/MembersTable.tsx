@@ -4,7 +4,7 @@ import MembersTableRow from "./MembersTableRow";
 import StatsDisplayer from "../StatsDisplayer";
 import { getClassMembers } from "@/lib/data/data-layer/members.data-layer";
 import { getStudentEnrollmentData } from "@/lib/data/data-layer/user.data-layer";
-import NoDataUI from "../../../components/NoDataUI";
+import NoDataUI from "../../../../../../../../components/server/NoDataUI";
 
 export default async function MembersTable({ class_id }: { class_id: string }) {
   const members = await getClassMembers(class_id);
@@ -30,7 +30,7 @@ export default async function MembersTable({ class_id }: { class_id: string }) {
         studentEnrollment={studentEnrollment}
       />
       <MembersTableHeader class_id={class_id} />
-      <div className="space-y-2.5">
+      <div className="space-y-1.5">
         {members.map((row) => (
           <MembersTableRow
             member={row}

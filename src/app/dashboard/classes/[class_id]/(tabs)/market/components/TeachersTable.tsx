@@ -1,5 +1,5 @@
 import { getClassTeachers } from "@/lib/data/data-layer/teachers.data-layer";
-import NoDataUI from "../../components/NoDataUI";
+import NoDataUI from "../../../../../../../components/server/NoDataUI";
 import TeacherCard from "./TeacherCard";
 import TeachersTableHeader from "./TeachersTableHeader";
 import { getStudentEnrollmentData } from "@/lib/data/data-layer/user.data-layer";

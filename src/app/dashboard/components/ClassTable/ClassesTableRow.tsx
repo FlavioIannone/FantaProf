@@ -50,7 +50,7 @@ export default function ClassesTableRow({
         </div>
       </div>
       <div className="flex flex-col justify-end items-end">
-        <h1 className="font-bold text-2xl">{classData.currUserData.admin}</h1>
+        <h1 className="font-bold text-2xl">{classData.currUserData.points}</h1>
         <h2 className="opacity-70">Punti</h2>
       </div>
     </Link>
