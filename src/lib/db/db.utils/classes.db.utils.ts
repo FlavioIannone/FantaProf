@@ -1,9 +1,9 @@
-import {  admin_firestore } from "../firebase-connection.server";
-import { FieldPath, FieldValue, QueryDocumentSnapshot } from "firebase-admin/firestore";
+import { admin_firestore } from "../firebase-connection.server";
+import { FieldPath, FieldValue } from "firebase-admin/firestore";
 import { Class, StudentEnrollment } from "../schema.db";
 import z from "zod";
 import { cache } from "react";
-import {  WriteOperationResult } from "@/lib/types";
+import { WriteOperationResult } from "@/lib/types";
 import { ClassesTableRowType } from "@/lib/data/types.data";
 
 /**
@@ -13,16 +13,23 @@ import { ClassesTableRowType } from "@/lib/data/types.data";
  * @param classData - Object containing class_name and initial_credits
  * @returns Promise resolving to true on success, false on failure
  */
-export const createClassInFirestore = async (uid: string, classData:Pick<z.infer<typeof Class.schema>, "class_name"| "initial_credits">): Promise<{
-  classData: z.infer<typeof Class.schema>,
-  class_id: string
-} | undefined> => {
+export const createClassInFirestore = async (
+  uid: string,
+  classData: Pick<
+    z.infer<typeof Class.schema>,
+    "class_name" | "initial_credits"
+  >
+): Promise<
+  | {
+      classData: z.infer<typeof Class.schema>;
+      class_id: string;
+    }
+  | undefined
+> => {
   const batch = admin_firestore.batch(); // Start a batch write for atomic operation
 
   // Generate new document reference for the class (auto ID)
-  const classDocRef = admin_firestore
-    .collection(Class.collection)
-    .doc();
+  const classDocRef = admin_firestore.collection(Class.collection).doc();
 
   // Generate document reference for the creator's enrollment inside the class
   const studentEnrollmentDocRef = admin_firestore
@@ -44,7 +51,6 @@ export const createClassInFirestore = async (uid: string, classData:Pick<z.infer
       uid,
       admin: true, // The creator is admin
       credits: classData.initial_credits,
-      team: [] // Empty team by default
     });
 
     // Add create operation for enrollment doc to batch
@@ -53,8 +59,11 @@ export const createClassInFirestore = async (uid: string, classData:Pick<z.infer
     // Commit the batch atomically
     await batch.commit();
 
-    const classFromFirestore = (await classDocRef.get());
-    return { classData: Class.schema.parse(classFromFirestore.data()), class_id: classFromFirestore.id }// Success
+    const classFromFirestore = await classDocRef.get();
+    return {
+      classData: Class.schema.parse(classFromFirestore.data()),
+      class_id: classFromFirestore.id,
+    }; // Success
   } catch (error) {
     console.log(error);
     return; // Failure
@@ -68,62 +77,63 @@ export const createClassInFirestore = async (uid: string, classData:Pick<z.infer
  * @param uid - User ID
  * @returns Promise resolving to an array of classes or undefined on error
  */
-export const getClassesFromFirestore = cache(async (uid: string): Promise<ClassesTableRowType[] | undefined> => {
-  try {
-    // Query all student enrollments for the user across all classes, ordered by creation date descending
-    const enrollmentSnapshot = await admin_firestore
-      .collectionGroup(StudentEnrollment.collection)
-      .where("uid", "==", uid)
-      .orderBy("created_at", "desc")
-      .get();
+export const getClassesFromFirestore = cache(
+  async (uid: string): Promise<ClassesTableRowType[] | undefined> => {
+    try {
+      // Query all student enrollments for the user across all classes, ordered by creation date descending
+      const enrollmentSnapshot = await admin_firestore
+        .collectionGroup(StudentEnrollment.collection)
+        .where("uid", "==", uid)
+        .orderBy("created_at", "desc")
+        .get();
 
       // The user is not part of any class
-      if(enrollmentSnapshot.empty) {
-        return []
+      if (enrollmentSnapshot.empty) {
+        return [];
       }
 
-    // Parse enrollment data from documents using Zod schema
-    const enrollmentDocsData = enrollmentSnapshot.docs.map(
-      (doc) => {        
-        return StudentEnrollment.schema.parse(doc.data())}
-    );
+      // Parse enrollment data from documents using Zod schema
+      const enrollmentDocsData = enrollmentSnapshot.docs.map((doc) => {
+        return StudentEnrollment.schema.parse(doc.data());
+      });
 
-    // Extract parent class document references for each enrollment
-    const classRefs = enrollmentSnapshot.docs
-      .map((doc) => doc.ref.parent.parent)
-      .filter((ref) => ref !== null); // Filter out null refs
+      // Extract parent class document references for each enrollment
+      const classRefs = enrollmentSnapshot.docs
+        .map((doc) => doc.ref.parent.parent)
+        .filter((ref) => ref !== null); // Filter out null refs
 
-    if (classRefs.length === 0) {
-      return []; // No classes found
-    }
+      if (classRefs.length === 0) {
+        return []; // No classes found
+      }
 
-    // Fetch all class documents in parallel using getAll
-    const classSnapshots = await admin_firestore.getAll(...classRefs);
+      // Fetch all class documents in parallel using getAll
+      const classSnapshots = await admin_firestore.getAll(...classRefs);
 
-    // Combine class data with corresponding enrollment data for UI display
-    const classes: ClassesTableRowType[] = classSnapshots.map((doc, index) => {
-      const data = Class.schema.parse(doc.data());
-      return {
-        class_id: doc.id,
-        class_name: data.class_name,
-        members: data.members,
-        teachers: data.teachers,
-        currUserData: {
-          admin: enrollmentDocsData[index].admin,
-          credits: enrollmentDocsData[index].credits,
-          points: enrollmentDocsData[index].points,
+      // Combine class data with corresponding enrollment data for UI display
+      const classes: ClassesTableRowType[] = classSnapshots.map(
+        (doc, index) => {
+          const data = Class.schema.parse(doc.data());
+          return {
+            class_id: doc.id,
+            class_name: data.class_name,
+            members: data.members,
+            teachers: data.teachers,
+            currUserData: {
+              admin: enrollmentDocsData[index].admin,
+              credits: enrollmentDocsData[index].credits,
+              points: enrollmentDocsData[index].points,
+            },
+          };
         }
-        
-      };
-    });
+      );
 
-    return classes;
-
-  } catch (err) {
-    console.log(err);
-    return undefined; // Return undefined on error
+      return classes;
+    } catch (err) {
+      console.log(err);
+      return undefined; // Return undefined on error
+    }
   }
-});
+);
 
 /**
  * Retrieves detailed class data for a specific class ID.
@@ -134,9 +144,10 @@ export const getClassesFromFirestore = cache(async (uid: string): Promise<Classe
 export const getClassFromFirestore = cache(async (class_id: string) => {
   try {
     // Fetch class document by ID
-    const classQuerySnapshot = (await admin_firestore
-      .collection(Class.collection).doc(class_id)
-      .get());
+    const classQuerySnapshot = await admin_firestore
+      .collection(Class.collection)
+      .doc(class_id)
+      .get();
 
     // Throw error if class not found
     if (!classQuerySnapshot.exists) {
@@ -145,7 +156,6 @@ export const getClassFromFirestore = cache(async (class_id: string) => {
 
     // Parse and return class data using Zod schema
     return Class.schema.parse(classQuerySnapshot.data());
-
   } catch (error: any) {
     console.log(error);
     return undefined; // Return undefined on other errors
@@ -167,19 +177,21 @@ export const joinClassInFirestore = async (
   try {
     await admin_firestore.runTransaction(async (transaction) => {
       const classRef = admin_firestore.doc(`${Class.collection}/${class_id}`);
-      const enrollmentRef = admin_firestore.doc(`${classRef.path}/${StudentEnrollment.collection}/${uid}`);
+      const enrollmentRef = admin_firestore.doc(
+        `${classRef.path}/${StudentEnrollment.collection}/${uid}`
+      );
 
       // Fetch class and enrollment docs concurrently
       const [classSnap, enrollmentSnap] = await Promise.all([
         transaction.get(classRef),
-        transaction.get(enrollmentRef) // fetch to see if the user is already part of the class
+        transaction.get(enrollmentRef), // fetch to see if the user is already part of the class
       ]);
 
       // Throw 404 if class does not exist
       if (!classSnap.exists) {
         throw {
           status: 404,
-          message: `Class ${class_id} doesn't exist`
+          message: `Class ${class_id} doesn't exist`,
         };
       }
 
@@ -187,7 +199,7 @@ export const joinClassInFirestore = async (
       if (enrollmentSnap.exists) {
         throw {
           status: 409,
-          message: `User ${uid} is already enrolled in class ${class_id}`
+          message: `User ${uid} is already enrolled in class ${class_id}`,
         };
       }
 
@@ -198,22 +210,18 @@ export const joinClassInFirestore = async (
       const newStudent = StudentEnrollment.schema.parse({
         uid,
         credits: classData.initial_credits,
-        admin: false,
         points: 0,
-        team: []
       });
 
       // Create enrollment doc and increment member count atomically
-      transaction.create(enrollmentRef, newStudent)
-        .update(classRef, {
-          members: FieldValue.increment(1)
-        });
+      transaction.create(enrollmentRef, newStudent).update(classRef, {
+        members: FieldValue.increment(1),
+      });
     });
 
     return {
-      successful: true
+      successful: true,
     };
-
   } catch (error: any) {
     // Default to 500 internal error if status/message not set
     const status = error.status ?? 500;
@@ -224,7 +232,7 @@ export const joinClassInFirestore = async (
     return {
       successful: false,
       status,
-      message
+      message,
     };
   }
 };
@@ -238,9 +246,16 @@ export const joinClassInFirestore = async (
  * @param class_id - Class document ID
  * @returns Promise resolving to WriteOperationResult indicating success or failure
  */
-export const leaveClassInFirestore = async (uid: string, class_id: string): Promise<WriteOperationResult> => {
-  const classDocRef = admin_firestore.collection(Class.collection).doc(class_id);
-  const studentDocRef = classDocRef.collection(StudentEnrollment.collection).doc(uid);
+export const leaveClassInFirestore = async (
+  uid: string,
+  class_id: string
+): Promise<WriteOperationResult> => {
+  const classDocRef = admin_firestore
+    .collection(Class.collection)
+    .doc(class_id);
+  const studentDocRef = classDocRef
+    .collection(StudentEnrollment.collection)
+    .doc(uid);
 
   try {
     await admin_firestore.runTransaction(async (tx) => {
@@ -257,7 +272,9 @@ export const leaveClassInFirestore = async (uid: string, class_id: string): Prom
       const classData = Class.schema.parse(classSnap.data());
 
       if (!studentSnap.exists) {
-        throw new Error(`NOT_FOUND:User ${uid} is not part of the class ${class_id}`);
+        throw new Error(
+          `NOT_FOUND:User ${uid} is not part of the class ${class_id}`
+        );
       }
 
       // Parse student's enrollment data
@@ -279,7 +296,9 @@ export const leaveClassInFirestore = async (uid: string, class_id: string): Prom
 
         // Prevent leaving if user is only admin and there are other members
         if (adminCount === 0 && classMemberCount > 1) {
-          throw new Error(`CONFLICT:The user ${uid} is the only admin and cannot leave without another admin.`);
+          throw new Error(
+            `CONFLICT:The user ${uid} is the only admin and cannot leave without another admin.`
+          );
         }
       }
 
@@ -298,12 +317,13 @@ export const leaveClassInFirestore = async (uid: string, class_id: string): Prom
     });
 
     return {
-      successful: true
+      successful: true,
     };
-
   } catch (error: any) {
     let status = 500;
-    let message: string = error.message ? error.message.split(":")[1] : "Internal server error";
+    let message: string = error.message
+      ? error.message.split(":")[1]
+      : "Internal server error";
 
     // Map error messages to status codes
     if (error.message.startsWith("NOT_FOUND")) {
@@ -317,7 +337,7 @@ export const leaveClassInFirestore = async (uid: string, class_id: string): Prom
     return {
       successful: false,
       status: 500,
-      message: "Internal server error"
+      message: "Internal server error",
     };
   }
 };
