@@ -132,6 +132,12 @@
 
 /** Keyframes for Shrink Animation*/
 
+@layer utilities {
+  .d-tooltip > .d-tooltip-content {
+    @apply max-w-[12rem];
+  }
+}
+
 @utility d-btn {
   @apply d-rounded-box;
 }

@@ -28,7 +28,9 @@ export default function DashboardLoading() {
           </nav>
         </>
         <div className="lg:px-10 lg:pt-10 md:px-8 md:pt-8 sm:px-5 sm:pt-2.5 p-2.5 max-h-full">
-          <h1 className="text-3xl mb-2.5 font-extrabold">Bentornato!</h1>
+          <h1 className="text-3xl mb-2.5 font-extrabold invisible">
+            Bentornato!
+          </h1>
           {/**Stats */}
 
           <div className="d-card sm:mb-3.5 mb-2.5 lg:space-x-5 space-x-2.5 grid grid-cols-2 shadow-lg d-skeleton">
