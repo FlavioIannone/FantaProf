@@ -25,6 +25,7 @@ export const getClassTeachersFromFirestore = cache(
         .doc(class_id);
       const teachersCollectionRef = classDocRef
         .collection(Teacher.collection)
+        .where("deleted", "==", false)
         .orderBy("created_at", "desc");
 
       const [classDocSnap, teachersCollectionSnap] = await Promise.all([

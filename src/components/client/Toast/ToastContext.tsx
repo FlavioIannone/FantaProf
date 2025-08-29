@@ -88,6 +88,20 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
         return "bg-base-200";
     }
   };
+  const getToastLoaderBorderColor = () => {
+    switch (toastProps?.toastType) {
+      case "success":
+        return "border-t-success";
+      case "error":
+        return "border-t-error";
+      case "warning":
+        return "border-t-warning";
+      case "info":
+        return "border-t-info";
+      default:
+        return "border-t-base-200";
+    }
+  };
 
   const getToastColor = () => {
     switch (toastProps?.toastType) {
@@ -128,7 +142,7 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
               </button>
             </div>
             <div
-              className={`w-full h-1 overflow-clip ${getToastLoaderBgColor()} rounded-b-box border border-base-200`}
+              className={`w-full h-1 overflow-clip ${getToastLoaderBgColor()} rounded-b-box border border-base-200 ${getToastLoaderBorderColor()}`}
             >
               <div
                 className={`h-full animate-shrink ${getToastLoaderTrailColor()}`}

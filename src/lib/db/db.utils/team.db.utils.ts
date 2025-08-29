@@ -192,7 +192,10 @@ export const getTeamFromFirestore = cache(
             teamEnrollmentDoc.id
           );
           if (res.status !== 200) throw res;
-          return res.data;
+          return {
+            ...res.data,
+            points: res.data.captain ? res.data.points * 2 : res.data.points,
+          };
         })
       );
 
