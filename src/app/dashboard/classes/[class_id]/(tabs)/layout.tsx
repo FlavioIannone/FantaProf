@@ -28,7 +28,7 @@ export default async function ClassLayout({
             <div className="d-divider d-divider-horizontal mx-2 h-full"></div>
             <div className="flex flex-col">
               <h1 className="sm:text-2xl text-xl">{`Classe ${
-                classData ? classData.class_name : "N/D"
+                classData.status !== 200 ? "N/D" : classData.data.class_name
               }`}</h1>
 
               <h2 className="text-md opacity-70">Gestisci la classe</h2>

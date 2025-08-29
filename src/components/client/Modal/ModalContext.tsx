@@ -15,7 +15,7 @@ export type ModalContextType = {
   readonly isOpen: boolean;
   readonly isLoading: boolean;
   setIsLoading: (value: boolean) => void;
-  setModal: (value: boolean, newModalContent?: ModalProps) => void;
+  setModal: (open: boolean, props?: ModalProps) => void;
   setConfirmButtonDisabled: (value: boolean) => void;
   modalProps: ModalProps;
 };
@@ -32,13 +32,13 @@ function ModalProvider({ children }: Readonly<{ children: React.ReactNode }>) {
   const [submitDisabled, setSubmitDisabled] = useState(false);
   const dialogRef = useRef<HTMLDialogElement>(null);
 
-  const setModal = (value: boolean, newModalContent?: ModalProps) => {
-    if (newModalContent)
+  const setModal = (open: boolean, props?: ModalProps) => {
+    if (props)
       setModalProps({
-        ...newModalContent,
-        closeOnSubmit: newModalContent.closeOnSubmit ?? true,
+        ...props,
+        closeOnSubmit: props.closeOnSubmit ?? true,
       });
-    setIsOpen(value);
+    setIsOpen(open);
   };
 
   // Open/close dialog when isOpen changes

@@ -3,18 +3,27 @@ import MembersTableRow from "./MembersTableRow";
 
 import StatsDisplayer from "../StatsDisplayer";
 import { getClassMembers } from "@/lib/data/data-layer/members.data-layer";
-import { getStudentEnrollmentData } from "@/lib/data/data-layer/user.data-layer";
-import NoDataUI from "../../../../../../../../components/server/NoDataUI";
+import { getCurrentUserEnrollmentData } from "@/lib/data/data-layer/user.data-layer";
+import NoDataUI from "@/components/server/NoDataUI";
+import { redirect } from "next/navigation";
 
 export default async function MembersTable({ class_id }: { class_id: string }) {
-  const members = await getClassMembers(class_id);
-  const studentEnrollment = await getStudentEnrollmentData(class_id);
-  if (!members || (members && members.length === 0)) {
+  const [membersRes, studentEnrollmentRes] = await Promise.all([
+    getClassMembers(class_id),
+    getCurrentUserEnrollmentData(class_id),
+  ]);
+
+  // Redirect if enrollment isn't valid
+  if (studentEnrollmentRes.status !== 200) {
+    redirect("/dashboard");
+  }
+
+  if (membersRes.status !== 200) {
     return (
       <>
         <StatsDisplayer
           class_id={class_id}
-          studentEnrollment={studentEnrollment}
+          studentEnrollment={studentEnrollmentRes}
         />
         <MembersTableHeader class_id={class_id} />
         {/* Show members list or error */}
@@ -27,16 +36,18 @@ export default async function MembersTable({ class_id }: { class_id: string }) {
     <>
       <StatsDisplayer
         class_id={class_id}
-        studentEnrollment={studentEnrollment}
+        studentEnrollment={studentEnrollmentRes}
       />
       <MembersTableHeader class_id={class_id} />
       <div className="space-y-1.5">
-        {members.map((row) => (
+        {membersRes.data.map((row) => (
           <MembersTableRow
             member={row}
             key={row.uid}
             class_id={class_id}
-            isAdmin={studentEnrollment ? studentEnrollment.admin : false}
+            isAdmin={
+              studentEnrollmentRes ? studentEnrollmentRes.data.admin : false
+            }
           />
         ))}
       </div>

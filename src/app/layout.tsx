@@ -5,6 +5,7 @@ import "bootstrap-icons/font/bootstrap-icons.css";
 import { ThemeProvider } from "@/components/client/Theme/ThemeContext";
 import { ModalProvider } from "@/components/client/Modal/ModalContext";
 import { UserDataProvider } from "@/components/client/UserDataContext";
+import { ToastProvider } from "@/components/client/Toast/ToastContext";
 
 const siteUrl = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
 
@@ -88,7 +89,9 @@ export default function RootLayout({
       >
         <ThemeProvider>
           <UserDataProvider>
-            <ModalProvider>{children}</ModalProvider>
+            <ToastProvider>
+              <ModalProvider>{children}</ModalProvider>
+            </ToastProvider>
           </UserDataProvider>
         </ThemeProvider>
       </body>

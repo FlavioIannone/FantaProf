@@ -23,5 +23,6 @@ export const makeUserAdminAction = withSession(
     if (adminResult) {
       revalidatePath(`/dashboard/classes/${class_id}/overview`);
     }
+    return adminResult;
   }
 );

@@ -20,7 +20,11 @@ export const addTeacherToTeamInFirestore = async (
   uid: string,
   class_id: string,
   teacher_id: string
-): Promise<WriteOperationResult> => {
+): Promise<
+  WriteOperationResult<{
+    isCaptain: boolean;
+  }>
+> => {
   // Reference to the student's enrollment document in this class
   const studentEnrollmentDocRef = admin_firestore
     .collection(Class.collection)
@@ -49,7 +53,7 @@ export const addTeacherToTeamInFirestore = async (
     // - The teacher-team enrollment doc (to check if already in team)
     // - The team collection (to check if this is the first teacher, i.e., captain)
     // - The teacher doc
-
+    let isCaptain = false;
     await admin_firestore.runTransaction(async (transaction) => {
       const [
         studentEnrollmentDocSnap,
@@ -96,13 +100,13 @@ export const addTeacherToTeamInFirestore = async (
         };
       }
 
+      isCaptain = teamCollectionSnap.empty; // The teacher becomes captain if this is the first teacher in the team
       // Add the teacher to the student’s team
-      // The teacher becomes captain if this is the first teacher in the team
       transaction
         .create(
           teacherTeamEnrollmentDocRef,
           TeacherTeamEnrollment.schema.parse({
-            captain: teamCollectionSnap.empty,
+            captain: isCaptain,
           })
         )
         .update(studentEnrollmentDocRef, {
@@ -112,16 +116,22 @@ export const addTeacherToTeamInFirestore = async (
     });
 
     // If everything went fine, return success
-    return { successful: true };
+    return {
+      status: 200,
+      data: {
+        isCaptain,
+      },
+    };
   } catch (error: any) {
+    const status = error.status ?? 500;
+    const message = error.message ?? "Internal server error";
     console.log(error);
 
     // On failure, return error info.
     // Defaults to 500 if status/message aren’t explicitly set
     return {
-      successful: false,
-      status: error.status ?? 500,
-      message: error.message ?? "Internal server error",
+      status,
+      message,
     };
   }
 };

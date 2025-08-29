@@ -24,7 +24,7 @@ export default function TeacherTeamTableRow({
       </div>
       <div className="flex items-center">
         <button type="button" className="d-btn d-btn-ghost p-0">
-          <i className="bi bi-trash3 text-error text-3xl"></i>
+          <i className="bi bi-trash3 text-error text-3xl" aria-hidden></i>
         </button>
       </div>
     </div>

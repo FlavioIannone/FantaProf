@@ -2,22 +2,29 @@ import { getClassTeachers } from "@/lib/data/data-layer/teachers.data-layer";
 import NoDataUI from "../../../../../../../components/server/NoDataUI";
 import TeacherCard from "./TeacherCard";
 import TeachersTableHeader from "./TeachersTableHeader";
-import { getStudentEnrollmentData } from "@/lib/data/data-layer/user.data-layer";
+import { getCurrentUserEnrollmentData } from "@/lib/data/data-layer/user.data-layer";
+import { redirect } from "next/navigation";
 
 export default async function TeachersTable({
   class_id,
 }: {
   class_id: string;
 }) {
-  const teachers = await getClassTeachers(class_id);
-  const studentEnrollment = await getStudentEnrollmentData(class_id);
-  const isAdmin = studentEnrollment?.admin ?? false;
+  const teachersRes = await getClassTeachers(class_id);
+  const studentEnrollmentRes = await getCurrentUserEnrollmentData(class_id);
 
-  if ((teachers && teachers.length === 0) || !teachers) {
+  // Redirect if enrollment isn't valid
+  if (studentEnrollmentRes.status !== 200) {
+    redirect("/dashboard");
+  }
+
+  const isAdmin = studentEnrollmentRes.data.admin;
+
+  if (teachersRes.status !== 200)
     return (
       <>
         <TeachersTableHeader
-          enrollmentData={studentEnrollment}
+          enrollmentData={studentEnrollmentRes.data}
           class_id={class_id}
         />
         <NoDataUI
@@ -26,21 +33,20 @@ export default async function TeachersTable({
         />
       </>
     );
-  }
 
   return (
     <>
       <TeachersTableHeader
-        enrollmentData={studentEnrollment}
+        enrollmentData={studentEnrollmentRes.data}
         class_id={class_id}
       />
       <div className="mt-4 grid md:grid-cols-2 grid-cols-1 gap-2.5">
-        {teachers.map((teacher) => {
+        {teachersRes.data.map((teacher) => {
           return (
             <TeacherCard
               class_id={class_id}
               teacherData={teacher}
-              isAdmin={isAdmin}
+              studentEnrollment={studentEnrollmentRes.data}
               key={teacher.teacher_id}
             />
           );

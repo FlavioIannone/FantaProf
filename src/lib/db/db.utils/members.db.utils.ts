@@ -6,29 +6,33 @@ import {
   Teacher,
   TeacherTeamEnrollment,
 } from "../schema.db";
-import { MembersTableRowType } from "@/lib/data/types.data";
+import { MemberRowType } from "@/lib/data/types.data";
 import { FieldPath } from "firebase-admin/firestore";
+import { ReadOperationResult, WriteOperationResult } from "@/lib/types";
 
 /**
  * Retrieves every member of an existing class from Firestore + Auth.
+ * @param class_id - The ID of the class
+ * @returns Successful state operation result, an error with it's status code and message otherwise. If the class doesn't exist or the class doesn't contain any event registations: 404.
  */
 export const getClassMembersFromFirestore = cache(
-  async (class_id: string): Promise<MembersTableRowType[] | undefined> => {
+  async (class_id: string): Promise<ReadOperationResult<MemberRowType[]>> => {
     try {
       // Get all student enrollments ordered by points desc
       const membersEnrollmentSnapshot = await admin_firestore
         .collection(Class.collection)
         .doc(class_id)
         .collection(StudentEnrollment.collection)
-        .orderBy("points", "desc")
-        // TODO: Modify logic, implement a new field in student enrollment to hold the id of the class, for faster query
         .get();
 
       if (membersEnrollmentSnapshot.empty) {
-        return [];
+        throw {
+          status: 404,
+          message: "The class has no members",
+        };
       }
 
-      // Extract UIDs from enrollment docs
+      // Extract UIDs from enrollment docs. Format: {uid:string}[] because of how the firebase auth sdk works
       const uids = membersEnrollmentSnapshot.docs.map((doc) => {
         return { uid: doc.id };
       });
@@ -42,7 +46,7 @@ export const getClassMembersFromFirestore = cache(
       );
 
       // Combine Firestore + Auth data
-      const members: MembersTableRowType[] = [];
+      const members: MemberRowType[] = [];
 
       for (const enrollmentDoc of membersEnrollmentSnapshot.docs) {
         const enrollmentData = StudentEnrollment.schema.parse(
@@ -74,10 +78,17 @@ export const getClassMembersFromFirestore = cache(
         });
       }
 
-      return members;
-    } catch (err) {
-      console.error("[getClassMembersFromFirestore]", err);
-      return undefined;
+      return { status: 200, data: members.sort((a, b) => b.points - a.points) };
+    } catch (error: any) {
+      const status = error.status ?? 500;
+      const message =
+        error.message ?? "Error while deleting the event template";
+      console.log(error);
+
+      return {
+        status,
+        message,
+      };
     }
   }
 );
@@ -86,24 +97,50 @@ export const getClassMembersFromFirestore = cache(
  * Makes a member admin in a class by setting admin = true in enrollment doc.
  * @param uid - The ID of the user to make admin
  * @param class_id - The ID of the class in which the user is part
- * @returns - A boolean that tells if the operation was successful or not
+ * @returns - Successful state operation result, an error with it's status code and message otherwise. If the class or the student doesn't exist, status: 404.
  */
 export const makeUserAdminInFirestore = async (
   uid: string,
   class_id: string
-): Promise<boolean> => {
+): Promise<WriteOperationResult> => {
+  const classDocRef = admin_firestore
+    .collection(Class.collection)
+    .doc(class_id);
+  const studentDocRef = classDocRef
+    .collection(StudentEnrollment.collection)
+    .doc(uid);
   try {
-    const studentDocRef = admin_firestore
-      .collection(Class.collection)
-      .doc(class_id)
-      .collection(StudentEnrollment.collection)
-      .doc(uid);
+    const [classDocSnap, studentDocSnap] = await Promise.all([
+      classDocRef.get(),
+      studentDocRef.get(),
+    ]);
+
+    if (!classDocSnap.exists) {
+      throw {
+        status: 404,
+        message: "The class doesn't exist.",
+      };
+    }
+    if (!studentDocSnap.exists) {
+      throw {
+        status: 404,
+        message: "The student doesn't exist.",
+      };
+    }
 
     await studentDocRef.update({ admin: true });
-    return true;
-  } catch (err) {
-    console.error("[makeUserAdminInFirestore]", err);
-    return false;
+    return {
+      status: 200,
+    };
+  } catch (error: any) {
+    const status = error.status ?? 500;
+    const message = error.message ?? "Error while deleting the event template";
+    console.log(error);
+
+    return {
+      status,
+      message,
+    };
   }
 };
 

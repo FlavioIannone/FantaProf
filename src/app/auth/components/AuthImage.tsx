@@ -24,7 +24,7 @@ export default function AuthImage() {
   }, [theme]);
 
   return (
-    <div className="w-full h-full relative">
+    <div className="w-full h-full relative p-5">
       {isLoading && (
         <div className="absolute inset-0 w-full h-full d-skeleton bg-neutral/10 rounded-xl" />
       )}

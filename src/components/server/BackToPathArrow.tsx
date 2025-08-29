@@ -5,11 +5,13 @@ export default function BackToPathArrow({
   text,
   textColor,
   href = "/",
+  forceStretch = false,
 }: Readonly<{
   href?: string;
   className?: string;
   text?: string;
   textColor?: string;
+  forceStretch?: boolean;
 }>) {
   return (
     <Link
@@ -29,9 +31,9 @@ export default function BackToPathArrow({
           aria-hidden
         ></i>
         <p
-          className={`opacity-70 group-hover:opacity-100 ${text && "me-1.5"} ${
-            textColor ?? ""
-          } md:block hidden`}
+          className={`opacity-70 text-2xl group-hover:opacity-100 ${
+            text && "me-1.5"
+          } ${textColor ?? ""} ${!forceStretch && "md:block hidden"}`}
         >
           {text}
         </p>

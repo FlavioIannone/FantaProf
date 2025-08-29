@@ -6,9 +6,10 @@ import { revalidatePath } from "next/cache";
 export const addTeacherToTeam = withSession(
   async (uid: string, class_id: string, teacher_id: string) => {
     const res = await addTeacherToTeamInFirestore(uid, class_id, teacher_id);
-    if (res.successful) {
+    if (res.status === 200) {
       revalidatePath(`/dashboard/classes/${class_id}/team`);
       revalidatePath(`/dashboard/classes/${class_id}/overview`);
     }
+    return res;
   }
 );

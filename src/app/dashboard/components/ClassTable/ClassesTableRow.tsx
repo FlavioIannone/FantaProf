@@ -1,5 +1,5 @@
 "use client";
-import { ClassesTableRowType } from "@/lib/data/types.data";
+import { ClassRowType } from "@/lib/data/types.data";
 import Link from "next/link";
 
 import { useState } from "react";
@@ -7,7 +7,7 @@ import { useState } from "react";
 export default function ClassesTableRow({
   classData,
 }: {
-  classData: ClassesTableRowType;
+  classData: ClassRowType;
 }) {
   const [loading, setLoading] = useState(false);
 

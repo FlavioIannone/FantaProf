@@ -1,22 +1,22 @@
 import { cache } from "react";
-import {
-  Class,
-  EventWrapper,
-  StudentEnrollment,
-  Teacher,
-  TeacherEventRegistration,
-} from "../schema.db";
+import { Class, EventTemplate, Teacher, EventRegistration } from "../schema.db";
 import z from "zod";
 import { admin_firestore } from "../firebase-connection.server";
-import { WriteOperationResult } from "@/lib/types";
+import {
+  EventRegistrationRowType,
+  ReadOperationResult,
+  WriteOperationResult,
+} from "@/lib/types";
 import { FieldValue } from "firebase-admin/firestore";
+import { getClassTeacherFromFirestore } from "./teachers.db.utils";
+import { EventTemplateType } from "@/lib/data/types.data";
 
 export type TemplateEventData = Omit<
-  z.input<typeof EventWrapper.schema>,
+  z.input<typeof EventTemplate.schema>,
   "created_at" | "deleted"
 >;
 export type EventData = Omit<
-  z.input<typeof TeacherEventRegistration.schema>,
+  z.input<typeof EventRegistration.schema>,
   "created_at"
 >;
 
@@ -25,7 +25,7 @@ export type EventData = Omit<
  * Creates a template event in an existing class.
  * @param class_id - The id of the class to add the event template into
  * @param templateEventData - Data of the template event
- * @returns The result of the write operation. On error, returns an object with status and message.
+ * @returns Successful state operation result, an error with it's status code and message otherwise. If the class doesn't exist: 404.
  */
 export const createEventTemplateInFirestore = async (
   class_id: string,
@@ -38,7 +38,7 @@ export const createEventTemplateInFirestore = async (
 
   // Create a new ref to the event to add
   const eventTemplateDocRef = classDocRef
-    .collection(EventWrapper.collection)
+    .collection(EventTemplate.collection)
     .doc();
 
   try {
@@ -52,9 +52,9 @@ export const createEventTemplateInFirestore = async (
       };
     }
     // Create the event
-    eventTemplateDocRef.create(EventWrapper.schema.parse(templateEventData));
+    eventTemplateDocRef.create(EventTemplate.schema.parse(templateEventData));
     return {
-      successful: true,
+      status: 200,
     };
   } catch (error: any) {
     // Default to 500 internal error if status/message not set
@@ -64,7 +64,6 @@ export const createEventTemplateInFirestore = async (
     console.log(error);
 
     return {
-      successful: false,
       status,
       message,
     };
@@ -76,13 +75,13 @@ export const createEventTemplateInFirestore = async (
  * @param class_id - The ID of the class
  * @param event_id - The ID of the event template
  * @param eventData - The new data of the event template
- * @returns The result of the write operation. On error, returns an object with status and message.
+ * @returns Successful state operation result, an error with it's status code and message otherwise. If the event template doesn't exist or the class doesn't exist: 404.
  */
 export const modifyEventTemplateInFirestore = async (
   class_id: string,
   event_id: string,
   eventData: Partial<TemplateEventData>
-) => {
+): Promise<WriteOperationResult> => {
   // Ref to the class
   const classDocRef = admin_firestore
     .collection(Class.collection)
@@ -90,7 +89,7 @@ export const modifyEventTemplateInFirestore = async (
 
   // Ref to the event
   const eventDocRef = classDocRef
-    .collection(EventWrapper.collection)
+    .collection(EventTemplate.collection)
     .doc(event_id);
   try {
     //Fetch class and event docs in parallel
@@ -115,15 +114,16 @@ export const modifyEventTemplateInFirestore = async (
     // Logic deletion
     await eventDocRef.update(eventData);
     return {
-      successful: true,
+      status: 200,
     };
   } catch (error: any) {
+    // Default to 500 internal error if status/message not set
     const status = error.status ?? 500;
-    const message = error.message ?? "Error while deleting the event template";
+    const message = error.message ?? "Internal server error";
+
     console.log(error);
 
     return {
-      successful: false,
       status,
       message,
     };
@@ -132,12 +132,12 @@ export const modifyEventTemplateInFirestore = async (
 
 /**
  * Logically deletes an event template in the database by setting its "deleted" flag to true.
- * This ensures that the template is hidden from users but its data remains available for consistency,
+ * This ensures that the template is hidden from students but its data remains available for consistency,
  * especially if there are event registrations linked to it.
  *
  * @param class_id - The ID of the class containing the event template.
  * @param event_id - The ID of the event template to logically delete.
- * @returns The result of the write operation. On error, returns an object with status and message.
+ * @returns Successful state operation result, an error with it's status code and message otherwise. If the event template doesn't exist or is already deleted or the class doesn't exist: 404.
  */
 export const deleteEventTemplateInFirestore = async (
   class_id: string,
@@ -150,7 +150,7 @@ export const deleteEventTemplateInFirestore = async (
 
   // Ref to the event
   const eventDocRef = classDocRef
-    .collection(EventWrapper.collection)
+    .collection(EventTemplate.collection)
     .doc(event_id);
   try {
     //Fetch class and event docs in parallel
@@ -158,13 +158,6 @@ export const deleteEventTemplateInFirestore = async (
       classDocRef.get(),
       eventDocRef.get(),
     ]);
-    // If the event doesn't exist
-    if (!eventDocSnap.exists) {
-      throw {
-        status: 404,
-        message: "The event doesn't exist",
-      };
-    }
     // If the class doesn't exist
     if (!classDocSnap.exists) {
       throw {
@@ -172,12 +165,21 @@ export const deleteEventTemplateInFirestore = async (
         message: "The class doesn't exist",
       };
     }
+    const eventDocData = EventTemplate.schema.parse(eventDocSnap.data());
+    // If the event doesn't exist or if the event is already deleted
+    if (!eventDocSnap.exists || eventDocData.deleted) {
+      throw {
+        status: 404,
+        message: "The event doesn't exist",
+      };
+    }
+
     // Logic deletion
     await eventDocRef.update({
       deleted: true,
     });
     return {
-      successful: true,
+      status: 200,
     };
   } catch (error: any) {
     const status = error.status ?? 500;
@@ -185,7 +187,6 @@ export const deleteEventTemplateInFirestore = async (
     console.log(error);
 
     return {
-      successful: false,
       status,
       message,
     };
@@ -197,22 +198,18 @@ export const deleteEventTemplateInFirestore = async (
  * Omits the creation date of the event templates.
  *
  * @param class_id - The id of the class from which retrieving the data
- * @returns The list of the event templates of the given class
+ * @returns Successful state operation result, an error with it's status code and message otherwise. If the class doesn't contain any event templates: 404.
  */
+
 export const getEventsTemplateFromFirestore = cache(
   async (
     class_id: string
-  ): Promise<
-    | (Omit<z.infer<typeof EventWrapper.schema>, "created_at" | "deleted"> & {
-        id: string;
-      })[]
-    | undefined
-  > => {
+  ): Promise<ReadOperationResult<EventTemplateType[]>> => {
     // Ref to the event collection, ordered by the creation date
     const eventsCollectionRef = admin_firestore
       .collection(Class.collection)
       .doc(class_id)
-      .collection(EventWrapper.collection)
+      .collection(EventTemplate.collection)
       .where("deleted", "==", false)
       .orderBy("created_at", "desc");
 
@@ -221,16 +218,28 @@ export const getEventsTemplateFromFirestore = cache(
       const eventCollectionDocsSnap = await eventsCollectionRef.get();
       // If the collection is empty
       if (eventCollectionDocsSnap.empty) {
-        return [];
+        throw { status: 404, message: "There are no events for this class" };
       }
       // Return the parsed data
-      return eventCollectionDocsSnap.docs.map((value) => ({
-        ...EventWrapper.schema.parse(value.data()),
-        id: value.id,
+      const templateEvents = eventCollectionDocsSnap.docs.map((value) => ({
+        ...EventTemplate.schema.parse(value.data()),
+        event_id: value.id,
       }));
-    } catch (error) {
+      return {
+        status: 200,
+        data: templateEvents,
+      };
+    } catch (error: any) {
+      // Default to 500 internal error if status/message not set
+      const status = error.status ?? 500;
+      const message = error.message ?? "Internal server error";
+
       console.log(error);
-      return undefined;
+
+      return {
+        status,
+        message,
+      };
     }
   }
 );
@@ -240,23 +249,18 @@ export const getEventsTemplateFromFirestore = cache(
  *
  * @param class_id - The ID of the class containing the event template.
  * @param event_id - The ID of the event template to logically delete.
- * @returns The event template data
+ * @returns Successful state operation result, an error with it's status code and message otherwise. If the event template doesn't exist or is already deleted or the class doesn't exist: 404.
  */
 export const getEventTemplateFromFirestore = cache(
   async (
     class_id: string,
     event_id: string
-  ): Promise<
-    | (Omit<z.infer<typeof EventWrapper.schema>, "created_at" | "deleted"> & {
-        id: string;
-      })
-    | undefined
-  > => {
+  ): Promise<ReadOperationResult<EventTemplateType>> => {
     // Ref to the event doc
     const eventDocRef = admin_firestore
       .collection(Class.collection)
       .doc(class_id)
-      .collection(EventWrapper.collection)
+      .collection(EventTemplate.collection)
       .doc(event_id);
 
     try {
@@ -271,12 +275,23 @@ export const getEventTemplateFromFirestore = cache(
       }
       // Return the parsed data
       return {
-        ...EventWrapper.schema.parse(eventDocSnap.data()),
-        id: eventDocRef.id,
+        status: 200,
+        data: {
+          ...EventTemplate.schema.parse(eventDocSnap.data()),
+          event_id: eventDocRef.id,
+        },
       };
-    } catch (error) {
+    } catch (error: any) {
+      // Default to 500 internal error if status/message not set
+      const status = error.status ?? 500;
+      const message = error.message ?? "Internal server error";
+
       console.log(error);
-      return undefined;
+
+      return {
+        status,
+        message,
+      };
     }
   }
 );
@@ -292,17 +307,18 @@ export const getEventTemplateFromFirestore = cache(
  *
  * @param class_id - The ID of the class where the event is registered.
  * @param eventData - The event details, including the `event_id` and the `teacher_id` and the description.
- * @returns The result of the write operation. On error, returns an object with status and message.
+ * @returns Successful state operation result, an error with it's status code and message otherwise. If the class doesn't exist or the teacher doesn't exist or the event template doesn't exist: 404.
  *
  */
 export const registerEventInFirestore = async (
   class_id: string,
   eventData: EventData
 ): Promise<WriteOperationResult> => {
-  // Ref to the
-  const teacherDocRef = admin_firestore
+  const classDocRef = admin_firestore
     .collection(Class.collection)
-    .doc(class_id)
+    .doc(class_id);
+  // Ref to the teacher doc
+  const teacherDocRef = classDocRef
     .collection(Teacher.collection)
     .doc(eventData.teacher_id);
 
@@ -310,21 +326,26 @@ export const registerEventInFirestore = async (
   const teachersEventRegistrationDocRef = admin_firestore
     .collection(Class.collection)
     .doc(class_id)
-    .collection(TeacherEventRegistration.collection)
+    .collection(EventRegistration.collection)
     .doc();
 
   try {
     await admin_firestore.runTransaction(async (transaction) => {
-      const [templateData, teacherDocSnap] = await Promise.all([
+      const [classDocSnap, templateData, teacherDocSnap] = await Promise.all([
+        classDocRef.get(),
         getEventTemplateFromFirestore(class_id, eventData.event_id),
         teacherDocRef.get(),
       ]);
 
-      if (!templateData) {
+      if (!classDocSnap.exists) {
         throw {
           status: 404,
-          message: "The event template doesn't exist",
+          message: "The class doesn't exist",
         };
+      }
+
+      if (templateData.status !== 200) {
+        throw templateData;
       }
       if (!teacherDocSnap.exists) {
         throw {
@@ -337,16 +358,16 @@ export const registerEventInFirestore = async (
       transaction
         // Add points to the teacher
         .update(teacherDocRef, {
-          points: FieldValue.increment(templateData.points),
+          points: FieldValue.increment(templateData.data.points),
         })
         // Create the event registration
         .create(teachersEventRegistrationDocRef, {
-          ...TeacherEventRegistration.schema.parse(eventData),
+          ...EventRegistration.schema.parse(eventData),
         });
     });
 
     return {
-      successful: true,
+      status: 200,
     };
   } catch (error: any) {
     const status = error.status ?? 500;
@@ -354,16 +375,90 @@ export const registerEventInFirestore = async (
     console.log(error);
 
     return {
-      successful: false,
       status,
       message,
     };
   }
 };
 
-export const deleteEventInFirestore = async (
-  class_id: string,
-  event_id: string
-) => {};
+/**
+ * Retrieves all registered events for a given class from Firestore.
+ *
+ * @param  class_id - The ID of the class to fetch registered events for.
+ * @returns  Successful state operation result, an error with it's status code and message otherwise. If the class doesn't exist or the class doesn't contain any event registation: 404.
+ *
+ */
+export const getRegisteredEventsFromFirestore = cache(
+  async (
+    class_id: string
+  ): Promise<ReadOperationResult<EventRegistrationRowType[]>> => {
+    const classDocRef = admin_firestore
+      .collection(Class.collection)
+      .doc(class_id);
+    const eventRegistrationCollectionRef = classDocRef
+      .collection(EventRegistration.collection)
+      .orderBy("created_at", "desc");
+    try {
+      const [classDocSnap, eventRegistrationCollectionSnap] = await Promise.all(
+        [classDocRef.get(), eventRegistrationCollectionRef.get()]
+      );
 
-export const getEventsFromFirestore = cache(async (class_id: string) => {});
+      if (!classDocSnap.exists) {
+        throw {
+          status: 404,
+          message: "The class doesn't exist",
+        };
+      }
+
+      if (eventRegistrationCollectionSnap.empty) {
+        throw {
+          status: 404,
+          message: "There are no registered events for this class",
+        };
+      }
+      const registeredEvents = await Promise.all(
+        eventRegistrationCollectionSnap.docs.map(
+          async (eventRegistrationSnap) => {
+            const registration = EventRegistration.schema.parse(
+              eventRegistrationSnap.data()
+            );
+            const [eventTemplate, teacher] = await Promise.all([
+              getEventTemplateFromFirestore(class_id, registration.event_id),
+              getClassTeacherFromFirestore(class_id, registration.teacher_id),
+            ]);
+            if (teacher.status !== 200) {
+              throw teacher;
+            }
+            if (eventTemplate.status !== 200) {
+              throw eventTemplate;
+            }
+            const registrationRow: EventRegistrationRowType = {
+              registration_id: eventRegistrationSnap.id,
+              teacher_name: `${teacher.data.name} ${teacher.data.surname}`,
+              points: eventTemplate.data.points,
+              created_at: registration.created_at as Date,
+              title: eventTemplate.data.title,
+              description: registration.description,
+            };
+            return registrationRow;
+          }
+        )
+      );
+
+      return {
+        status: 200,
+        data: registeredEvents,
+      };
+    } catch (error: any) {
+      const status = error.status ?? 500;
+      const message =
+        error.message ?? "Error while deleting the event template";
+      console.log(error);
+
+      return {
+        status,
+        message,
+      };
+    }
+  }
+);

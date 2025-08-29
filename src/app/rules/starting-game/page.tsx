@@ -113,11 +113,11 @@ type SectionProps = {
 const Section = ({ title, children, icon }: SectionProps) => (
   <section className="mb-10">
     <h2 className="lg:text-4xl md:text-3xl sm:text-2xl text-2xl text-primary flex items-center mb-3">
-      {icon && <i className={`bi ${icon} me-2`} aria-hidden="true"></i>}
+      {icon && <i className={`bi ${icon} me-2`} aria-hidden></i>}
       {title}
     </h2>
     <div className="lg:text-xl sm:text-lg text-lg opacity-80">
-      <p>{children}</p>
+      <div>{children}</div>
     </div>
   </section>
 );
@@ -125,7 +125,7 @@ const Section = ({ title, children, icon }: SectionProps) => (
 // --- Page Component ---
 export default function StartingGameRule() {
   return (
-    <main className="px-4 lg:px-16 py-8">
+    <>
       <h1 className="lg:text-5xl md:text-3xl sm:text-2xl text-2xl text-primary mb-6">
         Inizio e Durata del Gioco
       </h1>
@@ -173,6 +173,6 @@ export default function StartingGameRule() {
         riconoscimenti in classe, bonus immaginari) per aumentare il
         coinvolgimento dei partecipanti.
       </Section>
-    </main>
+    </>
   );
 }

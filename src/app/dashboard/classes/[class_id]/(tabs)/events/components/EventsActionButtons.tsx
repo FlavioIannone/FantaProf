@@ -1,11 +1,12 @@
 "use client";
 
 import { useModal } from "@/components/client/Modal/ModalContext";
+import { useToast } from "@/components/client/Toast/ToastContext";
 import {
   createEventTemplateAction,
   registerEventAction,
 } from "@/lib/data/actions/events.actions";
-import { EventTemplateType, TeacherTableRowType } from "@/lib/data/types.data";
+import { EventTemplateType, TeacherRowType } from "@/lib/data/types.data";
 
 /**
  * Action buttons of the events tab
@@ -16,10 +17,11 @@ export default function EventsActionButtons({
   eventTemplates,
 }: {
   class_id: string;
-  teachers: TeacherTableRowType[] | undefined;
-  eventTemplates: EventTemplateType[] | undefined;
+  teachers: TeacherRowType[];
+  eventTemplates: EventTemplateType[];
 }) {
   const modal = useModal();
+  const toast = useToast();
 
   const submitEventTemplate = async (formData?: FormData) => {
     if (!formData) return;
@@ -32,12 +34,23 @@ export default function EventsActionButtons({
 
     if (eventName === "" || eventPoints === "") return;
 
-    await createEventTemplateAction(class_id, {
+    const res = await createEventTemplateAction(class_id, {
       title: eventName,
       description: eventDescription === "" ? undefined : eventDescription,
       points: parseInt(eventPoints),
     });
     modal.setModal(false);
+    if (res.status === 200) {
+      toast.setToast(true, {
+        content: "Template creato con successo.",
+        toastType: "success",
+      });
+      return;
+    }
+    toast.setToast(true, {
+      content: "Si è verificato un errore durante la creazione del template.",
+      toastType: "error",
+    });
   };
 
   const submitEvent = async (formData?: FormData) => {
@@ -50,34 +63,25 @@ export default function EventsActionButtons({
     const description = formData.get("event_description")!.toString().trim();
     if (selected_event === "" || selected_teacher === "") return;
 
-    await registerEventAction(class_id, {
+    const res = await registerEventAction(class_id, {
       description,
       event_id: selected_event,
       teacher_id: selected_teacher,
     });
     modal.setModal(false);
-  };
 
-  if (!eventTemplates || !teachers) {
-    return (
-      <div className="flex flex-row gap-2">
-        <button
-          type="button"
-          className="d-btn d-btn-primary d-btn-soft md:grow-0 grow"
-          disabled
-        >
-          Crea template evento
-        </button>
-        <button
-          type="button"
-          className="d-btn d-btn-primary md:grow-0 grow"
-          disabled
-        >
-          Registra evento
-        </button>
-      </div>
-    );
-  }
+    if (res.status === 200) {
+      toast.setToast(true, {
+        content: "Evento registrato con successo.",
+        toastType: "success",
+      });
+      return;
+    }
+    toast.setToast(true, {
+      content: "Si è verificato un errore durante la registazione dell'evento.",
+      toastType: "success",
+    });
+  };
 
   return (
     <div className="flex flex-row gap-2">
@@ -100,10 +104,31 @@ export default function EventsActionButtons({
         type="button"
         className="d-btn d-btn-primary md:grow-0 grow"
         onClick={() => {
+          let toastMessage = "";
+
+          if (teachers.length === 0) {
+            toastMessage = "la classe non ha professori";
+          }
+
+          if (eventTemplates.length === 0) {
+            toastMessage += toastMessage
+              ? " e non ha template evento"
+              : "la classe non ha template evento";
+          }
+
+          if (toastMessage) {
+            toast.setToast(true, {
+              content: `Impossibile registrare eventi: ${toastMessage}.`,
+              toastType: "error",
+            });
+            return;
+          }
+
           modal.setModal(true, {
             closeOnSubmit: false,
             confirmButtonText: "Aggiungi",
             title: "Aggiungi evento",
+
             content: (
               <EventModalBody
                 teachers={teachers}
@@ -168,7 +193,7 @@ function EventModalBody({
   teachers,
   eventTemplates,
 }: {
-  teachers: TeacherTableRowType[];
+  teachers: TeacherRowType[];
   eventTemplates: EventTemplateType[];
 }) {
   return (
@@ -205,7 +230,10 @@ function EventModalBody({
           {eventTemplates.map((eventTemplate) => {
             const isNegative = eventTemplate.points < 0;
             return (
-              <option key={eventTemplate.id} value={eventTemplate.id}>
+              <option
+                key={eventTemplate.event_id}
+                value={eventTemplate.event_id}
+              >
                 {eventTemplate.title} ({isNegative ? "-" : "+"}
                 {Math.abs(eventTemplate.points)})
               </option>

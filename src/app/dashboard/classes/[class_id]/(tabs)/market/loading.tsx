@@ -4,7 +4,12 @@ import TeacherTableSkeleton from "./components/TeachersTableSkeleton";
 export default function MarketLoading() {
   return (
     <>
-      <TeachersTableHeader />
+      <div className="w-full flex justify-between items-center">
+        <h1 className="text-3xl font-extrabold">
+          <span className="bi bi-backpack3 me-2" aria-hidden></span>
+          Professori
+        </h1>
+      </div>
       <TeacherTableSkeleton>
         {Array.from({ length: 6 }).map((_, index) => (
           <div

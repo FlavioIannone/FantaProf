@@ -1,28 +1,23 @@
 "use client";
 import { useModal } from "@/components/client/Modal/ModalContext";
+import { useToast } from "@/components/client/Toast/ToastContext";
 import { addTeacherAction } from "@/lib/data/actions/teachers.actions";
-import { FilteredStudentEnrollmentData } from "@/lib/data/types.data";
 import { TeacherDataInput } from "@/lib/types";
+
+type FilteredStudentEnrollmentData = {
+  credits: number;
+  admin: boolean;
+};
 
 export default function TeachersTableHeader({
   enrollmentData,
   class_id,
 }: {
-  enrollmentData?: FilteredStudentEnrollmentData | undefined;
-  class_id?: string | undefined;
+  enrollmentData: FilteredStudentEnrollmentData;
+  class_id: string;
 }) {
   const modal = useModal();
-
-  if (!enrollmentData || !class_id) {
-    return (
-      <div className="w-full flex justify-between items-center">
-        <h1 className="text-3xl font-extrabold">
-          <span className="bi bi-backpack3 me-2" aria-hidden></span>
-          Professori
-        </h1>
-      </div>
-    );
-  }
+  const toast = useToast();
 
   const onConfirm = async (formData?: FormData) => {
     if (!formData) return;
@@ -41,8 +36,26 @@ export default function TeachersTableHeader({
       description: description.trim(),
       price: parseInt(price),
     };
-    await addTeacherAction(class_id, teacherData);
+    const res = await addTeacherAction(class_id, teacherData);
     modal.setModal(false);
+    if (res.status === 200) {
+      toast.setToast(true, {
+        content: `Prof ${name} ${surname} aggiunto con successo.`,
+        toastType: "success",
+      });
+      return;
+    }
+    if (res.status === 400) {
+      toast.setToast(true, {
+        content: `Il prezzo del professor ${name} ${surname} supera il limite massimo di crediti impostato per la classe.`,
+        toastType: "warning",
+      });
+      return;
+    }
+    toast.setToast(true, {
+      content: `Errore durante l'aggiunta del professore.`,
+      toastType: "error",
+    });
   };
 
   return (

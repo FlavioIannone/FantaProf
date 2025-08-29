@@ -1,5 +1,5 @@
 // TYPES
-export type ClassesTableRowType = {
+export type ClassRowType = {
   class_name: string;
   members: number;
   teachers: number;
@@ -11,7 +11,7 @@ export type ClassesTableRowType = {
   };
 };
 
-export type MembersTableRowType = {
+export type MemberRowType = {
   display_name: string;
   credits: number;
   points: number;
@@ -21,23 +21,12 @@ export type MembersTableRowType = {
   uid: string;
 };
 
-export type TeacherTableRowType = {
+export type TeacherRowType = {
   name: string;
   surname: string;
   price: number;
   description: string;
   teacher_id: string;
-};
-
-export type FilteredClassData = {
-  members: number;
-  teachers: number;
-};
-
-export type FilteredStudentEnrollmentData = {
-  credits: number;
-  points: number;
-  admin: boolean;
 };
 
 /**
@@ -55,5 +44,17 @@ export type EventTemplateType = {
   title: string;
   description: string;
   points: number;
-  id: string;
+  event_id: string;
 };
+
+/**
+ * Formats the date into a string
+ * @param date - The date to format
+ * @returns The `date` formatted into a DD-MM-YYYY style
+ */
+export function formatDateToDDMMYYYY(date: Date): string {
+  const day = String(date.getDate()).padStart(2, "0");
+  const month = String(date.getMonth() + 1).padStart(2, "0"); // Months are 0-based
+  const year = date.getFullYear();
+  return `${day}-${month}-${year}`;
+}

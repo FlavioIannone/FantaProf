@@ -5,18 +5,18 @@ import { type SignInData } from "@/lib/types";
 import { client_auth } from "@/lib/firebase-connection.client";
 import { onAuthStateChanged, User } from "firebase/auth";
 import { useEffect, useRef, useState } from "react";
-import { useModal } from "@/components/client/Modal/ModalContext";
 import { useRouter } from "next/navigation";
 import {
   createAccountWithFormData,
   signInWithGoogle,
 } from "@/lib/authentication-manager";
 import { createSession } from "@/lib/data/session/session-manager.data-layer";
+import { useToast } from "@/components/client/Toast/ToastContext";
 
 export default function RegistrationForm() {
   const router = useRouter();
 
-  const { setModal } = useModal();
+  const toast = useToast();
   // True when on the server, false when on the client
   const [isPending, setIsPending] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
@@ -66,9 +66,9 @@ export default function RegistrationForm() {
       signInData.email === "" ||
       signInData.password === ""
     ) {
-      setModal(true, {
-        title: "Compila tutti i campi",
+      toast.setToast(true, {
         content: "Per favore, compila tutti i campi richiesti.",
+        toastType: "warning",
       });
       return;
     }
@@ -79,9 +79,9 @@ export default function RegistrationForm() {
     if (result.successful) {
       await redirectUser(result.user);
     } else {
-      setModal(true, {
-        title: "Errore di registrazione",
+      toast.setToast(true, {
         content: "Si è verificato un errore durante la registrazione.",
+        toastType: "warning",
       });
     }
 
@@ -96,9 +96,9 @@ export default function RegistrationForm() {
     if (result.successful) {
       await redirectUser(result.user);
     } else {
-      setModal(true, {
-        title: "Errore di registrazione",
+      toast.setToast(true, {
         content: "Si è verificato un errore durante la registrazione.",
+        toastType: "error",
       });
     }
     setIsLoading(false);

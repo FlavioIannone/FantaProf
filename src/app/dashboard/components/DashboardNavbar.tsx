@@ -19,13 +19,6 @@ export default function DashboardNavbar({
             <i className="bi bi-book me-1.5" aria-hidden></i>
             FantaProf
           </div>
-          {/* <label
-          htmlFor="dashboard-drawer"
-          role="button"
-          className="lg:hidden block"
-          >
-          <i className="bi bi-list text-2xl" aria-hidden></i>
-          </label> */}
           <Link href="/settings">
             <i className="bi bi-three-dots text-2xl" aria-hidden></i>
           </Link>
@@ -40,13 +33,6 @@ export default function DashboardNavbar({
               <i className="bi bi-book me-1.5" aria-hidden></i>
               FantaProf
             </div>
-            {/* <label
-          htmlFor="dashboard-drawer"
-          role="button"
-          className="lg:hidden block"
-        >
-          <i className="bi bi-list text-2xl" aria-hidden></i>
-        </label> */}
             <Link href="settings">
               <i className="bi bi-three-dots text-2xl" aria-hidden></i>
             </Link>
