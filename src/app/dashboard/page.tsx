@@ -6,7 +6,6 @@ import UsernameDisplayer from "./components/UsernameDisplayer";
 
 export default async function Dashboard() {
   const classes = await getClasses();
-
   return (
     <>
       <main className="w-full md:h-dvh flex flex-col justify-between">
