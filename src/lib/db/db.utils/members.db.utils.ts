@@ -4,7 +4,7 @@ import {
   Class,
   StudentEnrollment,
   Teacher,
-  TeacherTeamEnrollment,
+  TeamEnrollment,
 } from "../schema.db";
 import { MemberRowType } from "@/lib/data/types.data";
 import { FieldPath } from "firebase-admin/firestore";
@@ -187,7 +187,7 @@ export const calculatePointsBasedOnTeachersInTeamInFirestore = cache(
           .get(),
 
         studentEnrollmentDocRef
-          .collection(TeacherTeamEnrollment.collection)
+          .collection(TeamEnrollment.collection)
           .where(FieldPath.documentId(), "in", teachersInTeam)
           .where("captain", "==", true)
           .limit(1)

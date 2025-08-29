@@ -47,6 +47,17 @@ export type EventTemplateType = {
   event_id: string;
 };
 
+export type TeamEnrollment = {
+  captain: boolean;
+  teacher_id: string;
+  name: string;
+  surname: string;
+  description: string;
+  price: number;
+  points: number;
+  deleted: boolean;
+};
+
 /**
  * Formats the date into a string
  * @param date - The date to format

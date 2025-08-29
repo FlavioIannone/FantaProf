@@ -8,8 +8,9 @@ import {
   WriteOperationResult,
 } from "@/lib/types";
 import z from "zod";
-import { TeacherRowType } from "@/lib/data/types.data";
 import { getClassFromFirestore } from "./classes.db.utils";
+
+type TeacherDataType = z.infer<typeof Teacher.schema> & { teacher_id: string };
 
 /**
  * Retrieves all teachers of a class.
@@ -17,7 +18,7 @@ import { getClassFromFirestore } from "./classes.db.utils";
  * @returns Successful state operation result, an error with it's status code and message otherwise. If the class doesn't exist or the class doesn't contain any teacher: 404.
  */
 export const getClassTeachersFromFirestore = cache(
-  async (class_id: string): Promise<ReadOperationResult<TeacherRowType[]>> => {
+  async (class_id: string): Promise<ReadOperationResult<TeacherDataType[]>> => {
     try {
       const classDocRef = admin_firestore
         .collection(Class.collection)
@@ -71,7 +72,7 @@ export const getClassTeacherFromFirestore = cache(
   async (
     class_id: string,
     teacher_id: string
-  ): Promise<ReadOperationResult<TeacherRowType>> => {
+  ): Promise<ReadOperationResult<TeacherDataType>> => {
     try {
       const classDocRef = admin_firestore
         .collection(Class.collection)
@@ -85,7 +86,7 @@ export const getClassTeacherFromFirestore = cache(
         teacherDocRef.get(),
       ]);
 
-      if (!classDocSnap.exists || !teacherDocSnap.exists) {
+      if (!classDocSnap.exists) {
         return {
           status: 404,
           message: "The class doesn't exist",
@@ -210,8 +211,9 @@ export const deleteTeacherFromFirestore = async (
         };
       }
 
-      t.delete(teacherDocRef);
-      t.update(classDocRef, { teachers: FieldValue.increment(-1) });
+      t.update(teacherDocRef, { deleted: true }).update(classDocRef, {
+        teachers: FieldValue.increment(-1),
+      });
     });
 
     return { status: 200 };

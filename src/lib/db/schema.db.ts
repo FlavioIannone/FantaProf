@@ -115,7 +115,7 @@ const TeamEnrollmentSchema = z.object({
   created_at: TimestampFieldType,
 });
 
-export const Team = {
+export const TeamEnrollment = {
   schema: TeamEnrollmentSchema,
   collection: FirebaseCollections.TEAM,
 };

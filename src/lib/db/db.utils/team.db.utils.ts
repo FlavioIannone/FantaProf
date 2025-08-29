@@ -2,11 +2,18 @@ import {
   Class,
   StudentEnrollment,
   Teacher,
-  TeacherTeamEnrollment,
+  TeamEnrollment,
 } from "../schema.db";
 import { admin_firestore } from "../firebase-connection.server";
-import { WriteOperationResult } from "@/lib/types";
+import { ReadOperationResult, WriteOperationResult } from "@/lib/types";
 import { FieldValue } from "firebase-admin/firestore";
+import { getClassFromFirestore } from "./classes.db.utils";
+import { getStudentEnrollmentDataFromFirestore } from "./users.db.utils";
+import z from "zod";
+import { cache } from "react";
+import { getClassTeacherFromFirestore } from "./teachers.db.utils";
+type TeamEnrollmentType = z.infer<typeof TeamEnrollment.schema> &
+  Omit<z.infer<typeof Teacher.schema>, "created_at"> & { teacher_id: string };
 
 /**
  * Attempts to add a teacher to the student team, if the teacher is the first one to be added it will become the team's captain.
@@ -41,7 +48,7 @@ export const addTeacherToTeamInFirestore = async (
 
   // Reference to the subcollection of teachers enrolled in the student's team
   const teamCollectionRef = studentEnrollmentDocRef.collection(
-    TeacherTeamEnrollment.collection
+    TeamEnrollment.collection
   );
 
   // Reference to the specific teacher entry in the student's team
@@ -105,7 +112,7 @@ export const addTeacherToTeamInFirestore = async (
       transaction
         .create(
           teacherTeamEnrollmentDocRef,
-          TeacherTeamEnrollment.schema.parse({
+          TeamEnrollment.schema.parse({
             captain: isCaptain,
           })
         )
@@ -122,6 +129,214 @@ export const addTeacherToTeamInFirestore = async (
         isCaptain,
       },
     };
+  } catch (error: any) {
+    const status = error.status ?? 500;
+    const message = error.message ?? "Internal server error";
+    console.log(error);
+
+    // On failure, return error info.
+    // Defaults to 500 if status/message aren’t explicitly set
+    return {
+      status,
+      message,
+    };
+  }
+};
+
+/**
+ *
+ * @param uid - The ID of the student
+ * @param class_id - The ID of the class
+ * @returns Successful state operation result, an error with it's status code and message otherwise. If the class or the teacher doesn't exist or the team collection is empty, status: 404.
+ */
+export const getTeamFromFirestore = cache(
+  async (
+    uid: string,
+    class_id: string
+  ): Promise<ReadOperationResult<TeamEnrollmentType[]>> => {
+    const classDocRef = admin_firestore
+      .collection(Class.collection)
+      .doc(class_id);
+    const studentEnrollmentDocRef = classDocRef
+      .collection(StudentEnrollment.collection)
+      .doc(uid);
+    const teamCollectionRef = studentEnrollmentDocRef.collection(
+      TeamEnrollment.collection
+    );
+    try {
+      const [classRes, studentEnrollmentRes, teamCollectionSnap] =
+        await Promise.all([
+          getClassFromFirestore(class_id),
+          getStudentEnrollmentDataFromFirestore(class_id, uid),
+          teamCollectionRef.get(),
+        ]);
+
+      if (classRes.status !== 200) {
+        throw classRes;
+      }
+      if (studentEnrollmentRes.status !== 200) {
+        throw studentEnrollmentRes;
+      }
+      if (teamCollectionSnap.empty) {
+        throw {
+          status: 404,
+          message: "The team is empty",
+        };
+      }
+
+      const team: TeamEnrollmentType[] = await Promise.all(
+        teamCollectionSnap.docs.map(async (teamEnrollmentDoc) => {
+          const res = await getTeacherTeamEnrollmentFromFirestore(
+            uid,
+            class_id,
+            teamEnrollmentDoc.id
+          );
+          if (res.status !== 200) throw res;
+          return res.data;
+        })
+      );
+
+      return {
+        status: 200,
+        data: team,
+      };
+    } catch (error: any) {
+      const status = error.status ?? 500;
+      const message = error.message ?? "Internal server error";
+      console.log(error);
+
+      // On failure, return error info.
+      // Defaults to 500 if status/message aren’t explicitly set
+      return {
+        status,
+        message,
+      };
+    }
+  }
+);
+
+/**
+ * Retrieves the data of the teacher and the data about it's enrollment in the team of the specified student.
+ * @param uid - The ID of the student
+ * @param class_id - The ID of the class
+ * @param teacher_id - The ID of the teacher
+ * @returns Successful state operation result, an error with it's status code and message otherwise. If the class or the teacher or the student doesn't exist or the teacher is not part of the team, status: 404.
+ */
+
+export const getTeacherTeamEnrollmentFromFirestore = async (
+  uid: string,
+  class_id: string,
+  teacher_id: string
+): Promise<ReadOperationResult<TeamEnrollmentType>> => {
+  const classDocRef = admin_firestore
+    .collection(Class.collection)
+    .doc(class_id);
+  const studentEnrollmentDocRef = classDocRef
+    .collection(StudentEnrollment.collection)
+    .doc(uid);
+  const teacherTeamDocRef = studentEnrollmentDocRef
+    .collection(TeamEnrollment.collection)
+    .doc(teacher_id);
+  try {
+    const [classRes, studentEnrollmentRes, teacherRes, teacherTeamDocSnap] =
+      await Promise.all([
+        getClassFromFirestore(class_id),
+        getStudentEnrollmentDataFromFirestore(class_id, uid),
+        getClassTeacherFromFirestore(class_id, teacher_id),
+        teacherTeamDocRef.get(),
+      ]);
+
+    if (classRes.status !== 200) {
+      throw classRes;
+    }
+    if (studentEnrollmentRes.status !== 200) {
+      throw studentEnrollmentRes;
+    }
+    if (teacherRes.status !== 200) {
+      throw teacherRes;
+    }
+    if (!teacherTeamDocSnap.exists) {
+      throw {
+        status: 404,
+        message: "The team is empty",
+      };
+    }
+
+    return {
+      status: 200,
+      data: {
+        ...teacherRes.data,
+        ...TeamEnrollment.schema.parse(teacherTeamDocSnap.data()),
+      },
+    };
+  } catch (error: any) {
+    const status = error.status ?? 500;
+    const message = error.message ?? "Internal server error";
+    console.log(error);
+
+    // On failure, return error info.
+    // Defaults to 500 if status/message aren’t explicitly set
+    return {
+      status,
+      message,
+    };
+  }
+};
+
+/**
+ * Removes a teacher from the team of the specified student.
+ * @param uid - The ID of the student
+ * @param class_id - The ID of the class
+ * @param teacher_id - The ID of the teacher
+ * @returns Successful state operation result, an error with it's status code and message otherwise. If the class or the teacher doesn't exist or the team collection is empty, status: 404.
+ */
+export const removeTeacherFromTeamInFirestore = async (
+  uid: string,
+  class_id: string,
+  teacher_id: string
+): Promise<WriteOperationResult> => {
+  // Reference to the student's enrollment document in this class
+  const studentEnrollmentDocRef = admin_firestore
+    .collection(Class.collection)
+    .doc(class_id)
+    .collection(StudentEnrollment.collection)
+    .doc(uid);
+
+  const teacherTeamDocRef = studentEnrollmentDocRef
+    .collection(TeamEnrollment.collection)
+    .doc(teacher_id);
+
+  try {
+    await admin_firestore.runTransaction(async (t) => {
+      const [studentEnrollmentRes, teacherRes, teamEnrollmentRes] =
+        await Promise.all([
+          getStudentEnrollmentDataFromFirestore(class_id, uid),
+          getClassTeacherFromFirestore(class_id, teacher_id),
+          getTeacherTeamEnrollmentFromFirestore(uid, class_id, teacher_id),
+        ]);
+
+      if (studentEnrollmentRes.status !== 200) {
+        throw studentEnrollmentRes;
+      }
+      if (teacherRes.status !== 200) {
+        throw teacherRes;
+      }
+      if (teamEnrollmentRes.status !== 200) {
+        throw teamEnrollmentRes;
+      }
+      if (teamEnrollmentRes.data.captain) {
+        throw {
+          status: 400,
+          message: "This teacher is the captain and cannot be removed.",
+        };
+      }
+
+      t.update(studentEnrollmentDocRef, {
+        teacher_team_ids: FieldValue.arrayRemove(teacher_id),
+        credits: FieldValue.increment(teacherRes.data.price),
+      }).delete(teacherTeamDocRef);
+    });
+    return { status: 200 };
   } catch (error: any) {
     const status = error.status ?? 500;
     const message = error.message ?? "Internal server error";
