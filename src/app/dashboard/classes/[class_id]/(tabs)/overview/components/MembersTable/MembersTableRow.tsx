@@ -1,29 +1,47 @@
 "use client";
 
+import { useModal } from "@/components/client/Modal/ModalContext";
+import { useToast } from "@/components/client/Toast/ToastContext";
 import { useUserData } from "@/components/client/UserDataContext";
 import { makeUserAdminAction } from "@/lib/data/actions/members.actions";
-import { MembersTableRowType } from "@/lib/data/types.data";
+import { MemberRowType } from "@/lib/data/types.data";
 import Image from "next/image";
 import { useState } from "react";
 
-export default function MembersTablemember({
+export default function MembersTableRow({
   member,
   class_id,
   isAdmin,
 }: {
-  member: MembersTableRowType;
+  member: MemberRowType;
   class_id: string;
   isAdmin: boolean;
 }) {
   const { userData } = useUserData();
+  const modal = useModal();
+  const toast = useToast();
 
   const [memberLoading, setMemberLoading] = useState(false);
 
-  const makeAdmin = async () => {
-    if (member.admin) return;
-    setMemberLoading(true);
-    await makeUserAdminAction(member.uid, class_id);
-    setMemberLoading(false);
+  const attemptToMakeAdmin = async () => {
+    if (member.admin) {
+      toast.setToast(true, {
+        content: "Questo studente è gia un admin.",
+        toastType: "info",
+      });
+    }
+    const res = await makeUserAdminAction(member.uid, class_id);
+    if (res.status === 200) {
+      toast.setToast(true, {
+        content: "Lo studente ora è un admin.",
+        toastType: "success",
+      });
+      return;
+    }
+    toast.setToast(true, {
+      content: "Non è stato possibile cambiare il ruolo dello studente.",
+      toastType: "error",
+    });
   };
 
   if (memberLoading) {
@@ -124,7 +142,18 @@ export default function MembersTablemember({
               className="d-dropdown-content d-menu bg-base-100 rounded-box z-1 w-52 p-2 shadow-sm"
             >
               <li
-                onClick={makeAdmin}
+                onClick={() => {
+                  modal.setModal(true, {
+                    title: "Modificare ruolo?",
+                    content: `Vuoi davvero far diventare ${member.display_name} un admin?`,
+                    onConfirm: async () => {
+                      setMemberLoading(true);
+                      await attemptToMakeAdmin();
+                      setMemberLoading(false);
+                    },
+                    confirmButtonText: "Conferma",
+                  });
+                }}
                 className={`${member.admin && "d-menu-disabled"}`}
               >
                 <button type="button">

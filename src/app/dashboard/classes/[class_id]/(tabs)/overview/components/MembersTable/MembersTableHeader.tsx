@@ -44,6 +44,7 @@ const ModalContent = ({ class_id }: { class_id: string }) => {
       <code className="break-all">
         {`${process.env.NEXT_PUBLIC_BASE_URL}/dashboard/classes/${class_id}/join`}
       </code>
+      .
     </p>
   );
 };

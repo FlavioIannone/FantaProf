@@ -7,69 +7,27 @@ import {
   modifyTeacherAction,
   deleteTeacherAction,
 } from "@/lib/data/actions/teachers.actions";
-import {
-  TeacherTableRowType,
-  TeacherDataEditForm,
-} from "@/lib/data/types.data";
+import { TeacherRowType, TeacherDataEditForm } from "@/lib/data/types.data";
 import { addTeacherToTeam } from "@/lib/data/actions/team.actions";
+import { useToast } from "@/components/client/Toast/ToastContext";
 
-// Inner component: Modal content for editing a teacher
-function TeacherEditForm({
-  initialData,
-}: {
-  initialData: TeacherTableRowType;
-}) {
-  return (
-    <fieldset className="space-y-3">
-      <div>
-        <legend className="d-fieldset-legend">Nome</legend>
-        <input
-          className="d-input w-full"
-          name="teacher_name"
-          placeholder={initialData.name}
-        />
-      </div>
-      <div>
-        <legend className="d-fieldset-legend">Cognome</legend>
-        <input
-          className="d-input w-full"
-          name="teacher_surname"
-          placeholder={initialData.surname}
-        />
-      </div>
-      <div>
-        <legend className="d-fieldset-legend">Descrizione</legend>
-        <textarea
-          className="d-textarea w-full h-24"
-          name="teacher_description"
-          placeholder={initialData.description}
-        />
-        <div className="d-label">Facoltativo</div>
-      </div>
-      <div>
-        <legend className="d-fieldset-legend">Prezzo</legend>
-        <input
-          className="d-input w-full"
-          name="teacher_price"
-          placeholder={initialData.price.toString()}
-          type="number"
-        />
-      </div>
-    </fieldset>
-  );
-}
+type FilteredStudentEnrollmentData = {
+  credits: number;
+  admin: boolean;
+};
 
 // Main component: Card for showing a teacher's info and managing actions
 export default function TeacherCard({
   teacherData,
-  isAdmin,
+  studentEnrollment,
   class_id,
 }: {
-  teacherData: TeacherTableRowType;
-  isAdmin: boolean;
+  teacherData: TeacherRowType;
+  studentEnrollment: FilteredStudentEnrollmentData;
   class_id: string;
 }) {
   const modal = useModal(); // Modal controls
+  const toast = useToast();
 
   // State for truncating the description
   const [expanded, setExpanded] = useState(false);
@@ -104,12 +62,23 @@ export default function TeacherCard({
           price: price === "" ? undefined : parseInt(price),
         };
 
-        await modifyTeacherAction(
+        const res = await modifyTeacherAction(
           class_id,
           teacherData.teacher_id,
           newTeacherData
         );
         modal.setModal(false);
+        if (res.status !== 200) {
+          toast.setToast(true, {
+            content: `Errore durante la modifica dei dati del professore.`,
+            toastType: "error",
+          });
+          return;
+        }
+        toast.setToast(true, {
+          content: `Dati del prof ${teacherData.name} ${teacherData.surname} modificati con successo.`,
+          toastType: "success",
+        });
       },
     });
   };
@@ -159,12 +128,45 @@ export default function TeacherCard({
             onClick={async () => {
               modal.setModal(true, {
                 title: "Aggiungere il professore al team?",
-                content: `Vuoi davvero aggiungere ${teacherData.name} ${teacherData.surname} al tuo team?`,
+                content: `Vuoi davvero aggiungere il prof ${teacherData.name} ${teacherData.surname} al tuo team?`,
                 confirmButtonText: "Aggiungi",
                 closeOnSubmit: false,
                 onConfirm: async () => {
-                  await addTeacherToTeam(class_id, teacherData.teacher_id);
+                  const res = await addTeacherToTeam(
+                    class_id,
+                    teacherData.teacher_id
+                  );
                   modal.setModal(false);
+                  if (res.status === 200) {
+                    toast.setToast(true, {
+                      content: `Il prof ${teacherData.name} ${
+                        teacherData.surname
+                      } è stato aggiunto con successo al team${
+                        res.data!.isCaptain ? " come capitano" : ""
+                      }.`,
+                      toastType: "success",
+                    });
+
+                    return;
+                  }
+                  if (res.status === 409) {
+                    toast.setToast(true, {
+                      content: `Il prof ${teacherData.name} ${teacherData.surname} fa già parte del team.`,
+                      toastType: "warning",
+                    });
+                    return;
+                  }
+                  if (res.status === 402) {
+                    toast.setToast(true, {
+                      content: `Non hai abbastanza crediti per aggiungere il prof ${teacherData.name} ${teacherData.surname} al team.`,
+                      toastType: "warning",
+                    });
+                    return;
+                  }
+                  toast.setToast(true, {
+                    content: `Non è stato possibile aggiungere il prof ${teacherData.name} ${teacherData.surname} al team.`,
+                    toastType: "error",
+                  });
                 },
               });
             }}
@@ -173,7 +175,7 @@ export default function TeacherCard({
           </button>
 
           {/* Admin dropdown: edit/delete */}
-          {isAdmin && (
+          {studentEnrollment.admin && (
             <div className="d-dropdown d-dropdown-top d-dropdown-end">
               <button
                 tabIndex={0}
@@ -184,7 +186,7 @@ export default function TeacherCard({
               <ul className="d-dropdown-content d-menu bg-base-100 rounded-box w-52 p-2 shadow-sm mb-2 space-y-2">
                 <li>
                   <button onClick={openEditModal}>
-                    Modifica <i className="bi bi-pencil" />
+                    Modifica <i className="bi bi-pencil" aria-hidden />
                   </button>
                 </li>
                 <li>
@@ -198,16 +200,27 @@ export default function TeacherCard({
                         confirmButtonText: "Conferma",
                         closeOnSubmit: false,
                         onConfirm: async () => {
-                          await deleteTeacherAction(
+                          const res = await deleteTeacherAction(
                             class_id,
                             teacherData.teacher_id
                           );
                           modal.setModal(false);
+                          if (res.status !== 200) {
+                            toast.setToast(true, {
+                              content: `Errore durante l'eliminazione del prof ${teacherData.name} ${teacherData.surname}.`,
+                              toastType: "error",
+                            });
+                            return;
+                          }
+                          toast.setToast(true, {
+                            content: `Prof ${teacherData.name} ${teacherData.surname} eliminato con successo.`,
+                            toastType: "success",
+                          });
                         },
                       });
                     }}
                   >
-                    Elimina <i className="bi bi-trash3" />
+                    Elimina <i className="bi bi-trash3" aria-hidden />
                   </button>
                 </li>
               </ul>
@@ -216,5 +229,47 @@ export default function TeacherCard({
         </div>
       </div>
     </div>
+  );
+}
+
+// Inner component: Modal content for editing a teacher
+function TeacherEditForm({ initialData }: { initialData: TeacherRowType }) {
+  return (
+    <fieldset className="space-y-3">
+      <div>
+        <legend className="d-fieldset-legend">Nome</legend>
+        <input
+          className="d-input w-full"
+          name="teacher_name"
+          placeholder={initialData.name}
+        />
+      </div>
+      <div>
+        <legend className="d-fieldset-legend">Cognome</legend>
+        <input
+          className="d-input w-full"
+          name="teacher_surname"
+          placeholder={initialData.surname}
+        />
+      </div>
+      <div>
+        <legend className="d-fieldset-legend">Descrizione</legend>
+        <textarea
+          className="d-textarea w-full h-24"
+          name="teacher_description"
+          placeholder={initialData.description}
+        />
+        <div className="d-label">Facoltativo</div>
+      </div>
+      <div>
+        <legend className="d-fieldset-legend">Prezzo</legend>
+        <input
+          className="d-input w-full"
+          name="teacher_price"
+          placeholder={initialData.price.toString()}
+          type="number"
+        />
+      </div>
+    </fieldset>
   );
 }

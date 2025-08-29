@@ -3,6 +3,12 @@ import { admin_firestore } from "../firebase-connection.server";
 import { Class, StudentEnrollment } from "../schema.db";
 import z from "zod";
 import { calculatePointsBasedOnTeachersInTeamInFirestore } from "./members.db.utils";
+import { ReadOperationResult } from "@/lib/types";
+
+type StudentEnrollmentType = Omit<
+  z.infer<typeof StudentEnrollment.schema>,
+  "team"
+>;
 
 /**
  * Retrieves the class where the user has the highest score.
@@ -91,40 +97,53 @@ export const getClassesEnrollmentCountFromFirestore = cache(
   }
 );
 
-type StudentEnrollmentType = Omit<
-  z.infer<typeof StudentEnrollment.schema>,
-  "team"
->;
-
 /**
  * Retrieves the student enrollment data for a user in a specific class.
  * @param class_id - Class identifier
  * @param uid - User identifier
- * @returns Promise resolving to StudentEnrollment data or undefined if not found/error
+ * @returns Successful state operation result, an error with it's status code and message otherwise. If the student or the class doesn't exist, status: 404.
  */
 export const getStudentEnrollmentDataFromFirestore = async (
   class_id: string,
   uid: string
-): Promise<StudentEnrollmentType | undefined> => {
+): Promise<ReadOperationResult<StudentEnrollmentType>> => {
+  const classDocRef = admin_firestore
+    .collection(Class.collection)
+    .doc(class_id);
+  const studentDocRef = classDocRef
+    .collection(StudentEnrollment.collection)
+    .doc(uid);
   try {
-    const studentDocRef = admin_firestore
-      .collection(Class.collection)
-      .doc(class_id)
-      .collection(StudentEnrollment.collection)
-      .doc(uid);
+    const [classDocSnap, studentDocSnap] = await Promise.all([
+      classDocRef.get(),
+      studentDocRef.get(),
+    ]);
 
-    const studentDocSnap = await studentDocRef.get();
-
+    if (!classDocSnap.exists) {
+      throw {
+        status: 404,
+        message: "The class doesn't exist",
+      };
+    }
     if (!studentDocSnap.exists) {
-      return undefined;
+      throw {
+        status: 404,
+        message: "The student doesn't exist",
+      };
     }
 
-    return StudentEnrollment.schema.parse(studentDocSnap.data());
-  } catch (error) {
-    console.error(
-      "[getStudentEnrollmentDataFromFirestore] Error fetching enrollment data:",
-      error
-    );
-    return undefined;
+    return {
+      status: 200,
+      data: StudentEnrollment.schema.parse(studentDocSnap.data()),
+    };
+  } catch (error: any) {
+    const status = error.status ?? 500;
+    const message = error.message ?? "Error while deleting the event template";
+    console.log(error);
+
+    return {
+      status,
+      message,
+    };
   }
 };

@@ -51,6 +51,9 @@
   /** Wiggle Animation*/
   --animate-wiggle: wiggle 1s ease-in-out infinite;
 
+  /** Shrink Animation*/
+  --animate-shrink: shrink 1s linear forwards;
+
   /** Keyframes for Fade-In Animations*/
   @keyframes fade-in {
     0% {
@@ -105,8 +108,7 @@
     }
   }
 
-  /** Keyfraems for Wiggle Animation*/
-
+  /** Keyframes for Wiggle Animation*/
   @keyframes wiggle {
     0%,
     100% {
@@ -116,10 +118,22 @@
       transform: rotate(3deg);
     }
   }
+
+  /** Keyframes for Shrink Animation*/
+  @keyframes shrink {
+    0% {
+      width: 100%;
+    }
+    100% {
+      width: 0;
+    }
+  }
 }
 
+/** Keyframes for Shrink Animation*/
+
 @utility d-btn {
-  @apply d-rounded-box
+  @apply d-rounded-box;
 }
 
 .animation-delay-100 {

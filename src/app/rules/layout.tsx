@@ -128,7 +128,7 @@ export default function RulesLayout({
           ></label>
           <div className="bg-base-200 min-h-full w-80 p-4">
             <div className="flex justify-between items-center">
-              <BackToPathArrow text="Home" />
+              <BackToPathArrow text="Home" forceStretch />
               <label
                 className="d-btn d-btn-ghost"
                 htmlFor="rules-drawer"

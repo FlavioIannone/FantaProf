@@ -21,11 +21,11 @@
  * │    │   ├── name: string
  * │    │   ├── surname: string
  * │    │   ├── description: string
+ * │    │   ├── deleted: boolean
  * │    │   └── price: number
- * │    ├── StudentEnrollments (admin, credits, created_at, points, team)
+ * │    ├── StudentEnrollments (admin, credits, created_at)
  * │    │   ├── admin: boolean
  * │    │   ├── credits: number
- * │    │   ├── points: number
  * │    │   ├── teacher_team_ids: Array<string>
  * │    │   ├── created_at: Timestamp
  * │    │   ├── Team(teacher_id, captain, created_at)
@@ -79,6 +79,7 @@ const TeacherSchema = z.object({
   description: z.string().optional().default("Nessuna descrizione"),
   price: z.number().positive(),
   points: z.number().optional().default(0),
+  deleted: z.boolean().optional().default(false),
   created_at: TimestampFieldType,
 });
 
@@ -128,7 +129,6 @@ const StudentEnrollmentSchema = z.object({
   credits: z.number().int().positive(),
   created_at: TimestampFieldType,
   teacher_team_ids: z.array(z.string()).optional().default([]),
-  points: z.number().int().default(0),
 });
 
 export const StudentEnrollment = {
@@ -139,7 +139,7 @@ export const StudentEnrollment = {
 //
 // ========================== Events ==========================
 //
-const EventSchema = z.object({
+const EventTemplateSchema = z.object({
   title: z.string().min(1),
   description: z.string().optional().default("Nessuna descrizione"),
   points: z.number().int(),
@@ -147,8 +147,8 @@ const EventSchema = z.object({
   created_at: TimestampFieldType,
 });
 
-export const EventWrapper = {
-  schema: EventSchema,
+export const EventTemplate = {
+  schema: EventTemplateSchema,
 
   collection: FirebaseCollections.EVENTS,
 };
@@ -156,15 +156,15 @@ export const EventWrapper = {
 //
 // ========================== Teacher Events ==========================
 //
-const TeacherEventRegistrationSchema = z.object({
+const EventRegistrationSchema = z.object({
   event_id: z.string(),
   teacher_id: z.string(),
   description: z.string().optional().default("Nessuna descrizione"),
   created_at: TimestampFieldType,
 });
 
-export const TeacherEventRegistration = {
-  schema: TeacherEventRegistrationSchema,
+export const EventRegistration = {
+  schema: EventRegistrationSchema,
 
   collection: FirebaseCollections.TEACHER_EVENTS,
 };

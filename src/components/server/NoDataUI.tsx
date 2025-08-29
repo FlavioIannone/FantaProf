@@ -1,18 +1,18 @@
 export default function NoDataUI({
   message,
   additionalMessage,
-  stretch,
+  shrink,
   className,
 }: {
   message?: string;
   additionalMessage?: string;
-  stretch?: boolean;
+  shrink?: boolean;
   className?: string;
 }) {
   return (
     <div
-      className={`${className} flex flex-col ${
-        !stretch ? "h-dvh" : "mt-5"
+      className={`${className ?? ""} flex flex-col ${
+        !shrink ? "h-dvh" : "mt-5"
       } justify-center items-center`}
     >
       <i className="size-24" aria-hidden>

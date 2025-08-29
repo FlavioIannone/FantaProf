@@ -10,15 +10,15 @@ export default function AuthLayout({
   return (
     <>
       <main className="size-full">
-        <div className="size-full flex md:flex-row md:w-auto flex-col justify-center md:gap-2.5 p-5">
+        <div className="size-full flex md:flex-row md:w-auto flex-col justify-center md:gap-2.5">
           {/**Image */}
           <div className="md:flex-1/2 flex-1/6 md:h-auto h-10 motion-safe:opacity-0 animate-fade-in">
-            <nav className="d-navbar absolute z-30">
+            <nav className="d-navbar absolute z-30 p-5">
               <ReturnToHome textColor="text-primary-content" />
             </nav>
             <AuthImage />
           </div>
-          <div className="md:flex-1/2 flex-2/3 flex flex-col justify-center items-center w-full">
+          <div className="md:flex-1/2 flex-2/3 flex flex-col justify-center items-center w-full p-5">
             {children}
           </div>
         </div>

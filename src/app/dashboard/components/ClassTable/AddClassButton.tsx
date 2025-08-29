@@ -1,15 +1,53 @@
 "use client";
 
 import { useModal } from "@/components/client/Modal/ModalContext";
+import { useToast } from "@/components/client/Toast/ToastContext";
 import { addClassAction } from "@/lib/data/actions/classes.actions";
 import { useRouter } from "next/navigation";
 
 export default function AddClassButton() {
-  // Modal context, provides methods to open/close modals
   const modal = useModal();
+  const toast = useToast();
   const router = useRouter();
 
-  // If user is logged in and token is available, show active button
+  const handleAddClass = async (formData?: FormData) => {
+    if (!formData) {
+      toast.setToast(true, {
+        content: "I dati inseriti non sono validi.",
+        toastType: "warning",
+      });
+      return;
+    }
+
+    const className = formData.get("class_name")!.toString().trim();
+    const initialCredits = formData.get("initial_credits")!.toString().trim();
+    if (className === "" && initialCredits === "") {
+      toast.setToast(true, {
+        content: "I dati inseriti non sono validi.",
+        toastType: "warning",
+      });
+      return;
+    }
+
+    const res = await addClassAction({
+      class_name: className,
+      initial_credits: parseInt(initialCredits),
+    });
+    modal.setModal(false);
+    if (res.status !== 200) {
+      toast.setToast(true, {
+        content: "Errore durante la creazione della classe.",
+        toastType: "error",
+      });
+      return;
+    }
+    toast.setToast(true, {
+      content: "Classe aggiunta con successo.",
+      toastType: "success",
+    });
+    router.push(`/dashboard/classes/${res.data!.class_id}/overview`);
+  };
+
   return (
     <button
       type="button"
@@ -18,33 +56,10 @@ export default function AddClassButton() {
         // Open modal on button click
         modal.setModal(true, {
           title: "Crea classe",
-          // Modal content is a separate component declared below
           content: <ModalBody />,
           closeOnSubmit: false,
           confirmButtonText: "Crea",
-          onConfirm: async (formData) => {
-            if (!formData) return;
-
-            const className = formData.get("class_name")!.toString().trim();
-            const initialCredits = formData
-              .get("initial_credits")!
-              .toString()
-              .trim();
-            if (className !== "" && initialCredits !== "") {
-              const classData = await addClassAction({
-                class_name: className,
-                initial_credits: parseInt(initialCredits),
-              });
-              modal.setModal(false);
-              if (classData) {
-                router.push(
-                  `/dashboard/classes/${classData.class_id}/overview`
-                );
-                return;
-              }
-              // TODO: Add toast message
-            }
-          },
+          onConfirm: handleAddClass,
         });
       }}
     >

@@ -1,18 +1,27 @@
-import {
-  getClassData,
-} from "@/lib/data/data-layer/classes.data-layer";
+import { getClassData } from "@/lib/data/data-layer/classes.data-layer";
 import { Metadata } from "next";
 
-import { redirect } from "next/navigation";
 import { Class } from "@/lib/db/schema.db";
 import { admin_firestore } from "@/lib/db/firebase-connection.server";
-import { joinClassAction } from "@/lib/data/actions/classes.actions";
 import JoinClassComponent from "./components/JoinClassComponent";
 
+export default async function JoinClassPage({
+  params,
+}: {
+  params: Promise<{ class_id: string }>;
+}) {
+  const { class_id } = await params;
+  const classRes = getClassData(class_id, ["class_name"]);
+
+  return (
+    <main className="flex justify-center items-center size-full">
+      <JoinClassComponent class_id={class_id} classData={classRes} />
+    </main>
+  );
+}
+
 export const generateStaticParams = async () => {
-  const classesRefs = await admin_firestore
-    .collection(Class.collection)
-    .get();
+  const classesRefs = await admin_firestore.collection(Class.collection).get();
 
   const docs = classesRefs.docs;
   return docs.map((classSnap) => ({ class_id: classSnap.id }));
@@ -26,9 +35,9 @@ export const generateMetadata = async ({
   params: Promise<{ class_id: string }>;
 }): Promise<Metadata> => {
   const { class_id } = await params;
-  const classData = await getClassData(class_id);
+  const classRes = await getClassData(class_id);
 
-  if (!classData) {
+  if (classRes.status !== 200) {
     return {
       metadataBase: new URL(siteUrl),
       title: `Classe non trovata`,
@@ -84,10 +93,10 @@ export const generateMetadata = async ({
       },
     };
   }
-
+  const className = classRes.data.class_name;
   return {
     metadataBase: new URL(siteUrl),
-    title: `Unisciti alla classe ${classData.class_name}`,
+    title: `Unisciti alla classe ${className}`,
     description:
       "Unisciti alla classe ${classData.class_name} in FantaProf per iniziare a giocare con i tuoi professori e sfidare i tuoi amici!",
     alternates: {
@@ -109,7 +118,7 @@ export const generateMetadata = async ({
       "unisciti alla classe",
     ],
     openGraph: {
-      title: `Unisciti alla classe ${classData.class_name}`,
+      title: `Unisciti alla classe ${className}`,
 
       description:
         "Unisciti alla classe ${classData.class_name} in FantaProf per iniziare a giocare con i tuoi professori e sfidare i tuoi amici!",
@@ -128,7 +137,7 @@ export const generateMetadata = async ({
     },
     twitter: {
       card: "summary_large_image",
-      title: `Unisciti alla classe ${classData.class_name}`,
+      title: `Unisciti alla classe ${className}`,
       site: "@FantaProf",
       creator: "@FantaProf",
       description:
@@ -150,21 +159,3 @@ export const generateMetadata = async ({
     },
   };
 };
-
-export default async function JoinClassPage({
-  params,
-}: {
-  params: Promise<{ class_id: string }>;
-}) {
-  const { class_id } = await params;
-  const classData = getClassData(class_id, [
-    "class_name"
-  ]);
- 
-
-  return (
-    <main className="flex justify-center items-center size-full">
-        <JoinClassComponent class_id={class_id} classData={classData}/>
-    </main>
-  );
-}

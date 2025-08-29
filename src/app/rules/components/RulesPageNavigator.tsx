@@ -71,12 +71,12 @@ export default function RulesPageNavigator() {
       {/** Site Explaination */}
       <li>
         <Link
-          href="/rules/site-explaination"
+          href="/rules/site-explanation"
           onClick={() => {
             handleClick();
           }}
           className={`motion-safe:opacity-0 motion-reduce:animate-none animate-fade-in-left animation-delay-500 ${
-            pathname === "/rules/site-explaination" ? "d-menu-active" : ""
+            pathname === "/rules/site-explanation" ? "d-menu-active" : ""
           }`}
         >
           <p className="w-max">Funzionamento Sito</p>

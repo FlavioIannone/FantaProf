@@ -66,7 +66,7 @@ type SectionProps = {
 const Section = ({ title, children, icon }: SectionProps) => (
   <section className="mb-10">
     <h2 className="lg:text-4xl md:text-3xl sm:text-2xl text-2xl text-primary flex items-center mb-4">
-      {icon && <i className={`bi ${icon} me-2`} aria-hidden="true"></i>}
+      {icon && <i className={`bi ${icon} me-2`} aria-hidden></i>}
       {title}
     </h2>
     <p className="lg:text-lg sm:text-base text-base opacity-90">{children}</p>

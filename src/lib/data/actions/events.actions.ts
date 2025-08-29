@@ -28,7 +28,9 @@ export const createEventTemplateAction = withSession(
       class_id,
       templateEventData
     );
-    if (res.successful) revalidatePath(`/dashboard/classes/${class_id}/events`);
+    if (res.status === 200)
+      revalidatePath(`/dashboard/classes/${class_id}/events`);
+    return res;
   }
 );
 
@@ -40,7 +42,9 @@ export const createEventTemplateAction = withSession(
 export const deleteEventTemplateAction = withSession(
   async (uid: string, class_id: string, event_id: string) => {
     const res = await deleteEventTemplateInFirestore(class_id, event_id);
-    if (res.successful) revalidatePath(`/dashboard/classes/${class_id}/events`);
+    if (res.status === 200)
+      revalidatePath(`/dashboard/classes/${class_id}/events`);
+    return res;
   }
 );
 
@@ -56,19 +60,23 @@ export const modifyEventTemplateAction = withSession(
       event_id,
       templateEventData
     );
-    if (res.successful) {
+    if (res.status === 200) {
       revalidatePath(`/dashboard/classes/${class_id}/events`);
     }
+    return res;
   }
 );
 
 export const registerEventAction = withSession(
   async (uid: string, class_id: string, eventData: EventData) => {
     const res = await registerEventInFirestore(class_id, eventData);
-    if (res.successful) {
+    if (res.status === 200) {
+      console.log("Revalidating...");
+
       revalidatePath(`/dashboard/classes/${class_id}/events`);
       revalidatePath(`/dashboard/classes/${class_id}/overview`);
       revalidatePath(`/dashboard/classes/${class_id}/team`);
     }
+    return res;
   }
 );

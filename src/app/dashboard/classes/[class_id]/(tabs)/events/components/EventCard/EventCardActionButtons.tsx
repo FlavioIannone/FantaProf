@@ -1,11 +1,12 @@
 "use client";
 
 import { useModal } from "@/components/client/Modal/ModalContext";
+import { useToast } from "@/components/client/Toast/ToastContext";
 import {
   deleteEventTemplateAction,
   modifyEventTemplateAction,
 } from "@/lib/data/actions/events.actions";
-import { EventTemplateType, TeacherTableRowType } from "@/lib/data/types.data";
+import { EventTemplateType, TeacherRowType } from "@/lib/data/types.data";
 
 /**
  * Action buttons of the event template card
@@ -18,6 +19,7 @@ export default function EventCardActionButtons({
   eventData: EventTemplateType;
 }) {
   const modal = useModal();
+  const toast = useToast();
 
   const handleModifyTemplate = async (formData?: FormData) => {
     if (!formData) return;
@@ -27,12 +29,24 @@ export default function EventCardActionButtons({
       .toString()
       .trim();
     const eventPoints = formData.get("event_points")!.toString().trim();
-    await modifyEventTemplateAction(class_id, eventData.id, {
+    const res = await modifyEventTemplateAction(class_id, eventData.event_id, {
       title: eventName === "" ? undefined : eventName,
       description: eventDescription === "" ? undefined : eventDescription,
       points: eventPoints === "" ? undefined : parseInt(eventPoints),
     });
     modal.setModal(false);
+    if (res.status === 200) {
+      toast.setToast(true, {
+        content: "Template modificato con successo.",
+        toastType: "success",
+      });
+      return;
+    }
+    toast.setToast(true, {
+      content:
+        "Si è verificato un errore durante l'operazione di modifica del template.",
+      toastType: "error",
+    });
   };
 
   return (
@@ -65,7 +79,7 @@ export default function EventCardActionButtons({
               });
             }}
           >
-            <i className="bi bi-pencil"></i>
+            Modifica<i className="bi bi-pencil" aria-hidden></i>
           </button>
         </li>
         <li>
@@ -79,13 +93,28 @@ export default function EventCardActionButtons({
                 closeOnSubmit: false,
                 confirmButtonText: "Conferma",
                 onConfirm: async () => {
-                  await deleteEventTemplateAction(class_id, eventData.id);
+                  const res = await deleteEventTemplateAction(
+                    class_id,
+                    eventData.event_id
+                  );
                   modal.setModal(false);
+                  if (res.status === 200) {
+                    toast.setToast(true, {
+                      content: "Template eliminato con successo.",
+                      toastType: "success",
+                    });
+                    return;
+                  }
+                  toast.setToast(true, {
+                    content:
+                      "Si è verificato un errore durante l'eliminazione del template.",
+                    toastType: "error",
+                  });
                 },
               });
             }}
           >
-            <i className="bi bi-trash3"></i>
+            Elimina<i className="bi bi-trash3"></i>
           </button>
         </li>
       </ul>

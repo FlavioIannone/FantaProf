@@ -2,10 +2,10 @@ import DashboardNavbar from "@/app/dashboard/components/DashboardNavbar";
 import ClassesTable from "./components/ClassTable/ClassesTable";
 import StatsDisplayer from "./components/DashboardStats/StatsDisplayer";
 import { getClasses } from "@/lib/data/data-layer/classes.data-layer";
-import { Suspense } from "react";
 
 export default async function Dashboard() {
   const classes = await getClasses();
+
   return (
     <>
       <main className="w-full md:h-dvh flex flex-col justify-between">
@@ -16,7 +16,7 @@ export default async function Dashboard() {
             {/**Stats */}
             <StatsDisplayer />
             {/**Classes */}
-              <ClassesTable classes={classes} />
+            <ClassesTable classes={classes} />
           </div>
         </div>
       </main>
