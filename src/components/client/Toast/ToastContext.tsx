@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useState, useContext, useEffect } from "react";
+import { createContext, useState, useContext, useEffect, useRef } from "react";
 
 export type ToastProps = {
   content: React.ReactNode;
@@ -21,26 +21,43 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
   const [isOpen, setIsOpen] = useState(false);
   const [toastProps, setToastProps] = useState<ToastProps | null>(null);
 
+  // Queue of toasts waiting to show
+  const queueRef = useRef<ToastProps[]>([]);
+
   const setToast = (open: boolean, props?: ToastProps) => {
-    if (props) {
-      setToastProps(props);
+    if (open) {
+      if (isOpen) {
+        // se un toast è già aperto → accoda
+        if (props) queueRef.current.push(props);
+        return;
+      } else {
+        if (props) setToastProps(props);
+        setIsOpen(true);
+      }
+    } else {
+      setIsOpen(false);
     }
-    if (open && isOpen) return;
-    setIsOpen(open);
   };
 
   useEffect(() => {
     const duration = getToastDuration(); // In seconds
-    console.log(duration);
 
     let timeout: NodeJS.Timeout;
     if (isOpen) {
-      timeout = setTimeout(() => setIsOpen(false), duration * 1000);
+      timeout = setTimeout(() => {
+        setIsOpen(false);
+      }, duration * 1000);
     }
-    return () => {
-      clearTimeout(timeout);
-    };
+    return () => clearTimeout(timeout);
   }, [isOpen, toastProps]);
+
+  // When a toast closes, check the queue
+  useEffect(() => {
+    if (!isOpen && queueRef.current.length > 0) {
+      const next = queueRef.current.shift()!;
+      setToast(true, next);
+    }
+  }, [isOpen]);
 
   const getToastLoaderTrailColor = () => {
     switch (toastProps?.toastType) {
@@ -56,6 +73,7 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
         return "bg-base-content";
     }
   };
+
   const getToastLoaderBgColor = () => {
     switch (toastProps?.toastType) {
       case "success":
@@ -70,6 +88,7 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
         return "bg-base-200";
     }
   };
+
   const getToastColor = () => {
     switch (toastProps?.toastType) {
       case "success":
@@ -86,7 +105,7 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
   };
 
   const getToastDuration = () => {
-    if (!toastProps?.toastType) return 4;
+    if (!toastProps?.toastDuration) return 4;
     return toastProps.toastDuration ?? 4;
   };
 
@@ -103,14 +122,13 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
                 onClick={() => {
                   toastProps.onClose?.();
                   setIsOpen(false);
-                  console.log("Toast close");
                 }}
               >
                 <i className="bi bi-x-lg" aria-disabled></i>
               </button>
             </div>
             <div
-              className={`w-full h-1 overflow-clip ${getToastLoaderBgColor()} rounded-b-box border border-base-200 border-t-0`}
+              className={`w-full h-1 overflow-clip ${getToastLoaderBgColor()} rounded-b-box border border-base-200`}
             >
               <div
                 className={`h-full animate-shrink ${getToastLoaderTrailColor()}`}
