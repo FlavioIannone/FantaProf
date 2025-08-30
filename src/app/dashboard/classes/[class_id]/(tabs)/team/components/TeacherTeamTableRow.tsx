@@ -1,7 +1,10 @@
 "use client";
 import { useModal } from "@/components/client/Modal/ModalContext";
 import { useToast } from "@/components/client/Toast/ToastContext";
-import { removeTeacherFromTeam } from "@/lib/data/actions/team.actions";
+import {
+  makeTeacherCaptain,
+  removeTeacherFromTeam,
+} from "@/lib/data/actions/team.actions";
 
 export default function TeacherTeamTableRow({
   class_id,
@@ -74,6 +77,7 @@ export default function TeacherTeamTableRow({
       </div>
       {!skeleton && (
         <>
+          {/* Dropdown */}
           <div className="d-dropdown d-dropdown-end">
             <div tabIndex={0} role="button" className="d-btn d-btn-ghost p-0">
               <svg
@@ -88,10 +92,41 @@ export default function TeacherTeamTableRow({
                 <path d="M9.5 13a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0m0-5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0m0-5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0" />
               </svg>
             </div>
+            {/* Actions */}
             <ul
               tabIndex={0}
               className="d-dropdown-content d-menu bg-base-100 rounded-box z-1 w-52 p-2 shadow-sm"
             >
+              {/* Make captain */}
+              <li
+                onClick={() => {
+                  modal.setModal(true, {
+                    title: "Far diventare capitano",
+                    content: `Vuoi far diventare capitano del team il prof ${teacherData.name} ${teacherData.surname}?`,
+                    closeOnSubmit: false,
+                    confirmButtonText: "Conferma",
+                    onConfirm: async () => {
+                      const res = await makeTeacherCaptain(
+                        class_id,
+                        teacherData.teacher_id
+                      );
+                      modal.setModal(false);
+                      if (res.status === 200) {
+                        toast.setToast(true, {
+                          content: `Il prof ${teacherData.name} ${teacherData.surname} è diventato il capitano dal team.`,
+                          toastType: "success",
+                        });
+                      }
+                    },
+                  });
+                }}
+              >
+                <button type="button">
+                  <i className="bi bi-star" aria-hidden></i>
+                  Fai capitano
+                </button>
+              </li>
+              {/* Remove */}
               <li
                 onClick={() => {
                   modal.setModal(true, {

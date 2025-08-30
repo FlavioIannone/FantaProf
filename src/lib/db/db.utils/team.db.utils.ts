@@ -353,3 +353,76 @@ export const removeTeacherFromTeamInFirestore = async (
     };
   }
 };
+
+/**
+ * Makes a teacher the new captain of the specified student's team and removes the old one from the role.
+ * @param uid - The ID of the student
+ * @param class_id - The ID of the class
+ * @param teacher_id - The ID of the teacher
+ * @returns Successful state operation result, an error with it's status code and message otherwise. If the class or the teacher doesn't exist or the team collection is empty, status: 404.
+ */
+export const makeTeacherCaptainInFirestore = async (
+  uid: string,
+  class_id: string,
+  teacher_id: string
+): Promise<WriteOperationResult> => {
+  const newCaptainDocRef = admin_firestore
+    .collection(Class.collection)
+    .doc(class_id)
+    .collection(StudentEnrollment.collection)
+    .doc(uid)
+    .collection(TeamEnrollment.collection)
+    .doc(teacher_id);
+  const oldCaptainCollectionRef = admin_firestore
+    .collection(Class.collection)
+    .doc(class_id)
+    .collection(StudentEnrollment.collection)
+    .doc(uid)
+    .collection(TeamEnrollment.collection)
+    .where("captain", "==", true)
+    .limit(1);
+
+  try {
+    admin_firestore.runTransaction(async (t) => {
+      const [newCaptainSnap, oldCaptainCollectionSnap] = await Promise.all([
+        t.get(newCaptainDocRef),
+        t.get(oldCaptainCollectionRef),
+      ]);
+
+      if (!newCaptainSnap.exists) {
+        throw {
+          status: 404,
+          message: "The teacher to make captain doesn't exist",
+        };
+      }
+      if (oldCaptainCollectionSnap.empty) {
+        throw {
+          status: 404,
+          message:
+            "The teacher you want to remove from captain role doesn’t exist.",
+        };
+      }
+      const oldCaptainDocRef = oldCaptainCollectionSnap.docs[0].ref;
+      t.update(oldCaptainDocRef, {
+        captain: false,
+      }).update(newCaptainDocRef, {
+        captain: true,
+      });
+    });
+
+    return {
+      status: 200,
+    };
+  } catch (error: any) {
+    const status = error.status ?? 500;
+    const message = error.message ?? "Internal server error";
+    console.log(error);
+
+    // On failure, return error info.
+    // Defaults to 500 if status/message aren’t explicitly set
+    return {
+      status,
+      message,
+    };
+  }
+};
