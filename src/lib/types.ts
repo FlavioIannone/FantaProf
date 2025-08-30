@@ -1,3 +1,6 @@
+import { deleteSession } from "./data/session/session-manager.data-layer";
+import { client_auth } from "./firebase-connection.client";
+
 type ErrorStatuses = 400 | 402 | 403 | 404 | 409 | 500;
 type SuccessStatuses = 200;
 /**
@@ -85,4 +88,51 @@ export type EventRegistrationRowType = {
  */
 export const delay = (seconds: number): Promise<void> => {
   return new Promise((resolve) => setTimeout(resolve, seconds * 1000));
+};
+
+export const licenses = [
+  {
+    name: "questo sito",
+    link: "https://github.com/FlavioIannone/FantaProf/blob/main/LICENSE",
+  },
+  {
+    name: "Next.js",
+    link: "https://github.com/vercel/next.js/blob/canary/license.md",
+  },
+  {
+    name: "React.js",
+    link: "https://github.com/reactjs/react.dev/blob/main/LICENSE-DOCS.md",
+  },
+  {
+    name: "Tailwind.css",
+    link: "https://github.com/tailwindlabs/tailwindcss/blob/main/LICENSE",
+  },
+  {
+    name: "DaisyUI",
+    link: "https://github.com/saadeghi/daisyui/blob/master/LICENSE",
+  },
+  {
+    name: "Bootstrap Icons",
+    link: "https://github.com/twbs/bootstrap/blob/main/LICENSE",
+  },
+];
+
+export class AuthenticationWorkflowCodes {
+  static readonly joinClass = "join-class";
+  static readonly sessionExpired = "session-expired";
+  static readonly reauthenticationNeeded = "reauthentication-needed";
+}
+
+export const handleLogout = async () => {
+  // Delete the session
+  const sessionDeletionRes = await deleteSession();
+  try {
+    if (sessionDeletionRes) {
+      // Sign out from Firebase client
+      await client_auth.signOut();
+    }
+    return true;
+  } catch (error) {
+    return false;
+  }
 };

@@ -9,6 +9,7 @@ import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { withSession } from "../session/session-helpers.data-layer";
 import { verifySession } from "../session/session-manager.data-layer";
+import { AuthenticationWorkflowCodes } from "@/lib/types";
 
 /**
  * Creates a new class for the current user.
@@ -48,7 +49,9 @@ export const joinClassAction = async (class_id: string) => {
   const res = await verifySession();
   if (!res.successful) {
     redirect(
-      `/auth/login?reason=join-class&class_id=${encodeURIComponent(class_id)}`
+      `/auth/login?reason=${encodeURIComponent(
+        AuthenticationWorkflowCodes.joinClass
+      )}&class_id=${encodeURIComponent(class_id)}`
     );
   }
   const joinResult = await joinClassInFirestore(res.session.uid, class_id);

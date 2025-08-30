@@ -3,6 +3,10 @@ import { Class } from "@/lib/db/schema.db";
 import TeacherTeamTableRow from "./components/TeacherTeamTableRow";
 import { getTeam } from "@/lib/data/data-layer/team.data-layer";
 import NoDataUI from "@/components/server/NoDataUI";
+import { getClassData } from "@/lib/data/data-layer/classes.data-layer";
+import { getCurrentUserEnrollmentData } from "@/lib/data/data-layer/user.data-layer";
+import { redirect } from "next/navigation";
+import { calculatePointsBasedOnTeachersInTeamInFirestore } from "@/lib/db/db.utils/members.db.utils";
 
 export const generateStaticParams = async () => {
   const classesRefs = await admin_firestore.collection(Class.collection).get();
@@ -17,7 +21,20 @@ export default async function TeamTab({
   params: Promise<{ class_id: string }>;
 }) {
   const { class_id } = await params;
-  const [teamRes] = await Promise.all([getTeam(class_id)]);
+  const [teamRes, classRes, studentEnrollmentRes] = await Promise.all([
+    getTeam(class_id),
+    getClassData(class_id, ["initial_credits"]),
+    getCurrentUserEnrollmentData(class_id),
+  ]);
+
+  // Redirect if enrollment isn't valid
+  if (studentEnrollmentRes.status !== 200) {
+    redirect("/dashboard");
+  }
+
+  if (classRes.status !== 200) {
+    return null;
+  }
 
   const renderTeamTableUI = () => {
     if (teamRes.status === 200) {
@@ -115,13 +132,22 @@ export default async function TeamTab({
       <div className="d-rounded-box flex items-center shadow-lg border border-base-300 p-5">
         <div className="grow">
           <p className="text-primary">
-            <span className="text-4xl">230</span>pts
+            <span className="text-4xl">
+              {calculatePointsBasedOnTeachersInTeamInFirestore(
+                studentEnrollmentRes.data.uid,
+                class_id
+              )}
+            </span>
+            pts
           </p>
           <p>Il tuo punteggio</p>
         </div>
         <div className="grow">
           <p className="text-primary">
-            <span className="text-4xl">100</span>/200
+            <span className="text-4xl">
+              {studentEnrollmentRes.data.credits}
+            </span>
+            /{classRes.data.initial_credits}
           </p>
           <p>Crediti rimanenti</p>
         </div>

@@ -72,8 +72,8 @@ export default function AddClassButton() {
 // Separate component for the modal's content form fields
 const ModalBody = () => {
   return (
-    <fieldset className="d-fieldset">
-      <div>
+    <>
+      <fieldset className="d-fieldset">
         <legend className="d-fieldset-legend">Nome classe</legend>
         <input
           type="text"
@@ -85,8 +85,8 @@ const ModalBody = () => {
         <div className="d-validator-hint h-0 peer-user-invalid:h-auto">
           Nome non valido
         </div>
-      </div>
-      <div>
+      </fieldset>
+      <fieldset className="d-fieldset">
         <legend className="d-fieldset-legend">Crediti iniziali</legend>
         <input
           type="number"
@@ -98,7 +98,7 @@ const ModalBody = () => {
         <div className="d-validator-hint h-0 peer-user-invalid:h-auto">
           Crediti non validi
         </div>
-      </div>
-    </fieldset>
+      </fieldset>
+    </>
   );
 };

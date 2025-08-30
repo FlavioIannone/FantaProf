@@ -3,7 +3,11 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState, FormEvent, useEffect, useRef } from "react";
 import { client_auth } from "@/lib/firebase-connection.client";
-import { type LoginData } from "@/lib/types";
+import {
+  AuthenticationWorkflowCodes,
+  handleLogout,
+  type LoginData,
+} from "@/lib/types";
 import { onAuthStateChanged, User } from "firebase/auth";
 import {
   logInWithLoginData,
@@ -17,7 +21,7 @@ export default function LoginForm() {
   const toast = useToast();
   // True when on the server, false when on the client
   const [isPending, setIsPending] = useState(true);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [isRedirecting, setIsRedirecting] = useState(false);
 
   const searchParams = useSearchParams();
@@ -35,12 +39,12 @@ export default function LoginForm() {
   const redirectFlag = useRef(false);
 
   useEffect(() => {
-    if (reason === "join-class") {
+    if (reason === AuthenticationWorkflowCodes.joinClass) {
       toast.setToast(true, {
         content: "Esegui il login per entrare nella classe.",
         toastType: "info",
       });
-    } else if (reason === "session-expired") {
+    } else if (reason === AuthenticationWorkflowCodes.sessionExpired) {
       toast.setToast(true, {
         content: "Effettua di nuovo il login per continuare.",
         toastType: "info",
@@ -51,14 +55,15 @@ export default function LoginForm() {
   // Redirect se già autenticato
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(client_auth, async (user) => {
-      setIsLoading(true);
+      setIsSubmitting(true);
       if (user) {
         setIsRedirecting(true);
         await redirectUser(user);
       }
-      setIsPending(false);
-      setIsLoading(false);
+
+      setIsSubmitting(false);
     });
+    setIsPending(false);
     return () => unsubscribe();
   }, [router]);
 
@@ -71,8 +76,10 @@ export default function LoginForm() {
 
     await createSession(token);
 
-    if (reason === "join-class") {
+    if (reason === AuthenticationWorkflowCodes.joinClass) {
+      // Obtain the class id
       const classId = safeDecode(searchParams.get("class_id"));
+      // If the class id isn't valid
       if (classId === "") {
         toast.setToast(true, {
           content: "ID classe non valido.",
@@ -103,7 +110,7 @@ export default function LoginForm() {
       return;
     }
 
-    setIsLoading(true);
+    setIsSubmitting(true);
     const result = await logInWithLoginData(loginData);
 
     if (result.successful) {
@@ -114,12 +121,12 @@ export default function LoginForm() {
         toastType: "error",
       });
     }
-    setIsLoading(false);
+    setIsSubmitting(false);
   };
 
   // Gestione login con Google
   const onGoogleLogin = async () => {
-    setIsLoading(true);
+    setIsSubmitting(true);
     const result = await signInWithGoogle();
     if (result.successful) {
       await redirectUser(result.user);
@@ -129,10 +136,10 @@ export default function LoginForm() {
         toastType: "error",
       });
     }
-    setIsLoading(false);
+    setIsSubmitting(false);
   };
 
-  if (isLoading || isRedirecting) {
+  if (isSubmitting || isRedirecting) {
     return (
       <main className="flex justify-center items-center size-full">
         <span className="d-loading d-loading-ring d-loading-xl"></span>
@@ -202,7 +209,7 @@ export default function LoginForm() {
         type="submit"
         aria-label="Accedi"
         className="d-btn d-btn-primary d-btn-block animate-fade-in-bottom text-lg motion-reduce:animate-none  "
-        disabled={isLoading || isPending || isRedirecting}
+        disabled={isSubmitting || isPending || isRedirecting}
       >
         Accedi
       </button>
@@ -220,7 +227,7 @@ export default function LoginForm() {
         aria-label="Accedi con google"
         onClick={onGoogleLogin}
         className="d-btn d-btn-outline d-btn-block animate-fade-in-bottom motion-reduce:animate-none  "
-        disabled={isLoading || isPending || isRedirecting}
+        disabled={isSubmitting || isPending || isRedirecting}
       >
         <i className="bi bi-google" aria-hidden></i>Accedi con google
       </button>

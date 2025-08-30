@@ -94,10 +94,10 @@ function ModalProvider({ children }: Readonly<{ children: React.ReactNode }>) {
               setIsLoading(true);
               const formData = new FormData(e.currentTarget);
               const res = await modalProps.onConfirm?.(formData);
+              setIsLoading(false);
               if (res === false) {
                 return;
               }
-              setIsLoading(false);
               if (modalProps.closeOnSubmit === false) return;
               setIsOpen(false);
             }}

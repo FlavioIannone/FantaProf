@@ -6,9 +6,12 @@ import {
   GoogleAuthProvider,
   signInWithEmailAndPassword,
   AuthErrorCodes,
-
   User,
   updateProfile,
+  reauthenticateWithPopup,
+  EmailAuthProvider,
+  reauthenticateWithCredential,
+  sendEmailVerification,
 } from "firebase/auth";
 import { client_auth } from "./firebase-connection.client";
 import { SignInData, LoginData } from "./types";
@@ -27,13 +30,13 @@ const signInWithGooglePopup = () =>
 
 type AuthenticationFunctionsReturnType =
   | {
-    successful: true;
-    user: User
-  }
+      successful: true;
+      user: User;
+    }
   | {
-    successful: false;
-    errorMsg: string;
-  };
+      successful: false;
+      errorMsg: string;
+    };
 
 export const signInWithGoogle =
   async (): Promise<AuthenticationFunctionsReturnType> => {
@@ -42,7 +45,7 @@ export const signInWithGoogle =
       const userCredentials = await signInWithGooglePopup();
       return {
         successful: true,
-        user: userCredentials.user
+        user: userCredentials.user,
       };
     } catch (error) {
       const authError = error as AuthError;
@@ -60,6 +63,40 @@ export const signInWithGoogle =
     }
   };
 
+export const reauthenticateGoogleUser = async (user: User) => {
+  try {
+    const provider = new GoogleAuthProvider();
+    provider.setCustomParameters({ prompt: "select_account" }); // forces account selection
+    await reauthenticateWithPopup(user, provider);
+    return { successful: true };
+  } catch (error) {
+    const authError = error as AuthError;
+    return {
+      successful: false,
+      errorMsg:
+        authError.code === "auth/popup-closed-by-user"
+          ? "La finestra di autenticazione è stata chiusa."
+          : "Errore durante la ri-autenticazione.",
+    };
+  }
+};
+
+export const reauthenticateEmailUser = async (user: User, password: string) => {
+  try {
+    const credential = EmailAuthProvider.credential(user.email!, password);
+    await reauthenticateWithCredential(user, credential);
+    return { successful: true };
+  } catch (error: any) {
+    let message = "Errore durante la ri-autenticazione.";
+    if (error.code === "auth/wrong-password") {
+      message = "Password errata.";
+    } else if (error.code === "auth/too-many-requests") {
+      message = "Troppi tentativi. Riprova più tardi.";
+    }
+    return { successful: false, errorMsg: message };
+  }
+};
+
 export const createAccountWithFormData = async (
   formData: SignInData
 ): Promise<AuthenticationFunctionsReturnType> => {
@@ -70,12 +107,13 @@ export const createAccountWithFormData = async (
       formData.email!,
       formData.password!
     );
-    updateProfile(userCredentials.user, {
-      displayName: formData.username
-    })
+    await updateProfile(userCredentials.user, {
+      displayName: formData.username,
+    });
+    await sendEmailVerification(userCredentials.user);
     return {
       successful: true,
-      user: userCredentials.user
+      user: userCredentials.user,
     };
   } catch (error) {
     const authError = error as AuthError;
@@ -106,15 +144,15 @@ export const logInWithLoginData = async (
     );
     return {
       successful: true,
-      user: userCredentials.user
-    }
+      user: userCredentials.user,
+    };
   } catch (error) {
     console.log(error);
 
     const authError = error as AuthError;
     let message = "Errore durante l'accesso.";
     if (authError.code === AuthErrorCodes.INVALID_LOGIN_CREDENTIALS) {
-      message = "Credenziali non valide."
+      message = "Credenziali non valide.";
     }
     if (authError.code === AuthErrorCodes.USER_DELETED) {
       message = "Utente non trovato.";

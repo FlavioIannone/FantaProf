@@ -15,6 +15,7 @@ export default function TeacherTeamTableRow({
     points: number;
     deleted: boolean;
     teacher_id: string;
+    captain: boolean;
   };
   skeleton?: boolean;
 }) {
@@ -44,15 +45,23 @@ export default function TeacherTeamTableRow({
       }`}
     >
       <div className="flex items-center gap-2">
-        <div className="d-avatar size-14 rounded-full">
-          <span
-            className={`size-full flex items-center justify-center bg-base-300 rounded-full text-2xl ${
-              skeleton && "invisible"
-            }`}
-          >
-            {teacherData.name.charAt(0) + teacherData.surname.charAt(0)}
-          </span>
+        <div className="d-indicator d-indicator-bottom d-indicator-center">
+          {teacherData.captain && (
+            <span className="d-indicator-item d-badge p-0.5 size-6 bg-base-100 rounded-full">
+              <i className="bi bi-star" aria-hidden></i>
+            </span>
+          )}
+          <div className="d-avatar size-14 rounded-full">
+            <span
+              className={`size-full flex items-center justify-center bg-base-300 rounded-full text-2xl ${
+                skeleton && "invisible"
+              }`}
+            >
+              {teacherData.name.charAt(0) + teacherData.surname.charAt(0)}
+            </span>
+          </div>
         </div>
+
         <div className="flex flex-col">
           <h1 className={`md:text-2xl text-lg ${skeleton && "invisible"}`}>
             {teacherData.name} {teacherData.surname}

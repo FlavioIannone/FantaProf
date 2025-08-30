@@ -34,6 +34,7 @@ export default function TeamTabLoading() {
                 points: (index + 1) * 10,
                 deleted: false,
                 teacher_id: "",
+                captain: false,
               }}
             />
           ))}

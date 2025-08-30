@@ -26,7 +26,7 @@ function UserDataProvider({ children }: { children: React.ReactNode }) {
     });
 
     return () => unsubscribe(); // Clean up the listener
-  }, []);
+  }, [client_auth]);
 
   return (
     <UserDataContext.Provider value={{ userData, setUserData }}>

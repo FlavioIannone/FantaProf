@@ -78,6 +78,11 @@ export default function RegistrationForm() {
     const result = await createAccountWithFormData(signInData);
     if (result.successful) {
       await redirectUser(result.user);
+      toast.setToast(true, {
+        content: "Ti è stata inviata una mail di verifica per questo account.",
+        toastDuration: 10,
+        toastType: "info",
+      });
     } else {
       toast.setToast(true, {
         content: "Si è verificato un errore durante la registrazione.",
@@ -95,6 +100,11 @@ export default function RegistrationForm() {
     const result = await signInWithGoogle();
     if (result.successful) {
       await redirectUser(result.user);
+      toast.setToast(true, {
+        content: "Ti è stata inviata una mail di verifica per questo account.",
+        toastDuration: 10,
+        toastType: "info",
+      });
     } else {
       toast.setToast(true, {
         content: "Si è verificato un errore durante la registrazione.",

@@ -6,7 +6,7 @@ import Image from "next/image";
 import { UserData } from "@/lib/types";
 import { updateEmail, updateProfile } from "firebase/auth";
 
-export default function UserDataSettingsCard() {
+export default function UserProfileSettingsCard() {
   const { userData } = useUserData();
   const [modifyState, setModifyState] = useState<
     "idle" | "modifying" | "updating"
@@ -52,7 +52,8 @@ export default function UserDataSettingsCard() {
           <div className="sm:block flex justify-center">
             <div className="d-avatar [&>div]:overflow-visible! relative lg:size-32 md:size-28 sm:size-24 size-48 me-5">
               <div className="d-indicator">
-                <span className="d-indicator-item">
+                {/* TODO: Add logic to change profile picture*/}
+                {/* <span className="d-indicator-item">
                   <button
                     type="button"
                     className={`d-btn d-btn-primary p-0.5 h-auto rounded-full`}
@@ -73,20 +74,19 @@ export default function UserDataSettingsCard() {
                       }}
                     />
                   </button>
-                </span>
+                </span> */}
                 {/* Profile Image and fallback*/}
                 <>
                   {userData.photoURL ? (
                     /*Image */
                     <Image
                       src={userData.photoURL}
-                      priority={false}
+                      priority={true}
                       alt="Profile Picture"
                       width={96}
                       quality={100}
                       height={96}
                       className={`rounded-full border border-base-content/25`}
-                      loading="lazy"
                     />
                   ) : (
                     /**Person Icon*/

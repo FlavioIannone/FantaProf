@@ -2,32 +2,13 @@
 
 import { useModal } from "@/components/client/Modal/ModalContext";
 import { useToast } from "@/components/client/Toast/ToastContext";
-import { deleteSession } from "@/lib/data/session/session-manager.data-layer";
-import { client_auth } from "@/lib/firebase-connection.client";
+import { handleLogout } from "@/lib/types";
 import { useRouter } from "next/navigation";
 
 export default function LogoutButton() {
   const router = useRouter();
   const modal = useModal();
   const toast = useToast();
-
-  const handleLogout = async () => {
-    // Delete the session
-    const sessionDeletionRes = await deleteSession();
-    try {
-      if (sessionDeletionRes) {
-        // Sign out from Firebase client
-        await client_auth.signOut();
-        router.replace("/");
-      }
-      modal.setModal(false);
-    } catch (error) {
-      toast.setToast(true, {
-        content: "Si è verificato un errore durante la procedura di logout.",
-        toastType: "error",
-      });
-    }
-  };
 
   return (
     <button
@@ -37,7 +18,19 @@ export default function LogoutButton() {
         modal.setModal(true, {
           title: "Effettuare il logout",
           content: "Confermi di voler effettuare il logout?",
-          onConfirm: handleLogout,
+          onConfirm: async () => {
+            const res = await handleLogout();
+            modal.setModal(false);
+            if (!res) {
+              toast.setToast(true, {
+                content:
+                  "Si è verificato un errore durante la procedura di logout.",
+                toastType: "error",
+              });
+              return;
+            }
+            router.replace("/");
+          },
           confirmButtonText: "Conferma",
           closeOnSubmit: false,
         });

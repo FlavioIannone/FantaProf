@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { verifySession } from "./session-manager.data-layer";
+import { AuthenticationWorkflowCodes } from "@/lib/types";
 
 /**
  * Verifies the session and then returns the function
@@ -16,7 +17,11 @@ export function withSession<TArgs extends any[], TResult>(
     const res = await verifySession();
 
     if (!res.successful) {
-      redirect("/auth/login?reason=session-expired");
+      redirect(
+        `/auth/login?reason=${encodeURIComponent(
+          AuthenticationWorkflowCodes.sessionExpired
+        )}`
+      );
     }
 
     return fn(res.session.uid, ...args);
