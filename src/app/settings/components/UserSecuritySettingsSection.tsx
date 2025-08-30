@@ -16,12 +16,22 @@ import {
   reauthenticateEmailUser,
   reauthenticateGoogleUser,
 } from "@/lib/authentication-manager";
+import { useEffect } from "react";
+import { client_auth } from "@/lib/firebase-connection.client";
 
 export default function UserSecuritySettingsSection() {
   const { userData } = useUserData();
   const toast = useToast();
   const modal = useModal();
   const router = useRouter();
+
+  useEffect(() => {
+    const logUser = async () => {
+      await client_auth.currentUser?.reload();
+      console.log(client_auth.currentUser);
+    };
+    logUser();
+  }, [client_auth.currentUser]);
 
   const handleReauthentication = async (user: User | undefined) => {
     modal.setIsLoading(false);
@@ -98,6 +108,7 @@ export default function UserSecuritySettingsSection() {
         toastDuration: 8,
       });
       sendEmailVerification(userData);
+      return;
     }
 
     try {
@@ -159,7 +170,7 @@ export default function UserSecuritySettingsSection() {
       );
       return;
     }
-    if (!userData.email) {
+    if (!userData.providerData[0].email) {
       toast.setToast(true, {
         content: "Nessun indirizzo mail collegato con questo account.",
         toastType: "error",
@@ -175,7 +186,7 @@ export default function UserSecuritySettingsSection() {
     }
     await sendEmailVerification(userData);
     toast.setToast(true, {
-      content: `Email di verifica inviato all'indirizzo ${userData.email}.`,
+      content: `Email di verifica inviato all'indirizzo ${userData.providerData[0].email}.`,
       toastType: "info",
     });
   };
@@ -232,7 +243,7 @@ export default function UserSecuritySettingsSection() {
               );
               return;
             }
-            if (!userData.email) {
+            if (!userData.providerData[0].email) {
               toast.setToast(true, {
                 content: "Nessun indirizzo mail collegato con questo account.",
                 toastType: "error",
@@ -241,7 +252,7 @@ export default function UserSecuritySettingsSection() {
             }
             modal.setModal(true, {
               title: "Procedura di verifica indirizzo mail",
-              content: `Desideri verificare l'indirizzo mail ${userData.email}?`,
+              content: `Desideri verificare l'indirizzo mail ${userData.providerData[0].email}?`,
               confirmButtonText: "Conferma",
               onConfirm: attempToVerifyEmail,
             });

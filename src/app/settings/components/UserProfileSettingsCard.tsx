@@ -124,7 +124,7 @@ export default function UserProfileSettingsCard() {
                 </h1>
               )}
               <h2 className="lg:text-2xl md:text-xl sm:text-xl text-lg opacity-70">
-                {userData.email ?? (
+                {userData.providerData[0].email ?? (
                   <p className="italic">Email non collegata</p>
                 )}
               </h2>

@@ -43,6 +43,7 @@ export const signInWithGoogle =
     try {
       await client_auth.setPersistence(browserLocalPersistence);
       const userCredentials = await signInWithGooglePopup();
+
       return {
         successful: true,
         user: userCredentials.user,
