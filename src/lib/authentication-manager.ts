@@ -12,6 +12,7 @@ import {
   EmailAuthProvider,
   reauthenticateWithCredential,
   sendEmailVerification,
+  updateEmail,
 } from "firebase/auth";
 import { client_auth } from "./firebase-connection.client";
 import { SignInData, LoginData } from "./types";
