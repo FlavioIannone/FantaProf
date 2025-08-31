@@ -73,7 +73,7 @@ export const getClassMembersFromFirestore = cache(
           credits: enrollmentData.credits ?? 0,
           points: totalPoints ?? 0,
           admin: enrollmentData.admin ?? false,
-          email: user.providerData[0].email ?? "No email",
+          email: user.email ?? "No email",
           uid: user.uid,
         });
       }

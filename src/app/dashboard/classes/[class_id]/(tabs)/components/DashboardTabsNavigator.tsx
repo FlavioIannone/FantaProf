@@ -36,7 +36,7 @@ export default function DashboardTabsNavigator({
         key={tabData.label}
         role="tab"
         disabled
-        className="d-tab md:grow-0 grow flex md:space-x-1 md:flex-row flex-col md:h-auto h-max  "
+        className="d-tab md:grow-0 grow flex md:space-x-1 md:flex-row flex-col md:h-auto h-max"
       >
         <i className={`text-lg ${tabData.icon}`} aria-hidden></i>
         <p className="md:text-lg text-md">{tabData.label}</p>
@@ -66,11 +66,11 @@ export default function DashboardTabsNavigator({
 
   return (
     <nav
-      className={`${className} flex d-navbar md:shadow md:border-b border-t border-base-300 items-center lg:px-8 md:px-6 sm:px-5 px-4`}
+      className={`${className} flex d-navbar md:shadow md:border-b border-t border-base-300 items-center lg:px-8 md:px-6 sm:px-5 px-2`}
     >
       <div
         role="tablist"
-        className="d-tabs d-tabs-border h-full flex md:space-x-5 space-x-0 w-full md:px-0 px-8"
+        className="d-tabs d-tabs-border h-full flex md:space-x-5 space-x-0 w-full"
       >
         {activeTab === null ? <TabButtonsSkeleton /> : <TabButtons />}
       </div>
