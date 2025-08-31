@@ -12,16 +12,16 @@ import {
   EmailAuthProvider,
   reauthenticateWithCredential,
   sendEmailVerification,
+  updateEmail,
 } from "firebase/auth";
 import { client_auth } from "./firebase-connection.client";
 import { SignInData, LoginData } from "./types";
 
 //* Google Auth Provider
 const googleProvider = new GoogleAuthProvider();
-googleProvider.addScope("email"); // Ensure proper scopes are added
-googleProvider.setCustomParameters({
-  prompt: "select_account", // Ensures the account selection popup is shown
-});
+googleProvider.addScope("email");
+googleProvider.addScope("profile");
+googleProvider.setCustomParameters({ prompt: "select_account" });
 
 const signInWithGooglePopup = () =>
   signInWithPopup(client_auth, googleProvider);
@@ -43,6 +43,7 @@ export const signInWithGoogle =
     try {
       await client_auth.setPersistence(browserLocalPersistence);
       const userCredentials = await signInWithGooglePopup();
+      await userCredentials.user.reload();
 
       return {
         successful: true,
@@ -66,6 +67,8 @@ export const signInWithGoogle =
 
 export const reauthenticateGoogleUser = async (user: User) => {
   try {
+    await user.reload();
+
     const provider = new GoogleAuthProvider();
     provider.setCustomParameters({ prompt: "select_account" }); // forces account selection
     await reauthenticateWithPopup(user, provider);
@@ -84,6 +87,8 @@ export const reauthenticateGoogleUser = async (user: User) => {
 
 export const reauthenticateEmailUser = async (user: User, password: string) => {
   try {
+    await user.reload();
+
     const credential = EmailAuthProvider.credential(user.email!, password);
     await reauthenticateWithCredential(user, credential);
     return { successful: true };
@@ -108,10 +113,13 @@ export const createAccountWithFormData = async (
       formData.email!,
       formData.password!
     );
+    await userCredentials.user.reload();
+
     await updateProfile(userCredentials.user, {
       displayName: formData.username,
     });
     await sendEmailVerification(userCredentials.user);
+
     return {
       successful: true,
       user: userCredentials.user,
@@ -143,6 +151,8 @@ export const logInWithLoginData = async (
       loginData.email!,
       loginData.password!
     );
+    await userCredentials.user.reload();
+
     return {
       successful: true,
       user: userCredentials.user,

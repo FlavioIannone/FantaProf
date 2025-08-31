@@ -110,8 +110,7 @@ export default function MembersTableRow({
         </div>
         <div className="flex flex-col">
           <h1 className="md:text-2xl text-xl">
-            {member.display_name}{" "}
-            {member.email === userData?.providerData[0].email && " (tu)"}
+            {member.display_name} {member.email === userData?.email && " (tu)"}
           </h1>
           <h2 className="opacity-70 md:text-lg text-md">
             Crediti: {member.credits}
