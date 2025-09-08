@@ -60,7 +60,7 @@ export const createEventTemplateInFirestore = async (
     // Default to 500 internal error if status/message not set
     const status = error.status ?? 500;
     const message = error.message ?? "Internal server error";
-
+    console.log(`Fn: createEventTemplateInFirestore, error: `);
     console.log(error);
 
     return {
@@ -120,7 +120,7 @@ export const modifyEventTemplateInFirestore = async (
     // Default to 500 internal error if status/message not set
     const status = error.status ?? 500;
     const message = error.message ?? "Internal server error";
-
+    console.log(`Fn: modifyEventTemplateInFirestore, error: `);
     console.log(error);
 
     return {
@@ -184,8 +184,8 @@ export const deleteEventTemplateInFirestore = async (
   } catch (error: any) {
     const status = error.status ?? 500;
     const message = error.message ?? "Error while deleting the event template";
+    console.log(`Fn: deleteEventTemplateInFirestore, error: `);
     console.log(error);
-
     return {
       status,
       message,
@@ -234,8 +234,8 @@ export const getEventsTemplateFromFirestore = cache(
       const status = error.status ?? 500;
       const message = error.message ?? "Internal server error";
 
+      console.log(`Fn: getEventsTemplateFromFirestore, error: `);
       console.log(error);
-
       return {
         status,
         message,
@@ -286,8 +286,8 @@ export const getEventTemplateFromFirestore = cache(
       const status = error.status ?? 500;
       const message = error.message ?? "Internal server error";
 
+      console.log(`Fn: getEventTemplateFromFirestore, error: `);
       console.log(error);
-
       return {
         status,
         message,
@@ -372,8 +372,8 @@ export const registerEventInFirestore = async (
   } catch (error: any) {
     const status = error.status ?? 500;
     const message = error.message ?? "Error while deleting the event template";
+    console.log(`Fn: registerEventInFirestore, error: `);
     console.log(error);
-
     return {
       status,
       message,
@@ -453,8 +453,8 @@ export const getRegisteredEventsFromFirestore = cache(
       const status = error.status ?? 500;
       const message =
         error.message ?? "Error while deleting the event template";
+      console.log(`Fn: getRegisteredEventsFromFirestore, error: `);
       console.log(error);
-
       return {
         status,
         message,

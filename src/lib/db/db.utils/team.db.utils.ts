@@ -132,6 +132,7 @@ export const addTeacherToTeamInFirestore = async (
   } catch (error: any) {
     const status = error.status ?? 500;
     const message = error.message ?? "Internal server error";
+    console.log(`Fn: addTeacherToTeamInFirestore, error: `);
     console.log(error);
 
     // On failure, return error info.
@@ -206,6 +207,7 @@ export const getTeamFromFirestore = cache(
     } catch (error: any) {
       const status = error.status ?? 500;
       const message = error.message ?? "Internal server error";
+      console.log(`Fn: getTeamFromFirestore, error: `);
       console.log(error);
 
       // On failure, return error info.
@@ -275,6 +277,7 @@ export const getTeacherTeamEnrollmentFromFirestore = async (
   } catch (error: any) {
     const status = error.status ?? 500;
     const message = error.message ?? "Internal server error";
+    console.log(`Fn: getTeacherTeamEnrollmentFromFirestore, error: `);
     console.log(error);
 
     // On failure, return error info.
@@ -343,6 +346,7 @@ export const removeTeacherFromTeamInFirestore = async (
   } catch (error: any) {
     const status = error.status ?? 500;
     const message = error.message ?? "Internal server error";
+    console.log(`Fn: removeTeacherFromTeamInFirestore, error: `);
     console.log(error);
 
     // On failure, return error info.
@@ -416,6 +420,7 @@ export const makeTeacherCaptainInFirestore = async (
   } catch (error: any) {
     const status = error.status ?? 500;
     const message = error.message ?? "Internal server error";
+    console.log(`Fn: makeTeacherCaptainInFirestore, error: `);
     console.log(error);
 
     // On failure, return error info.

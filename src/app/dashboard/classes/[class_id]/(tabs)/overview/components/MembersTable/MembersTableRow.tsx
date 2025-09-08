@@ -13,15 +13,19 @@ export default function MembersTableRow({
   class_id,
   isAdmin,
 }: {
-  member: MemberRowType;
-  class_id: string;
-  isAdmin: boolean;
+  member?: MemberRowType;
+  class_id?: string;
+  isAdmin?: boolean;
 }) {
   const { userData } = useUserData();
   const modal = useModal();
   const toast = useToast();
 
   const [memberLoading, setMemberLoading] = useState(false);
+
+  if (!member || !class_id || isAdmin === undefined) {
+    return <Skeleton />;
+  }
 
   const attemptToMakeAdmin = async () => {
     if (member.admin) {
@@ -45,37 +49,7 @@ export default function MembersTableRow({
   };
 
   if (memberLoading) {
-    return (
-      <div className="flex justify-between d-skeleton rounded-2xl px-4">
-        <div className="flex items-center gap-2">
-          <div className="d-avatar md:size-18 sm:size-16 size-12 rounded-full bg-base-300 md:p-4 sm:p-2 p-2 invisible">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="16"
-              height="16"
-              fill="currentColor"
-              className="bi bi-bank size-full text-base-content"
-              viewBox="0 0 16 16"
-              aria-hidden
-            >
-              <path d="m8 0 6.61 3h.89a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-.5.5H15v7a.5.5 0 0 1 .485.38l.5 2a.498.498 0 0 1-.485.62H.5a.498.498 0 0 1-.485-.62l.5-2A.5.5 0 0 1 1 13V6H.5a.5.5 0 0 1-.5-.5v-2A.5.5 0 0 1 .5 3h.89zM3.777 3h8.447L8 1zM2 6v7h1V6zm2 0v7h2.5V6zm3.5 0v7h1V6zm2 0v7H12V6zM13 6v7h1V6zm2-1V4H1v1zm-.39 9H1.39l-.25 1h13.72z" />
-            </svg>
-          </div>
-          <div className="flex flex-col justify-end invisible">
-            <h1 className="text-2xl">Class_Name</h1>
-            <div className="flex">
-              <h2 className="opacity-70">0 membri</h2>
-              <i className="bi bi-dot" aria-hidden></i>
-              <h2 className="opacity-70">0 crediti</h2>
-            </div>
-          </div>
-        </div>
-        <div className="flex flex-col justify-end items-end invisible">
-          <h1 className="font-bold text-2xl">0</h1>
-          <h2 className="opacity-70">Punti</h2>
-        </div>
-      </div>
-    );
+    return <Skeleton />;
   }
 
   return (
@@ -167,3 +141,21 @@ export default function MembersTableRow({
     </div>
   );
 }
+
+const Skeleton = () => {
+  return (
+    <div className="flex justify-between bg-base-200 rounded-2xl px-4 py-3 d-skeleton">
+      <div className="flex items-center gap-2">
+        <div className="d-avatar size-14 rounded-full">
+          <span className="size-full flex items-center justify-center bg-base-300 rounded-full text-4xl d-skeleton">
+            <p className="invisible">O</p>
+          </span>
+        </div>
+        <div className="flex flex-col gap-0.5">
+          <h2 className="md:text-2xl text-xl d-skeleton w-30 h-6"></h2>
+          <h3 className="opacity-70 md:text-lg text-md d-skeleton w-20 h-3"></h3>
+        </div>
+      </div>
+    </div>
+  );
+};

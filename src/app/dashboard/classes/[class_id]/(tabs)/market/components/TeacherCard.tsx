@@ -22,9 +22,9 @@ export default function TeacherCard({
   studentEnrollment,
   class_id,
 }: {
-  teacherData: TeacherRowType;
-  studentEnrollment: FilteredStudentEnrollmentData;
-  class_id: string;
+  teacherData?: TeacherRowType;
+  studentEnrollment?: FilteredStudentEnrollmentData;
+  class_id?: string;
 }) {
   const modal = useModal(); // Modal controls
   const toast = useToast();
@@ -39,7 +39,11 @@ export default function TeacherCard({
   useEffect(() => {
     const el = descRef.current;
     if (el) setIsTruncated(el.scrollHeight > el.clientHeight);
-  }, [teacherData.description]);
+  }, [teacherData?.description]);
+
+  if (!teacherData || !studentEnrollment || !class_id) {
+    return <Skeleton />;
+  }
 
   // Open edit modal with pre-filled form
   const openEditModal = () => {
@@ -84,7 +88,7 @@ export default function TeacherCard({
   };
 
   return (
-    <div className="d-card-md   bg-base-200 shadow-sm p-0">
+    <div className="d-card-md shadow-sm p-0">
       <div className="d-card-body">
         {/* Header: Avatar + name + price */}
         <div className="flex gap-3 items-center">
@@ -271,5 +275,39 @@ function TeacherEditForm({ initialData }: { initialData: TeacherRowType }) {
         />
       </div>
     </fieldset>
+  );
+}
+
+function Skeleton() {
+  return (
+    <div className="lg:d-card-lg d-rounded-box bg-base-200 md:d-card-md d-card-md shadow-sm p-0">
+      <div className="d-card-body">
+        <div className="flex gap-3 flex-row items-center">
+          <div className="d-avatar rounded-full size-max d-skeleton">
+            <span className="lg:size-32 md:size-28 size-24 lg:text-5xl text-4xl rounded-full flex items-center justify-center d-skeleton">
+              <p className="invisible">O</p>
+            </span>
+          </div>
+
+          <div className="flex flex-col justify-between w-full gap-2">
+            <h2 className="d-skeleton w-full h-7"></h2>
+            <h4 className="d-skeleton w-2/3 h-5"></h4>
+          </div>
+        </div>
+        <p className="w-full h-15 grid grid-rows-3 grid-cols-5 gap-1">
+          <span className="col-span-1 d-skeleton"></span>
+          <span className="col-span-4 d-skeleton"></span>
+          {/*  */}
+          <span className="col-span-3 d-skeleton"></span>
+          <span className="col-span-2 d-skeleton"></span>
+          {/*  */}
+          <span className="col-span-1 d-skeleton"></span>
+          <span className="col-span-4 d-skeleton"></span>
+        </p>
+        <button className="d-btn mt-2 d-skeleton" disabled>
+          <p className="invisible">Compra</p>
+        </button>
+      </div>
+    </div>
   );
 }

@@ -139,6 +139,7 @@ export const getStudentEnrollmentDataFromFirestore = async (
   } catch (error: any) {
     const status = error.status ?? 500;
     const message = error.message ?? "Error while deleting the event template";
+    console.log(`Fn: getStudentEnrollmentDataFromFirestore, error: `);
     console.log(error);
 
     return {

@@ -6,14 +6,7 @@ import NoDataUI from "@/components/server/NoDataUI";
 import { getClassData } from "@/lib/data/data-layer/classes.data-layer";
 import { getCurrentUserEnrollmentData } from "@/lib/data/data-layer/user.data-layer";
 import { redirect } from "next/navigation";
-import { calculatePointsBasedOnTeachersInTeamInFirestore } from "@/lib/db/db.utils/members.db.utils";
-
-export const generateStaticParams = async () => {
-  const classesRefs = await admin_firestore.collection(Class.collection).get();
-
-  const docs = classesRefs.docs;
-  return docs.map((classSnap) => ({ class_id: classSnap.id }));
-};
+import TeamStats from "./components/TeamStat";
 
 export default async function TeamTab({
   params,
@@ -36,11 +29,21 @@ export default async function TeamTab({
     return null;
   }
 
-  const renderTeamTableUI = () => {
+  const renderTeachersUI = () => {
     if (teamRes.status === 200) {
       const notDeletedTeachers = teamRes.data.filter(
         (teacher) => !teacher.deleted
       );
+
+      if (notDeletedTeachers.length === 0) {
+        return (
+          <NoDataUI
+            shrink
+            message="Il tuo team è vuoto"
+            additionalMessage="Aggiungi dei professori al team per vederli qui"
+          />
+        );
+      }
 
       return (
         <>
@@ -57,13 +60,17 @@ export default async function TeamTab({
     if (teamRes.status === 404) {
       return (
         <NoDataUI
+          shrink
           message="Il tuo team è vuoto"
           additionalMessage="Aggiungi dei professori al team per vederli qui"
         />
       );
     }
     return (
-      <NoDataUI message="Si è verificato un errore durante il caricamento del team" />
+      <NoDataUI
+        shrink
+        message="Si è verificato un errore durante il caricamento del team"
+      />
     );
   };
 
@@ -102,65 +109,29 @@ export default async function TeamTab({
         </>
       );
     }
-    if (teamRes.status === 404) {
-      return (
-        <>
-          <h2 className="text-3xl font-extrabold mt-5">
-            <span className="bi bi-backpack3 me-2" aria-hidden></span>
-            Professori eliminati:
-          </h2>
-          <NoDataUI
-            message="Il tuo team è vuoto"
-            additionalMessage="Aggiungi dei professori al team per vederli qui"
-          />
-        </>
-      );
-    }
-    return (
-      <>
-        <h2 className="text-3xl font-extrabold mt-5">
-          <span className="bi bi-backpack3 me-2" aria-hidden></span>
-          Professori eliminati:
-        </h2>
-        <NoDataUI message="Si è verificato un errore durante il caricamento del team" />
-      </>
-    );
+    return null;
   };
 
   return (
     <>
-      <div className="d-rounded-box flex items-center shadow-lg border border-base-300 p-5">
-        <div className="grow">
-          <p className="text-primary">
-            <span className="text-4xl">
-              {calculatePointsBasedOnTeachersInTeamInFirestore(
-                studentEnrollmentRes.data.uid,
-                class_id
-              )}
-            </span>
-            pts
-          </p>
-          <p>Il tuo punteggio</p>
-        </div>
-        <div className="grow">
-          <p className="text-primary">
-            <span className="text-4xl">
-              {studentEnrollmentRes.data.credits}
-            </span>
-            /{classRes.data.initial_credits}
-          </p>
-          <p>Crediti rimanenti</p>
-        </div>
-      </div>
+      <TeamStats class_id={class_id} />
+      {/* Team Section */}
       <div className="mt-5">
         <h2 className="text-3xl font-extrabold">
           <span className="bi bi-backpack3 me-2" aria-hidden></span>
           Il tuo team
         </h2>
-        <div className="space-y-1.5 mt-2">{renderTeamTableUI()}</div>
+        <div className="space-y-1.5 mt-2">{renderTeachersUI()}</div>
         {/* Deleted Teachers */}
         {renderDeletedTeachersUI()}
       </div>
     </>
   );
 }
+
+export const generateStaticParams = async () => {
+  const classesRefs = await admin_firestore.collection(Class.collection).get();
+
+  const docs = classesRefs.docs;
+  return docs.map((classSnap) => ({ class_id: classSnap.id }));
+};

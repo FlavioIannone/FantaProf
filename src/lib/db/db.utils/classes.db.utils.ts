@@ -74,6 +74,7 @@ export const createClassInFirestore = async (
     const status = error.status ?? 500;
     const message = error.message ?? "Internal server error";
 
+    console.log(`Fn: createClassInFirestore, error: `);
     console.log(error);
 
     return {
@@ -151,6 +152,7 @@ export const getClassesFromFirestore = cache(
       const status = error.status ?? 500;
       const message = error.message ?? "Internal server error";
 
+      console.log(`Fn: getClassesFromFirestore, error: `);
       console.log(error);
 
       return {
@@ -192,7 +194,7 @@ export const getClassFromFirestore = cache(
       // Default to 500 internal error if status/message not set
       const status = error.status ?? 500;
       const message = error.message ?? "Internal server error";
-
+      console.log(`Fn: getClassFromFirestore, error: `);
       console.log(error);
 
       return {
@@ -266,7 +268,7 @@ export const joinClassInFirestore = async (
     // Default to 500 internal error if status/message not set
     const status = error.status ?? 500;
     const message = error.message ?? "Internal server error";
-
+    console.log(`Fn: joinClassInFirestore, error: `);
     console.log(error);
 
     return {
@@ -368,7 +370,7 @@ export const leaveClassInFirestore = async (
     // Default to 500 internal error if status/message not set
     const status = error.status ?? 500;
     const message = error.message ?? "Internal server error";
-
+    console.log(`Fn: leaveClassInFirestore, error: `);
     console.log(error);
 
     return {

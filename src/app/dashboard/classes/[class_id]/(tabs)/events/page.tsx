@@ -14,6 +14,7 @@ import { getClassTeachers } from "@/lib/data/data-layer/teachers.data-layer";
 import { formatDateToDDMMYYYY } from "@/lib/data/types.data";
 import { ReactNode } from "react";
 import { redirect } from "next/navigation";
+import PointsBadge from "@/components/server/PointsBadge";
 
 export const generateStaticParams = async () => {
   const classesRefs = await admin_firestore.collection(Class.collection).get();
@@ -42,23 +43,6 @@ export default async function EventsTab({
   }
 
   const isAdmin = studentEnrollmentRes.data.admin;
-
-  const PointsBadge = ({ points }: { points: number }) => {
-    const negative = points < 0;
-    return (
-      <span
-        className={`d-badge ms-2 ${
-          negative
-            ? "d-badge bg-error/40 text-red-700"
-            : "d-badge bg-success/40 text-green-700"
-        }`}
-      >
-        {negative ? "-" : "+"}
-        {Math.abs(points)}
-        pts
-      </span>
-    );
-  };
 
   const renderEventRegistrationUI = (): ReactNode => {
     if (eventRegistrations.status !== 200 || teachers.status !== 200) {
@@ -98,7 +82,7 @@ export default async function EventsTab({
               </div>
             </div>
             <p className="opacity-70 text-lg">{registration.description}</p>
-            <div className="flex flex-row justify-start space-x-7 opacity-70">
+            <div className="flex flex-row justify-start space-x-3 opacity-70">
               <span className="flex">
                 <i className="bi bi-mortarboard me-1" aria-hidden></i>
                 Prof. {registration.teacher_name}
@@ -115,7 +99,7 @@ export default async function EventsTab({
   };
 
   const renderEventTemplatesUI = (): ReactNode => {
-    if (eventTemplates.status !== 200 || teachers.status !== 200) {
+    if (eventTemplates.status !== 200) {
       // Handle errors / missing data first
       if (eventTemplates.status === 404) {
         return (
@@ -154,10 +138,12 @@ export default async function EventsTab({
                   <PointsBadge points={eventTemplate.points} />
                 </div>
                 {/* Button */}
-                <EventCardActionButtons
-                  class_id={class_id}
-                  eventData={eventTemplate}
-                />
+                {isAdmin && (
+                  <EventCardActionButtons
+                    class_id={class_id}
+                    eventData={eventTemplate}
+                  />
+                )}
               </div>
               {/* Description */}
               <p className="opacity-70 text-lg">{eventTemplate.description}</p>

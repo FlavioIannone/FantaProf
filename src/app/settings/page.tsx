@@ -4,7 +4,6 @@ import UserProfileSettingsCard from "@/app/settings/components/UserProfileSettin
 import Link from "next/link";
 import LogoutButton from "@/app/settings/components/LogoutButton";
 import GoBackButton from "@/components/client/GoBackButton";
-import UserSecuritySettingsCard from "./components/UserSecuritySettingsCard";
 import UserSecuritySettingsSection from "./components/UserSecuritySettingsSection";
 import Footer from "@/components/server/Footer";
 import { licenses } from "@/lib/types";
@@ -12,7 +11,7 @@ import { licenses } from "@/lib/types";
 export default function SettingsPage() {
   return (
     <>
-      <div className="min-h-dvh w-full flex justify-center">
+      <div className="min-h-dvh w-full flex justify-center items-center">
         <div className="lg:w-2/3 sm:w-3/4 w-full">
           <nav className="d-navbar rounded-sm border-b border-base-content/10">
             <GoBackButton />
@@ -92,7 +91,7 @@ export default function SettingsPage() {
           </main>
         </div>
       </div>
-      <Footer className="px-5" />
+      <Footer className="sm:px-20 px-5" />
     </>
   );
 }

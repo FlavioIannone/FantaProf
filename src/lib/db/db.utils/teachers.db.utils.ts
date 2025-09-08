@@ -53,6 +53,7 @@ export const getClassTeachersFromFirestore = cache(
       const status = error.status ?? 500;
       const message =
         error.message ?? "Error while deleting the event template";
+      console.log(`Fn: getClassTeachersFromFirestore, error: `);
       console.log(error);
 
       return {
@@ -111,6 +112,7 @@ export const getClassTeacherFromFirestore = cache(
       const status = error.status ?? 500;
       const message =
         error.message ?? "Error while deleting the event template";
+      console.log(`Fn: getClassTeacherFromFirestore, error: `);
       console.log(error);
 
       return {
@@ -163,6 +165,7 @@ export const addTeacherInFirestore = async (
   } catch (error: any) {
     const status = error.status ?? 500;
     const message = error.message ?? "Error while deleting the event template";
+    console.log(`Fn: addTeacherInFirestore, error: `);
     console.log(error);
 
     return {
@@ -221,6 +224,7 @@ export const deleteTeacherFromFirestore = async (
   } catch (error: any) {
     const status = error.status ?? 500;
     const message = error.message ?? "Error while deleting the event template";
+    console.log(`Fn: deleteTeacherFromFirestore, error: `);
     console.log(error);
 
     return {
@@ -276,6 +280,7 @@ export const modifyTeacherInFirestore = async (
   } catch (error: any) {
     const status = error.status ?? 500;
     const message = error.message ?? "Error while deleting the event template";
+    console.log(`Fn: modifyTeacherInFirestore, error: `);
     console.log(error);
 
     return {

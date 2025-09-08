@@ -1,22 +1,11 @@
 import TeacherTeamTableRow from "./components/TeacherTeamTableRow";
+import TeamStats from "./components/TeamStat";
 
 export default function TeamTabLoading() {
   return (
     <>
-      <div className="d-rounded-box flex justify-between items-center shadow-lg border border-base-300 p-5 d-skeleton">
-        <div className="invisible">
-          <p className="text-primary">
-            <span className="text-4xl">230</span>pts
-          </p>
-          <p>Il tuo punteggio</p>
-        </div>
-        <div className="invisible">
-          <p className="text-primary">
-            <span className="text-4xl">100</span>/200
-          </p>
-          <p>Crediti rimanenti</p>
-        </div>
-      </div>
+      <TeamStats class_id="" skeleton />
+      {/* Team Section */}
       <div className="mt-5">
         <h2 className="text-3xl font-extrabold">
           <span className="bi bi-backpack3 me-2" aria-hidden></span>

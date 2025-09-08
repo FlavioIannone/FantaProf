@@ -83,6 +83,7 @@ export const getClassMembersFromFirestore = cache(
       const status = error.status ?? 500;
       const message =
         error.message ?? "Error while deleting the event template";
+      console.log(`Fn: getClassMembersFromFirestore, error: `);
       console.log(error);
 
       return {
@@ -135,6 +136,7 @@ export const makeUserAdminInFirestore = async (
   } catch (error: any) {
     const status = error.status ?? 500;
     const message = error.message ?? "Error while deleting the event template";
+    console.log(`Fn: makeUserAdminInFirestore, error: `);
     console.log(error);
 
     return {
@@ -212,11 +214,14 @@ export const calculatePointsBasedOnTeachersInTeamInFirestore = cache(
 
       return totalPoints;
     } catch (error) {
-      console.error("Error calculating points for team:", {
-        uid,
-        class_id,
-        error,
-      });
+      console.error(
+        "Error calculating points for team [calculatePointsBasedOnTeachersInTeamInFirestore]:",
+        {
+          uid,
+          class_id,
+          error,
+        }
+      );
       return undefined;
     }
   }

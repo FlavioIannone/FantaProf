@@ -49,7 +49,11 @@ export default function UserProfileSettingsCard() {
       <div>
         <div className="flex sm:flex-row flex-col gap-1.5">
           {/**Profile picture element */}
-          <div className="sm:block flex justify-center">
+          <div
+            className={`sm:block flex justify-center ${
+              modifyState === "modifying" && "animate-wiggle"
+            }`}
+          >
             <div className="d-avatar [&>div]:overflow-visible! relative lg:size-32 md:size-28 sm:size-24 size-48 me-5">
               <div className="d-indicator">
                 {/* TODO: Add logic to change profile picture*/}

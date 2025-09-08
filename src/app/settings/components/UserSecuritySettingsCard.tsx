@@ -12,7 +12,7 @@ export default function UserSecuritySettingsCard({
   children: React.ReactNode;
 }) {
   return (
-    <button type="button" onClick={onClick}>
+    <button type="button" className="hover:cursor-pointer" onClick={onClick}>
       <div className="flex justify-between">
         <div className="flex flex-row justify-center items-center gap-2">
           {children}

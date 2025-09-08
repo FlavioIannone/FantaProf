@@ -7,17 +7,29 @@ import { useState } from "react";
 export default function ClassesTableRow({
   classData,
 }: {
-  classData: ClassRowType;
+  classData?: ClassRowType;
 }) {
   const [loading, setLoading] = useState(false);
 
   // Reusable avatar icon
-  const AvatarIcon = () => (
-    <div className="d-avatar md:size-18 sm:size-16 size-12 rounded-full bg-base-300 p-2 md:p-4 sm:p-2">
+  const AvatarIcon = ({
+    visible = true,
+    skeleton = false,
+  }: {
+    visible?: boolean;
+    skeleton?: boolean;
+  }) => (
+    <div
+      className={`d-avatar size-18 rounded-full bg-base-300 p-2 md:p-4 sm:p-2 ${
+        skeleton && "d-skeleton"
+      }`}
+    >
       <svg
         xmlns="http://www.w3.org/2000/svg"
         fill="currentColor"
-        className="bi bi-mortarboard size-full text-base-content"
+        className={`bi bi-mortarboard size-full text-base-content ${
+          !visible && "invisible"
+        }`}
         viewBox="0 0 16 16"
         aria-hidden
       >
@@ -27,11 +39,25 @@ export default function ClassesTableRow({
     </div>
   );
 
+  if (!classData) {
+    return (
+      <div className="flex justify-between d-rounded-box p-4 bg-base-200 d-skeleton">
+        <div className="flex items-center gap-2">
+          <AvatarIcon visible={false} skeleton />
+          <div className="flex flex-col justify-end gap-1">
+            <h2 className="w-40 h-7 d-skeleton"></h2>
+            <h3 className="w-20 h-5 d-skeleton"></h3>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <Link
       key={classData.class_id}
       href={`/dashboard/classes/${classData.class_id}/overview`}
-      className={`flex justify-between bg-base-200 rounded-2xl p-4 ${
+      className={`flex justify-between bg-base-200 d-rounded-box p-4 ${
         loading && "animate-pulse"
       }`}
       onClick={() => {

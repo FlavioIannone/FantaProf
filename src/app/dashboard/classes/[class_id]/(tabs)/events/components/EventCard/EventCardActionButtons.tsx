@@ -6,7 +6,7 @@ import {
   deleteEventTemplateAction,
   modifyEventTemplateAction,
 } from "@/lib/data/actions/events.actions";
-import { EventTemplateType, TeacherRowType } from "@/lib/data/types.data";
+import { EventTemplateType } from "@/lib/data/types.data";
 
 /**
  * Action buttons of the event template card

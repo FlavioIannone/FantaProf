@@ -6,7 +6,7 @@ export default function Footer({
 }: Readonly<{ className?: string }>) {
   return (
     <footer
-      className={`footer md:flex sm:footer-horizontal bg-base-200 sm:space-x-5 space-x-0 sm:space-y-0 space-y-5 py-10 ${className}`}
+      className={`footer flex md:flex-row flex-col justify-center sm:footer-horizontal bg-base-200 md:space-x-5 space-x-0 md:space-y-0 space-y-5 py-10 ${className}`}
     >
       <section>
         <p className="d-footer-title lg:text-2xl md:text-xl sm:text-lg">
