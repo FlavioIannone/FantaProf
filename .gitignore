@@ -1,7 +1,7 @@
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
 # Firebase service account key
-**/fantaprof-app-firebase-adminsdk-*.json
+**/*-firebase-adminsdk-*.json
 
 
 # dependencies

@@ -20,7 +20,7 @@ export const createClassInFirestore = async (
   uid: string,
   classData: Pick<
     z.infer<typeof Class.schema>,
-    "class_name" | "initial_credits"
+    "class_name" | "initial_credits" | "use_anti_cheat"
   >
 ): Promise<
   WriteOperationResult<{
@@ -84,6 +84,76 @@ export const createClassInFirestore = async (
   }
 };
 
+/** * Updates class data such as class name and initial credits.
+ * @param class_id - The class document ID
+ * @param updatedData - Object containing fields to update (class_name, initial_credits)
+ * @returns Successful state operation result, an error with it's status code and message otherwise.
+ */
+export const updateClassInFirestore = async (
+  class_id: string,
+  updatedData: Partial<Pick<ClassType, "class_name" | "initial_credits">>
+): Promise<WriteOperationResult<void>> => {
+  const classDocRef = admin_firestore
+    .collection(Class.collection)
+    .doc(class_id);
+  const studentEnrollments = classDocRef.collection(
+    StudentEnrollment.collection
+  );
+  try {
+    await admin_firestore.runTransaction(async (t) => {
+      const enrollments = await t.get(studentEnrollments);
+      if (enrollments.empty) {
+        throw { status: 404, message: "No students enrolled in this class" };
+      }
+      t.update(classDocRef, { ...updatedData });
+      enrollments.docs.forEach((doc) => {
+        t.update(doc.ref, {
+          credits: updatedData.initial_credits,
+        });
+      });
+    });
+
+    return { status: 200 };
+  } catch (error: any) {
+    // Default to 500 internal error if status/message not set
+    const status = error.status ?? 500;
+    const message = error.message ?? "Internal server error";
+
+    console.log(`Fn: updateClassInFirestore, error: `);
+    console.log(error);
+
+    return {
+      status,
+      message,
+    };
+  }
+};
+
+export const startGameInFirestore = async (
+  class_id: string
+): Promise<WriteOperationResult<void>> => {
+  try {
+    // Update the class document with the new data
+    await admin_firestore
+      .collection(Class.collection)
+      .doc(class_id)
+      .update({ game_started: true, market_locked: true });
+    return { status: 200 };
+  } catch (error: any) {
+    // Default to 500 internal error if status/message not set
+    const status = error.status ?? 500;
+    const message = error.message ?? "Internal server error";
+
+    console.log(`Fn: updateClassInFirestore, error: `);
+    console.log(error);
+
+    return {
+      status,
+      message,
+    };
+  }
+};
+
 /**
  * Retrieves all classes that a student is enrolled in,
  * including class info merged with student's enrollment data.
@@ -137,6 +207,7 @@ export const getClassesFromFirestore = cache(
             class_name: data.class_name,
             members: data.members,
             teachers: data.teachers,
+            initial_credits: data.initial_credits,
             currUserData: {
               admin: enrollmentDocsData[index].admin,
               credits: enrollmentDocsData[index].credits,
@@ -247,6 +318,13 @@ export const joinClassInFirestore = async (
 
       // Get class data from Firestore snapshot
       const classData = Class.schema.parse(classSnap.data());
+
+      if (classData.game_started) {
+        throw {
+          status: 423,
+          message: `The game for this class has already started, you cannot join it anymore.`,
+        };
+      }
 
       // Prepare new student enrollment data (not admin, zero points initially)
       const newStudent = StudentEnrollment.schema.parse({

@@ -1,24 +1,50 @@
 "use client";
 
+import { getCurrentUserEnrollmentData } from "@/lib/data/data-layer/user.data-layer";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
+import { use, useEffect, useState } from "react";
+import { is } from "zod/locales";
 
 const tabs = [
   {
     icon: "bi bi-graph-up-arrow",
     label: "Panoramica",
     tabName: "overview",
+    needsAdmin: false,
   },
-  { icon: "bi bi-cart", label: "Market", tabName: "market" },
-  { icon: "bi bi-activity", label: "Eventi", tabName: "events" },
-  { icon: "bi bi-backpack3", label: "Team", tabName: "team" },
+  {
+    icon: "bi bi-cart",
+    label: "Market",
+    tabName: "market",
+    needsAdmin: false,
+  },
+  {
+    icon: "bi bi-activity",
+    label: "Eventi",
+    tabName: "events",
+    needsAdmin: false,
+  },
+  {
+    icon: "bi bi-backpack3",
+    label: "Team",
+    tabName: "team",
+    needsAdmin: false,
+  },
+  {
+    icon: "bi bi-gear",
+    label: "Opzioni",
+    tabName: "class-settings",
+    needsAdmin: true,
+  },
 ];
 
 export default function DashboardTabsNavigator({
   className,
+  isAdmin,
 }: {
   className?: string;
+  isAdmin: boolean;
 }) {
   const [activeTab, setActiveTab] = useState<string | null>(null);
   const pathName = usePathname();
@@ -44,25 +70,30 @@ export default function DashboardTabsNavigator({
     ));
 
   const TabButtons = () =>
-    tabs.map((tabData) => (
-      <Link
-        key={tabData.label}
-        prefetch={true}
-        role="tab"
-        href={`${tabData.tabName}`}
-        className={`d-tab md:grow-0 grow flex md:space-x-1 md:flex-row flex-col md:h-auto h-max ${
-          activeTab === tabData.tabName && "d-tab-active"
-        }`}
-      >
-        <i
-          className={`text-lg ${tabData.icon} ${
-            activeTab === tabData.tabName && "transition-all text-xl"
+    tabs.map((tabData) => {
+      if (tabData.needsAdmin) {
+        if (!isAdmin) return null;
+      }
+      return (
+        <Link
+          key={tabData.label}
+          prefetch={true}
+          role="tab"
+          href={`${tabData.tabName}`}
+          className={`d-tab md:grow-0 grow flex md:space-x-1 md:flex-row flex-col md:h-auto h-max ${
+            activeTab === tabData.tabName && "d-tab-active"
           }`}
-          aria-hidden
-        ></i>
-        <p className="md:text-lg text-md">{tabData.label}</p>
-      </Link>
-    ));
+        >
+          <i
+            className={`text-lg ${tabData.icon} ${
+              activeTab === tabData.tabName && "transition-all text-xl"
+            }`}
+            aria-hidden
+          ></i>
+          <p className="md:text-lg text-md">{tabData.label}</p>
+        </Link>
+      );
+    });
 
   return (
     <nav

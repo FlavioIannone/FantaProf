@@ -7,7 +7,7 @@ import {
   modifyTeacherAction,
   deleteTeacherAction,
 } from "@/lib/data/actions/teachers.actions";
-import { TeacherRowType, TeacherDataEditForm } from "@/lib/data/types.data";
+import { TeacherRowType, ClassData } from "@/lib/data/types.data";
 import { addTeacherToTeam } from "@/lib/data/actions/team.actions";
 import { useToast } from "@/components/client/Toast/ToastContext";
 
@@ -15,15 +15,18 @@ type FilteredStudentEnrollmentData = {
   credits: number;
   admin: boolean;
 };
+export type TeacherDataEditForm = Partial<Omit<TeacherRowType, "teacher_id">>;
 
 // Main component: Card for showing a teacher's info and managing actions
 export default function TeacherCard({
   teacherData,
   studentEnrollment,
+  classData,
   class_id,
 }: {
   teacherData?: TeacherRowType;
   studentEnrollment?: FilteredStudentEnrollmentData;
+  classData?: Pick<ClassData, "game_started" | "market_locked">;
   class_id?: string;
 }) {
   const modal = useModal(); // Modal controls
@@ -41,7 +44,7 @@ export default function TeacherCard({
     if (el) setIsTruncated(el.scrollHeight > el.clientHeight);
   }, [teacherData?.description]);
 
-  if (!teacherData || !studentEnrollment || !class_id) {
+  if (!teacherData || !studentEnrollment || !class_id || !classData) {
     return <Skeleton />;
   }
 
@@ -50,7 +53,13 @@ export default function TeacherCard({
     modal.setModal(true, {
       title: "Modifica professore",
       confirmButtonText: "Modifica",
-      content: <TeacherEditForm initialData={teacherData} />,
+      content: (
+        <TeacherEditForm
+          initialData={teacherData}
+          game_started={classData?.game_started}
+          market_locked={classData?.market_locked}
+        />
+      ),
       closeOnSubmit: false,
       onConfirm: async (formData) => {
         if (!formData) return;
@@ -59,11 +68,26 @@ export default function TeacherCard({
         const description = formData.get("teacher_description")! as string;
         const price = formData.get("teacher_price")! as string;
 
+        if (
+          name === "" &&
+          surname === "" &&
+          description === "" &&
+          (!price || price === "")
+        ) {
+          modal.setModal(false);
+          toast.setToast(true, {
+            content: "Nessuna modifica da apportare",
+            toastType: "info",
+          });
+          return;
+        }
+
+        const canModifyPrice = price !== "" && !classData.game_started;
         const newTeacherData: TeacherDataEditForm = {
           name: name === "" ? undefined : name.trim(),
           surname: surname === "" ? undefined : surname.trim(),
           description: description === "" ? undefined : description.trim(),
-          price: price === "" ? undefined : parseInt(price),
+          price: canModifyPrice ? parseInt(price) : undefined,
         };
 
         const res = await modifyTeacherAction(
@@ -237,7 +261,15 @@ export default function TeacherCard({
 }
 
 // Inner component: Modal content for editing a teacher
-function TeacherEditForm({ initialData }: { initialData: TeacherRowType }) {
+function TeacherEditForm({
+  initialData,
+  game_started,
+  market_locked,
+}: {
+  initialData: TeacherRowType;
+  game_started: boolean;
+  market_locked: boolean;
+}) {
   return (
     <fieldset className="space-y-3">
       <div>
@@ -259,7 +291,7 @@ function TeacherEditForm({ initialData }: { initialData: TeacherRowType }) {
       <div>
         <legend className="d-fieldset-legend">Descrizione</legend>
         <textarea
-          className="d-textarea w-full h-24"
+          className="d-textarea w-full h-14"
           name="teacher_description"
           placeholder={initialData.description}
         />
@@ -272,7 +304,17 @@ function TeacherEditForm({ initialData }: { initialData: TeacherRowType }) {
           name="teacher_price"
           placeholder={initialData.price.toString()}
           type="number"
+          disabled={game_started}
         />
+        {game_started && (
+          <p className="d-label max-w-full text-wrap">
+            <i
+              className="bi bi-info bg-info text-info-content rounded-full p-2 size-7 text-lg flex items-center justify-center"
+              aria-hidden
+            ></i>
+            Impossibile modificare il prezzo dopo che la partita è iniziata.
+          </p>
+        )}
       </div>
     </fieldset>
   );

@@ -1,7 +1,7 @@
 import { deleteSession } from "./data/session/session-manager.data-layer";
 import { client_auth } from "./firebase-connection.client";
 
-type ErrorStatuses = 400 | 402 | 403 | 404 | 409 | 500;
+type ErrorStatuses = 400 | 402 | 403 | 404 | 409 | 423 | 500;
 type SuccessStatuses = 200;
 /**
  * Form data filled by the user on signin

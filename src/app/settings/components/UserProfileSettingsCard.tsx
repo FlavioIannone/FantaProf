@@ -121,11 +121,11 @@ export default function UserProfileSettingsCard() {
                   }}
                 />
               ) : (
-                <h1 className="lg:text-3xl md:text-2xl sm:text-2xl text-xl">
+                <h2 className="lg:text-3xl md:text-2xl sm:text-2xl text-xl">
                   {userData.displayName ?? (
                     <p className="italic">Username non impostato</p>
                   )}
-                </h1>
+                </h2>
               )}
               <h2 className="lg:text-2xl md:text-xl sm:text-xl text-lg opacity-70">
                 {userData.email ?? (

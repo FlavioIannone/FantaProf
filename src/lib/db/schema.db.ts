@@ -15,7 +15,8 @@
  * │    ├── members: number,
  * │    ├── game_started: boolean,
  * │    ├── market_locked: boolean,
- * │    ├── created_at: Timestamp
+ * │    ├── use_anti_cheat: boolean,
+ * │    ├── created_at: Timestamp,
  * │    ├── Teachers (uid, name, surname, description, price)
  * │    │   ├── uid: string
  * │    │   ├── name: string
@@ -60,6 +61,7 @@ class FirebaseCollections {
 }
 
 import { FieldValue, Timestamp } from "firebase-admin/firestore";
+import { use } from "react";
 import { z } from "zod";
 
 const TimestampFieldType = z
@@ -99,6 +101,7 @@ const ClassSchema = z.object({
   game_started: z.boolean().optional().default(false),
   market_locked: z.boolean().optional().default(false),
   teachers: z.number().int().optional().default(0),
+  use_anti_cheat: z.boolean().optional().default(false),
 });
 
 export const Class = {

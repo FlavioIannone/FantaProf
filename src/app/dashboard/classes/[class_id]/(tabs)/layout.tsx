@@ -4,6 +4,7 @@ import { ReactNode } from "react";
 import { getClassData } from "@/lib/data/data-layer/classes.data-layer";
 import DashboardTabsNavigator from "./components/DashboardTabsNavigator";
 import LeaveClassButton from "./components/LeaveClassButton";
+import { getCurrentUserEnrollmentData } from "@/lib/data/data-layer/user.data-layer";
 
 export default async function ClassLayout({
   children,
@@ -13,7 +14,10 @@ export default async function ClassLayout({
   params: Promise<{ class_id: string }>;
 }) {
   const { class_id } = await params;
-  const classData = await getClassData(class_id);
+  const [classRes, enrollmentRes] = await Promise.all([
+    getClassData(class_id),
+    getCurrentUserEnrollmentData(class_id),
+  ]);
 
   return (
     <div className="w-full max-h-dvh flex flex-col overflow-hidden">
@@ -28,7 +32,7 @@ export default async function ClassLayout({
             <div className="d-divider d-divider-horizontal mx-2 h-full"></div>
             <div className="flex flex-col">
               <h1 className="sm:text-2xl text-xl">{`Classe ${
-                classData.status !== 200 ? "N/D" : classData.data.class_name
+                classRes.status !== 200 ? "N/D" : classRes.data.class_name
               }`}</h1>
 
               <h2 className="text-md opacity-70">Gestisci la classe</h2>
@@ -38,11 +42,21 @@ export default async function ClassLayout({
         </div>
       </header>
 
-      <DashboardTabsNavigator className="md:block hidden" />
+      <DashboardTabsNavigator
+        className="md:block hidden"
+        isAdmin={
+          enrollmentRes.status === 200 ? enrollmentRes.data.admin : false
+        }
+      />
       <main className="grow-1 max-h-dvh [&_.tab]:w-full [&_.tab]:max-h-full lg:px-8 md:px-6 sm:px-5 px-4 lg:py-6 md:py-5 sm:py-4 py-3 overflow-auto hide-scrollbar">
         {children}
       </main>
-      <DashboardTabsNavigator className="md:hidden block" />
+      <DashboardTabsNavigator
+        className="md:hidden block"
+        isAdmin={
+          enrollmentRes.status === 200 ? enrollmentRes.data.admin : false
+        }
+      />
     </div>
   );
 }

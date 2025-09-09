@@ -52,6 +52,16 @@ export default function JoinClassComponent({
               router.replace(`/dashboard/classes/${class_id}/overview`);
             },
           });
+        } else if (res.status === 423) {
+          modal.setModal(true, {
+            title: "Errore durante l'unione alla classe",
+            content:
+              "Il gioco per questa classe è già iniziato, non puoi più unirti.",
+            confirmButtonText: "Vai alla dashboard",
+            onClose: () => {
+              router.replace(`/dashboard`);
+            },
+          });
         } else {
           toast.setToast(true, {
             content: "Si è verificato un errore interno.",

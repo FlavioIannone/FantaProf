@@ -26,4 +26,9 @@ try {
 }
 
 export const admin_firestore = admin.firestore(app);
+// Only set settings once
+if (!(global as any)._firestoreSettingsApplied) {
+  admin_firestore.settings({ ignoreUndefinedProperties: true });
+  (global as any)._firestoreSettingsApplied = true;
+}
 export const admin_auth = admin.auth(app);

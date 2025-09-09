@@ -173,7 +173,6 @@ const Skeleton = () => {
           </h1>
           <div className="flex items-center gap-1">
             <div className="h-4 w-25 d-skeleton"></div>
-
             <PointsBadge />
           </div>
         </div>

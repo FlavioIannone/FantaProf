@@ -21,6 +21,10 @@ export default function AddClassButton() {
 
     const className = formData.get("class_name")!.toString().trim();
     const initialCredits = formData.get("initial_credits")!.toString().trim();
+    const antiCheatFormValue = formData.get("anti_cheat");
+    const antiCheatValue =
+      antiCheatFormValue === "on" || antiCheatFormValue === "true";
+
     if (className === "" && initialCredits === "") {
       toast.setToast(true, {
         content: "I dati inseriti non sono validi.",
@@ -32,6 +36,7 @@ export default function AddClassButton() {
     const res = await addClassAction({
       class_name: className,
       initial_credits: parseInt(initialCredits),
+      use_anti_cheat: antiCheatValue,
     });
     modal.setModal(false);
     if (res.status !== 200) {
@@ -98,6 +103,22 @@ const ModalBody = () => {
         <div className="d-validator-hint h-0 peer-user-invalid:h-auto">
           Crediti non validi
         </div>
+      </fieldset>
+      <fieldset className="d-fieldset">
+        <legend className="d-fieldset-legend">
+          Attiva anti-cheat (Consigliato)
+        </legend>
+        <input
+          type="checkbox"
+          className="d-toggle d-toggle-primary"
+          name="anti_cheat"
+          defaultChecked
+        />
+        <p className="d-label max-w-full text-wrap">
+          Abilitando questa opzione, gli studenti non potranno modificare i
+          crediti iniziali della classe e i costi dei professori una volta
+          iniziato il gioco.
+        </p>
       </fieldset>
     </>
   );

@@ -1,5 +1,5 @@
 export default function PointsBadge({ points }: { points?: number }) {
-  if (!points) {
+  if (points === undefined) {
     return (
       <span className={`d-skeleton d-badge d-rounded-selector ms-2`}>
         <p className="invisible">pts</p>

@@ -4,18 +4,26 @@ import TeacherCard from "./TeacherCard";
 import TeachersTableHeader from "./TeachersTableHeader";
 import { getCurrentUserEnrollmentData } from "@/lib/data/data-layer/user.data-layer";
 import { redirect } from "next/navigation";
+import { getClassData } from "@/lib/data/data-layer/classes.data-layer";
 
 export default async function TeachersTable({
   class_id,
 }: {
   class_id: string;
 }) {
-  const teachersRes = await getClassTeachers(class_id);
-  const studentEnrollmentRes = await getCurrentUserEnrollmentData(class_id);
+  const [teachersRes, studentEnrollmentRes, classRes] = await Promise.all([
+    getClassTeachers(class_id),
+    getCurrentUserEnrollmentData(class_id),
+    getClassData(class_id, ["game_started", "market_locked"]),
+  ]);
 
   // Redirect if enrollment isn't valid
   if (studentEnrollmentRes.status !== 200) {
     redirect("/dashboard");
+  }
+
+  if (classRes.status !== 200) {
+    return null;
   }
 
   const isAdmin = studentEnrollmentRes.data.admin;
@@ -47,6 +55,7 @@ export default async function TeachersTable({
               class_id={class_id}
               teacherData={teacher}
               studentEnrollment={studentEnrollmentRes.data}
+              classData={classRes.data}
               key={teacher.teacher_id}
             />
           );

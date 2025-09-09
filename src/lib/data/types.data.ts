@@ -1,43 +1,44 @@
 // TYPES
-export type ClassRowType = {
+
+export type ClassData = {
   class_name: string;
+  initial_credits: number;
   members: number;
+  game_started: boolean;
+  market_locked: boolean;
   teachers: number;
   class_id: string;
-  currUserData: {
-    points: number;
-    credits: number;
-    admin: boolean;
-  };
+  use_anti_cheat: boolean;
 };
 
-export type MemberRowType = {
+export type UserData = {
   display_name: string;
-  credits: number;
-  points: number;
-  admin: boolean;
-  photo_URL: string;
   email: string;
+  photo_URL: string;
   uid: string;
 };
 
+export type ClassRowType = Pick<
+  ClassData,
+  "class_id" | "class_name" | "teachers" | "members" | "initial_credits"
+> & {
+  currUserData: { credits: number; points: number; admin: boolean };
+};
+
+export type MemberRowType = UserData & {
+  credits: number;
+  points: number;
+  admin: boolean;
+};
+
 export type TeacherRowType = {
+  teacher_id: string;
   name: string;
   surname: string;
   price: number;
   description: string;
-  teacher_id: string;
-};
-
-/**
- * Represents editable teacher data for modification.
- * All fields are optional to allow partial updates.
- */
-export type TeacherDataEditForm = {
-  name?: string;
-  surname?: string;
-  description?: string;
-  price?: number;
+  deleted: boolean;
+  points: number;
 };
 
 export type EventTemplateType = {
@@ -47,15 +48,8 @@ export type EventTemplateType = {
   event_id: string;
 };
 
-export type TeamEnrollment = {
+export type TeamEnrollment = TeacherRowType & {
   captain: boolean;
-  teacher_id: string;
-  name: string;
-  surname: string;
-  description: string;
-  price: number;
-  points: number;
-  deleted: boolean;
 };
 
 /**
