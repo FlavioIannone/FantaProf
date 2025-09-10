@@ -8,7 +8,7 @@ import {
   deleteTeacherFromFirestore,
 } from "@/lib/db/db.utils/teachers.db.utils";
 import { withSession } from "../session/session-helpers.data-layer";
-import { TeacherDataEditForm } from "../types.data";
+import { TeacherDataEditForm } from "@/app/dashboard/classes/[class_id]/(tabs)/market/components/TeacherCard";
 
 /**
  * Adds a new teacher to a class.

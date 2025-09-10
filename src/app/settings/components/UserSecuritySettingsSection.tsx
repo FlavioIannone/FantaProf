@@ -4,6 +4,7 @@ import { useUserData } from "@/components/client/UserDataContext";
 import UserSecuritySettingsCard from "./UserSecuritySettingsCard";
 import {
   sendEmailVerification,
+  sendPasswordResetEmail,
   updateEmail,
   User,
   verifyBeforeUpdateEmail,
@@ -16,12 +17,17 @@ import {
   reauthenticateEmailUser,
   reauthenticateGoogleUser,
 } from "@/lib/authentication-manager";
+import { client_auth } from "@/lib/firebase-connection.client";
+import { useRef, useState } from "react";
 
 export default function UserSecuritySettingsSection() {
   const { userData } = useUserData();
   const toast = useToast();
   const modal = useModal();
   const router = useRouter();
+  const changePasswordClicked = useRef(false);
+  const changeEmailClicked = useRef(false);
+  const verifyEmailClicked = useRef(false);
 
   const handleReauthentication = async (user: User | undefined) => {
     modal.setIsLoading(false);
@@ -181,6 +187,70 @@ export default function UserSecuritySettingsSection() {
     });
   };
 
+  const sendResetPasswordEmail = async () => {
+    if (!userData) {
+      router.replace(
+        `/auth/login?reason=${AuthenticationWorkflowCodes.sessionExpired}`
+      );
+      return;
+    }
+
+    if (userData.email === null) {
+      toast.setToast(true, {
+        content: "Nessun indirizzo email associato a questo account.",
+        toastType: "error",
+      });
+      return;
+    }
+
+    if (!userData.emailVerified) {
+      toast.setToast(true, {
+        content:
+          "Devi verificare il tuo indirizzo email prima di resettare la password.",
+        toastType: "error",
+      });
+      return;
+    }
+
+    try {
+      await sendPasswordResetEmail(client_auth, userData.email, {
+        url: `${
+          process.env.NEXT_PUBLIC_BASE_URL ?? "localhost:3000"
+        }/auth/login`, // dove reindirizzare dopo il reset
+        handleCodeInApp: false,
+      });
+
+      toast.setToast(true, {
+        content: `Email di reset inviata a ${userData.email}. Controlla anche la cartella spam.`,
+        toastType: "info",
+        toastDuration: 10,
+      });
+      const logoutRes = await handleLogout();
+      if (logoutRes) {
+        router.replace("/auth/login");
+        return;
+      }
+      toast.setToast(true, {
+        content: `Si è verificato un errore.`,
+        toastType: "error",
+      });
+    } catch (error: any) {
+      console.log(error);
+      let message = "Errore durante l'invio dell'email. Riprova.";
+
+      if (error.code === "auth/user-not-found") {
+        message = "Nessun account trovato con questa email.";
+      } else if (error.code === "auth/invalid-email") {
+        message = "L'indirizzo email non è valido.";
+      }
+
+      toast.setToast(true, {
+        content: message,
+        toastType: "error",
+      });
+    }
+  };
+
   return (
     <div className="sm:px-5 pb-3 settings-card">
       <h1 className="text-lg font-medium opacity-70 mb-2">
@@ -189,7 +259,21 @@ export default function UserSecuritySettingsSection() {
       <div className="flex flex-col gap-2">
         {/* Password */}
         <UserSecuritySettingsCard
-          onClick={async () => {}}
+          onClick={async () => {
+            modal.setModal(true, {
+              content: "Ti verrà inviata un'email per resettare la password.",
+              title: "Confermi di voler modificare la password?",
+              onConfirm: async () => {
+                if (changePasswordClicked.current) {
+                  return;
+                }
+                changePasswordClicked.current = true;
+                await sendResetPasswordEmail();
+                changePasswordClicked.current = false;
+              },
+              confirmButtonText: "Modifica",
+            });
+          }}
           title="Cambia password"
           description="Modifica la tua password"
         >
@@ -207,9 +291,14 @@ export default function UserSecuritySettingsSection() {
               content: <ChangeEmailModal />,
               title: "Inserisci la nuova email",
               onConfirm: async (formData) => {
+                if (changeEmailClicked.current) {
+                  return;
+                }
+                changeEmailClicked.current = true;
                 if (!formData) return;
                 const newEmail = formData.get("new_email")!.toString().trim();
                 await attemptToModifyEmail(newEmail);
+                changeEmailClicked.current = false;
               },
               confirmButtonText: "Modifica",
             });
@@ -244,7 +333,14 @@ export default function UserSecuritySettingsSection() {
               title: "Procedura di verifica indirizzo mail",
               content: `Desideri verificare l'indirizzo mail ${userData.email}?`,
               confirmButtonText: "Conferma",
-              onConfirm: attempToVerifyEmail,
+              onConfirm: async () => {
+                if (verifyEmailClicked.current) {
+                  return;
+                }
+                verifyEmailClicked.current = true;
+                await attempToVerifyEmail();
+                verifyEmailClicked.current = false;
+              },
             });
           }}
           title="Verifica email"
@@ -276,6 +372,46 @@ const ChangeEmailModal = () => {
         />
         <div className="d-validator-hint h-0 peer-user-invalid:h-auto">
           Email non valida
+        </div>
+      </fieldset>
+    </>
+  );
+};
+const ChangePasswordModal = () => {
+  return (
+    <>
+      <fieldset className="d-fieldset">
+        <legend className="d-fieldset-legend">Vecchia password</legend>
+        <input
+          type="password"
+          className="d-input w-full peer d-validator"
+          placeholder="Inserisci la vecchia password"
+          name="old_password"
+          required
+        />
+        <div className="d-validator-hint h-0 peer-user-invalid:h-auto">
+          Password non valida
+        </div>
+      </fieldset>
+
+      <fieldset className="d-fieldset">
+        <legend className="d-fieldset-legend">Nuova password</legend>
+        <input type="password" required />
+        <div className="d-validator-hint h-0 peer-user-invalid:h-auto">
+          Password non valida
+        </div>
+      </fieldset>
+      <fieldset className="d-fieldset">
+        <legend className="d-fieldset-legend">Nuova password</legend>
+        <input
+          type="password"
+          className="d-input w-full peer d-validator"
+          placeholder="Inserisci la nuova password"
+          name="new_password"
+          required
+        />
+        <div className="d-validator-hint h-0 peer-user-invalid:h-auto">
+          Password non valida
         </div>
       </fieldset>
     </>
