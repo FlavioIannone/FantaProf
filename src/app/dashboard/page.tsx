@@ -3,6 +3,7 @@ import ClassesTable from "./components/ClassTable/ClassesTable";
 import StatsDisplayer from "./components/DashboardStats/StatsDisplayer";
 import { getClasses } from "@/lib/data/data-layer/classes.data-layer";
 import UsernameDisplayer from "./components/UsernameDisplayer";
+import AlertDisplayer from "../../components/client/Toast/AlertDisplayer";
 
 export default async function Dashboard() {
   const classes = await getClasses();
@@ -19,6 +20,10 @@ export default async function Dashboard() {
             <ClassesTable classes={classes} />
           </div>
         </div>
+        <AlertDisplayer
+          content="Nuova misura anti-cheat aggiunta, ora potrai creare classi con questa misura direttamente da questa pagina."
+          toastType="info"
+        />
       </main>
     </>
   );

@@ -4,6 +4,8 @@ import { Class } from "@/lib/db/schema.db";
 import ClassDataSettingsCard from "./components/ClassDataSettingsCard";
 import ClassDataTableDivider from "./components/TableDivider";
 import StartGameButton from "./components/StartGameButton";
+import { getCurrentUserEnrollmentData } from "@/lib/data/data-layer/user.data-layer";
+import { redirect } from "next/navigation";
 
 export default async function ClassSettingsTab({
   params,
@@ -11,7 +13,7 @@ export default async function ClassSettingsTab({
   params: Promise<{ class_id: string }>;
 }) {
   const { class_id } = await params;
-  const [classData] = await Promise.all([
+  const [classData, studentEnrollment] = await Promise.all([
     getClassData(class_id, [
       "class_name",
       "members",
@@ -21,10 +23,14 @@ export default async function ClassSettingsTab({
       "market_locked",
       "use_anti_cheat",
     ]),
+    getCurrentUserEnrollmentData(class_id),
   ]);
 
   if (classData.status !== 200) {
     return null;
+  }
+  if (studentEnrollment.status !== 200) {
+    redirect("/dashboard");
   }
 
   return (
@@ -49,7 +55,12 @@ export default async function ClassSettingsTab({
             <ClassDataTableDivider />
             <div className="w-full d-join-item">
               <div className="mb-3">
-                <h2 className="text-3xl font-bold">Inizia partita</h2>
+                <h2 className="text-3xl font-bold">
+                  Inizia partita
+                  <span className="d-badge d-badge-primary ms-1 animate-pulse motion-reduce:animate-none">
+                    New
+                  </span>
+                </h2>
                 <h3 className="text-lg opacity-70">
                   Cliccando il pulsante qui sotto, la partita inizierà per tutti
                   gli studenti. Assicurati di aver letto cosa comporta iniziare

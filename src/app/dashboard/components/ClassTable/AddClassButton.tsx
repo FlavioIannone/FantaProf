@@ -107,6 +107,9 @@ const ModalBody = () => {
       <fieldset className="d-fieldset">
         <legend className="d-fieldset-legend">
           Attiva anti-cheat (Consigliato)
+          <span className="d-badge d-badge-primary animate-pulse motion-reduce:animate-none">
+            New
+          </span>
         </legend>
         <input
           type="checkbox"
