@@ -97,8 +97,7 @@ export const generateMetadata = async ({
   return {
     metadataBase: new URL(siteUrl),
     title: `Unisciti alla classe ${className}`,
-    description:
-      "Unisciti alla classe ${classData.class_name} in FantaProf per iniziare a giocare con i tuoi professori e sfidare i tuoi amici!",
+    description: `Unisciti alla classe ${className} in FantaProf per iniziare a giocare con i tuoi professori e sfidare i tuoi amici!`,
     alternates: {
       canonical: new URL(`/dashboard/classes/${class_id}/join`, siteUrl),
     },
@@ -120,8 +119,7 @@ export const generateMetadata = async ({
     openGraph: {
       title: `Unisciti alla classe ${className}`,
 
-      description:
-        "Unisciti alla classe ${classData.class_name} in FantaProf per iniziare a giocare con i tuoi professori e sfidare i tuoi amici!",
+      description: `Unisciti alla classe ${className} in FantaProf per iniziare a giocare con i tuoi professori e sfidare i tuoi amici!`,
       url: new URL(`/dashboard/classes/${class_id}/join`, siteUrl),
       siteName: "FantaProf",
       images: [
@@ -140,8 +138,7 @@ export const generateMetadata = async ({
       title: `Unisciti alla classe ${className}`,
       site: "@FantaProf",
       creator: "@FantaProf",
-      description:
-        "Unisciti alla classe ${classData.class_name} in FantaProf per iniziare a giocare con i tuoi professori e sfidare i tuoi amici!",
+      description: `Unisciti alla classe ${className} in FantaProf per iniziare a giocare con i tuoi professori e sfidare i tuoi amici!`,
       images: [
         {
           url: "/fantaprof_twitter_image.webp",

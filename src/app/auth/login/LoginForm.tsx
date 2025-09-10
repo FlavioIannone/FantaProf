@@ -37,7 +37,6 @@ export default function LoginForm() {
 
   // Flag to prevent multiple redirects
   const redirectFlag = useRef(false);
-  const firstRender = useRef(true);
 
   useEffect(() => {
     if (reason === AuthenticationWorkflowCodes.joinClass) {
@@ -55,10 +54,6 @@ export default function LoginForm() {
 
   // Redirect se già autenticato
   useEffect(() => {
-    if (!firstRender.current) {
-      return;
-    }
-    firstRender.current = false;
     const unsubscribe = onAuthStateChanged(client_auth, async (user) => {
       setIsSubmitting(true);
       if (user) {
@@ -69,7 +64,7 @@ export default function LoginForm() {
     });
     setIsPending(false);
     return () => unsubscribe();
-  }, [router]);
+  }, []);
 
   const redirectUser = async (user: User) => {
     if (redirectFlag.current) return;
