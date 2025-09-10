@@ -61,7 +61,6 @@ class FirebaseCollections {
 }
 
 import { FieldValue, Timestamp } from "firebase-admin/firestore";
-import { use } from "react";
 import { z } from "zod";
 
 const TimestampFieldType = z
@@ -129,7 +128,7 @@ export const TeamEnrollment = {
 const StudentEnrollmentSchema = z.object({
   uid: z.string(),
   admin: z.boolean().optional().default(false),
-  credits: z.number().int().positive(),
+  credits: z.number().int().min(0),
   created_at: TimestampFieldType,
   teacher_team_ids: z.array(z.string()).optional().default([]),
 });

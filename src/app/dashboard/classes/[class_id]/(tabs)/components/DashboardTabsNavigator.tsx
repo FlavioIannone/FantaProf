@@ -1,10 +1,8 @@
 "use client";
 
-import { getCurrentUserEnrollmentData } from "@/lib/data/data-layer/user.data-layer";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { use, useEffect, useState } from "react";
-import { is } from "zod/locales";
+import { useEffect, useState } from "react";
 
 const tabs = [
   {
@@ -65,7 +63,7 @@ export default function DashboardTabsNavigator({
         className="d-tab md:grow-0 grow flex md:space-x-1 md:flex-row flex-col md:h-auto h-max"
       >
         <i className={`text-lg ${tabData.icon}`} aria-hidden></i>
-        <p className="md:text-lg text-md">{tabData.label}</p>
+        <p className="md:text-lg text-xs">{tabData.label}</p>
       </button>
     ));
 
@@ -80,7 +78,7 @@ export default function DashboardTabsNavigator({
           prefetch={true}
           role="tab"
           href={`${tabData.tabName}`}
-          className={`d-tab md:grow-0 grow flex md:space-x-1 md:flex-row flex-col md:h-auto h-max ${
+          className={`d-tab p-0 md:grow-0 grow flex md:space-x-1 md:flex-row flex-col md:h-auto h-max ${
             activeTab === tabData.tabName && "d-tab-active"
           }`}
         >
@@ -90,7 +88,7 @@ export default function DashboardTabsNavigator({
             }`}
             aria-hidden
           ></i>
-          <p className="md:text-lg text-md">{tabData.label}</p>
+          <p className="md:text-lg text-xs">{tabData.label}</p>
         </Link>
       );
     });

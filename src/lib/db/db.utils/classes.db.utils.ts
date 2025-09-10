@@ -1,6 +1,13 @@
 import { admin_firestore } from "../firebase-connection.server";
 import { FieldPath, FieldValue } from "firebase-admin/firestore";
-import { Class, StudentEnrollment } from "../schema.db";
+import {
+  Class,
+  EventRegistration,
+  EventTemplate,
+  StudentEnrollment,
+  Teacher,
+  TeamEnrollment,
+} from "../schema.db";
 import z from "zod";
 import { cache } from "react";
 import { ReadOperationResult, WriteOperationResult } from "@/lib/types";
@@ -377,83 +384,56 @@ export const leaveClassInFirestore = async (
     .doc(uid);
 
   try {
-    await admin_firestore.runTransaction(async (tx) => {
-      // Fetch class document
+    // Step 1: Transaction per rimuovere lo studente e aggiornare membri
+    const lastMember = await admin_firestore.runTransaction(async (tx) => {
       const classSnap = await tx.get(classDocRef);
-      if (!classSnap.exists) {
-        throw {
-          status: 404,
-          message: "The specified class doesn't exist",
-        };
-      }
+      if (!classSnap.exists) throw { status: 404, message: "Class not found" };
 
-      // Fetch student's enrollment document
       const studentSnap = await tx.get(studentDocRef);
+      if (!studentSnap.exists)
+        throw { status: 404, message: "Student not found" };
 
-      // Parse class data to get member count
       const classData = Class.schema.parse(classSnap.data());
-
-      if (!studentSnap.exists) {
-        throw {
-          status: 404,
-          message: "The specified student doesn't exist",
-        };
-      }
-
-      // Parse student's enrollment data
       const studentData = StudentEnrollment.schema.parse(studentSnap.data());
 
-      const classMemberCount = classData.members;
-
-      // If student is admin, ensure at least one other admin remains before allowing leave
+      // Controllo admin
       if (studentData.admin) {
-        // Query admins excluding the current student
-        const adminsQuery = classDocRef
+        const adminsSnap = await classDocRef
           .collection(StudentEnrollment.collection)
           .where("admin", "==", true)
-          .where(FieldPath.documentId(), "!=", uid);
-
-        // Get count of other admins
-        const adminsSnap = await adminsQuery.count().get();
-        const adminCount = adminsSnap.data().count;
-
-        // Prevent leaving if student is only admin and there are other members
-        if (adminCount === 0 && classMemberCount > 1) {
+          .where(FieldPath.documentId(), "!=", uid)
+          .count()
+          .get();
+        if (adminsSnap.data().count === 0 && classData.members > 1)
           throw {
             status: 409,
-            message:
-              "The specified student is the only admin in the class, so cannot leave",
+            message: "Only admin cannot leave if other members exist",
           };
-        }
       }
 
-      // Delete student enrollment document
+      // Elimina studente
       tx.delete(studentDocRef);
 
-      // If last member leaving, delete entire class document (which cascades)
-      if (classMemberCount <= 1) {
-        tx.delete(classDocRef);
+      // Aggiorna members
+      if (classData.members > 1) {
+        tx.update(classDocRef, { members: classData.members - 1 });
+        return false;
       } else {
-        // Otherwise decrement members count by 1
-        tx.update(classDocRef, {
-          members: classMemberCount - 1,
-        });
+        return true; // ultimo membro
       }
     });
 
-    return {
-      status: 200,
-    };
-  } catch (error: any) {
-    // Default to 500 internal error if status/message not set
-    const status = error.status ?? 500;
-    const message = error.message ?? "Internal server error";
-    console.log(`Fn: leaveClassInFirestore, error: `);
-    console.log(error);
+    // Step 2: Se ultimo membro, cancellare classe e tutte le subcollection
+    if (lastMember) {
+      await admin_firestore.recursiveDelete(classDocRef);
+    }
 
+    return { status: 200 };
+  } catch (error: any) {
+    console.error("Fn: leaveClassInFirestore, error:", error);
     return {
-      status,
-      message,
+      status: error.status ?? 500,
+      message: error.message ?? "Internal server error",
     };
   }
 };
