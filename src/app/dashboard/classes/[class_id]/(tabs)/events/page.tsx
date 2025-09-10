@@ -15,6 +15,9 @@ import { formatDateToDDMMYYYY } from "@/lib/data/types.data";
 import { ReactNode } from "react";
 import { redirect } from "next/navigation";
 import PointsBadge from "@/components/server/PointsBadge";
+import Link from "next/link";
+import { getRandomAmazonAd } from "@/lib/types";
+import AmazonAdJoinRow from "@/components/client/Ads/AmazonAdJoinRow";
 
 export const generateStaticParams = async () => {
   const classesRefs = await admin_firestore.collection(Class.collection).get();
@@ -71,29 +74,37 @@ export default async function EventsTab({
     // Successful case: render the table
     return (
       <EventsTable>
-        {eventRegistrations.data.map((registration) => (
-          <EventCard key={registration.registration_id}>
-            <div className="flex items-center justify-between">
-              <div className="flex items-center">
-                <h2 className="d-card-title flex items-center">
-                  {registration.title}
-                </h2>
-                <PointsBadge points={registration.points} />
-              </div>
+        {eventRegistrations.data.map((registration) => {
+          return (
+            <div
+              className="d-join-vertical d-card md:d-card-md border border-base-300 shadow-md d-card-sm"
+              key={registration.registration_id}
+            >
+              <EventCard key={registration.registration_id}>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center">
+                    <h2 className="d-card-title flex items-center">
+                      {registration.title}
+                    </h2>
+                    <PointsBadge points={registration.points} />
+                  </div>
+                </div>
+                <p className="opacity-70 text-lg">{registration.description}</p>
+                <div className="flex flex-row justify-start space-x-3 opacity-70">
+                  <span className="flex">
+                    <i className="bi bi-mortarboard me-1" aria-hidden></i>
+                    Prof. {registration.teacher_name}
+                  </span>
+                  <span className="flex">
+                    <i className="bi bi-calendar me-1" aria-hidden></i>
+                    {formatDateToDDMMYYYY(registration.created_at)}
+                  </span>
+                </div>
+              </EventCard>
+              <AmazonAdJoinRow />
             </div>
-            <p className="opacity-70 text-lg">{registration.description}</p>
-            <div className="flex flex-row justify-start space-x-3 opacity-70">
-              <span className="flex">
-                <i className="bi bi-mortarboard me-1" aria-hidden></i>
-                Prof. {registration.teacher_name}
-              </span>
-              <span className="flex">
-                <i className="bi bi-calendar me-1" aria-hidden></i>
-                {formatDateToDDMMYYYY(registration.created_at)}
-              </span>
-            </div>
-          </EventCard>
-        ))}
+          );
+        })}
       </EventsTable>
     );
   };
@@ -127,27 +138,35 @@ export default async function EventsTab({
       <EventsTable>
         {eventTemplates.data.map((eventTemplate) => {
           return (
-            <EventCard key={eventTemplate.event_id}>
-              <div className="flex items-center justify-between">
-                <div className="flex items-center">
-                  {/* Title */}
-                  <h2 className="d-card-title flex items-center">
-                    {eventTemplate.title}
-                  </h2>
-                  {/*  Badge */}
-                  <PointsBadge points={eventTemplate.points} />
+            <div
+              className="d-join-vertical d-card md:d-card-md border border-base-300 shadow-md d-card-sm"
+              key={eventTemplate.event_id}
+            >
+              <EventCard>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center">
+                    {/* Title */}
+                    <h2 className="d-card-title flex items-center">
+                      {eventTemplate.title}
+                    </h2>
+                    {/*  Badge */}
+                    <PointsBadge points={eventTemplate.points} />
+                  </div>
+                  {/* Button */}
+                  {isAdmin && (
+                    <EventCardActionButtons
+                      class_id={class_id}
+                      eventData={eventTemplate}
+                    />
+                  )}
                 </div>
-                {/* Button */}
-                {isAdmin && (
-                  <EventCardActionButtons
-                    class_id={class_id}
-                    eventData={eventTemplate}
-                  />
-                )}
-              </div>
-              {/* Description */}
-              <p className="opacity-70 text-lg">{eventTemplate.description}</p>
-            </EventCard>
+                {/* Description */}
+                <p className="opacity-70 text-lg">
+                  {eventTemplate.description}
+                </p>
+              </EventCard>
+              <AmazonAdJoinRow />
+            </div>
           );
         })}
       </EventsTable>

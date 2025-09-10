@@ -7,6 +7,9 @@ import { getClassData } from "@/lib/data/data-layer/classes.data-layer";
 import { getCurrentUserEnrollmentData } from "@/lib/data/data-layer/user.data-layer";
 import { redirect } from "next/navigation";
 import TeamStats from "./components/TeamStat";
+import Link from "next/link";
+import { getRandomAmazonAd } from "@/lib/types";
+import AmazonAdRow from "@/components/client/Ads/AmazonAdRow";
 
 export default async function TeamTab({
   params,
@@ -47,13 +50,20 @@ export default async function TeamTab({
 
       return (
         <>
-          {notDeletedTeachers.map((teacherData) => (
-            <TeacherTeamTableRow
-              class_id={class_id}
-              key={teacherData.teacher_id}
-              teacherData={teacherData}
-            />
-          ))}
+          {notDeletedTeachers.map((teacherData, index) => {
+            const showAd = (index + 1) % 2 === 0 || index === 0;
+
+            return (
+              <div key={teacherData.teacher_id} className="space-y-2.5">
+                <TeacherTeamTableRow
+                  class_id={class_id}
+                  key={teacherData.teacher_id}
+                  teacherData={teacherData}
+                />
+                {showAd && <AmazonAdRow />}
+              </div>
+            );
+          })}
         </>
       );
     }

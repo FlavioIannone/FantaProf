@@ -1,3 +1,4 @@
+import CookieConsentModal from "@/components/client/CookieConsentModal";
 import Footer from "@/components/server/Footer";
 import LandingCard from "@/components/server/LandingCard";
 import Navbar from "@/components/server/Navbar";
@@ -64,6 +65,7 @@ export default function Home() {
         </div>
       </main>
       <Footer className="lg:px-20 md:px-15 sm:px-10 px-5"></Footer>
+      <CookieConsentModal defaultChecked />
     </>
   );
 }

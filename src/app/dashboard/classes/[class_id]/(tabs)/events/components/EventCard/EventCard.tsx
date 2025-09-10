@@ -9,7 +9,7 @@ export default function EventCard({
     <div
       className={`${
         skeleton && "d-skeleton"
-      } d-card bg-base-200 md:d-card-md border border-base-300 shadow-md d-card-sm flex flex-row`}
+      } d-join-item bg-base-200 flex flex-row`}
     >
       {/* <div className="bg-primary h-full w-1"></div> */}
       <div className="d-card-body">{children}</div>

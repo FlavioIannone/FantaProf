@@ -5,6 +5,7 @@ import { getClassData } from "@/lib/data/data-layer/classes.data-layer";
 import DashboardTabsNavigator from "./components/DashboardTabsNavigator";
 import LeaveClassButton from "./components/LeaveClassButton";
 import { getCurrentUserEnrollmentData } from "@/lib/data/data-layer/user.data-layer";
+import Link from "next/link";
 
 export default async function ClassLayout({
   children,

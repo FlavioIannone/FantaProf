@@ -19,6 +19,7 @@ import {
 } from "@/lib/authentication-manager";
 import { client_auth } from "@/lib/firebase-connection.client";
 import { useRef, useState } from "react";
+import CookieConsentModal from "@/components/client/CookieConsentModal";
 
 export default function UserSecuritySettingsSection() {
   const { userData } = useUserData();
@@ -277,8 +278,11 @@ export default function UserSecuritySettingsSection() {
           title="Cambia password"
           description="Modifica la tua password"
         >
-          <div className="bg-red-500/20 rounded-full p-1.5 size-12 flex justify-center items-center">
-            <i className="bi bi-shield text-red-500 text-2xl" aria-hidden></i>
+          <div className="bg-orange-500/20 rounded-full p-1.5 size-12 flex justify-center items-center">
+            <i
+              className="bi bi-shield text-orange-500 text-2xl"
+              aria-hidden
+            ></i>
           </div>
         </UserSecuritySettingsCard>
 
@@ -306,8 +310,11 @@ export default function UserSecuritySettingsSection() {
           title="Cambia email"
           description="Modifica la tua email"
         >
-          <div className="bg-blue-500/20 rounded-full p-1.5 size-12 flex justify-center items-center">
-            <i className="bi bi-person text-blue-500 text-3xl" aria-hidden></i>
+          <div className="bg-indigo-500/20 rounded-full p-1.5 size-12 flex justify-center items-center">
+            <i
+              className="bi bi-person text-indigo-500 text-3xl"
+              aria-hidden
+            ></i>
           </div>
         </UserSecuritySettingsCard>
 
@@ -349,6 +356,42 @@ export default function UserSecuritySettingsSection() {
           <div className="bg-teal-500/20 rounded-full p-1.5 size-12 min-h-12 min-w-12 flex justify-center items-center d-btn-circle">
             <i
               className="bi bi-envelope-check text-teal-500 text-2xl"
+              aria-hidden
+            ></i>
+          </div>
+        </UserSecuritySettingsCard>
+
+        <div className="d-divider opacity-40"></div>
+
+        <UserSecuritySettingsCard
+          title="Consensi"
+          description="Modifica i consensi dei cookie"
+          onClick={() => {
+            modal.setModal(true, {
+              title: "Gestione cookie",
+              content: <CookieConsentModal alwaysShow defaultChecked={false} />, // il componente Banner interno gestirà i toggle
+              confirmButtonText: "Salva",
+              closeOnSubmit: true,
+              onConfirm: (formData) => {
+                if (!formData) return;
+
+                const affiliateCookie = formData.get("affiliate_cookie");
+                const consentValue =
+                  affiliateCookie === "on" || affiliateCookie === "true";
+
+                localStorage.setItem(
+                  "affiliateConsent",
+                  consentValue ? "true" : "false"
+                );
+
+                // Qui puoi attivare eventuali script Amazon se consentValue === true
+              },
+            });
+          }}
+        >
+          <div className="bg-blue-500/20 rounded-full p-1.5 size-12 min-h-12 min-w-12 flex justify-center items-center d-btn-circle">
+            <i
+              className="bi bi-check-circle text-blue-500 text-2xl"
               aria-hidden
             ></i>
           </div>

@@ -5,6 +5,9 @@ import TeachersTableHeader from "./TeachersTableHeader";
 import { getCurrentUserEnrollmentData } from "@/lib/data/data-layer/user.data-layer";
 import { redirect } from "next/navigation";
 import { getClassData } from "@/lib/data/data-layer/classes.data-layer";
+import Link from "next/link";
+import { getRandomAmazonAd } from "@/lib/types";
+import AmazonAdJoinRow from "@/components/client/Ads/AmazonAdJoinRow";
 
 export default async function TeachersTable({
   class_id,
@@ -49,17 +52,24 @@ export default async function TeachersTable({
         class_id={class_id}
       />
       <div className="mt-4 grid md:grid-cols-2 grid-cols-1 gap-2.5">
-        {teachersRes.data.map((teacher) => {
-          return (
-            <TeacherCard
-              class_id={class_id}
-              teacherData={teacher}
-              studentEnrollment={studentEnrollmentRes.data}
-              classData={classRes.data}
-              key={teacher.teacher_id}
-            />
-          );
-        })}
+        {await Promise.all(
+          teachersRes.data.map(async (teacher) => {
+            return (
+              <div
+                key={teacher.teacher_id}
+                className="d-join d-join-vertical d-card-md shadow-sm d-rounded-box"
+              >
+                <TeacherCard
+                  class_id={class_id}
+                  teacherData={teacher}
+                  studentEnrollment={studentEnrollmentRes.data}
+                  classData={classRes.data}
+                />
+                <AmazonAdJoinRow />
+              </div>
+            );
+          })
+        )}
       </div>
     </>
   );

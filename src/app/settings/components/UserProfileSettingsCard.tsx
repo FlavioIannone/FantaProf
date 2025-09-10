@@ -74,7 +74,6 @@ export default function UserProfileSettingsCard() {
                       tabIndex={-1}
                       id="photoFileField"
                       onChange={(event) => {
-                        console.log(event.target.files?.item(0));
                       }}
                     />
                   </button>

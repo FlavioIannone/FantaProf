@@ -1,8 +1,10 @@
 import AddClassButton from "@/app/dashboard/components/ClassTable/AddClassButton";
 import ClassesTableRow from "./ClassesTableRow";
 import { ClassRowType } from "@/lib/data/types.data";
-import { ReadOperationResult } from "@/lib/types";
 import NoDataUI from "@/components/server/NoDataUI";
+import Link from "next/link";
+import { getRandomAmazonAd, ReadOperationResult } from "@/lib/types";
+import AmazonAdRow from "@/components/client/Ads/AmazonAdRow";
 
 export default function ClassesTable({
   classes,
@@ -21,9 +23,16 @@ export default function ClassesTable({
 
       {classes.status === 200 ? (
         <div className="space-y-2.5">
-          {classes.data.map((row) => (
-            <ClassesTableRow key={row.class_id} classData={row} />
-          ))}
+          {classes.data.map((row, index) => {
+            const showAd = (index + 1) % 2 === 0 || index === 0;
+
+            return (
+              <div key={row.class_id} className="space-y-2.5">
+                <ClassesTableRow classData={row} />
+                {showAd && <AmazonAdRow />}
+              </div>
+            );
+          })}
         </div>
       ) : (
         <>

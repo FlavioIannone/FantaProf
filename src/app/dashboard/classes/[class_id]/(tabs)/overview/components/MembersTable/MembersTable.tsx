@@ -6,6 +6,9 @@ import { getClassMembers } from "@/lib/data/data-layer/members.data-layer";
 import { getCurrentUserEnrollmentData } from "@/lib/data/data-layer/user.data-layer";
 import NoDataUI from "@/components/server/NoDataUI";
 import { redirect } from "next/navigation";
+import Link from "next/link";
+import { getRandomAmazonAd } from "@/lib/types";
+import AmazonAdRow from "@/components/client/Ads/AmazonAdRow";
 
 export default async function MembersTable({ class_id }: { class_id: string }) {
   const [membersRes, studentEnrollmentRes] = await Promise.all([
@@ -40,16 +43,23 @@ export default async function MembersTable({ class_id }: { class_id: string }) {
       />
       <MembersTableHeader class_id={class_id} />
       <div className="space-y-1.5">
-        {membersRes.data.map((row) => (
-          <MembersTableRow
-            member={row}
-            key={row.uid}
-            class_id={class_id}
-            isAdmin={
-              studentEnrollmentRes ? studentEnrollmentRes.data.admin : false
-            }
-          />
-        ))}
+        {membersRes.data.map((row, index) => {
+          const showAd = (index + 1) % 2 === 0 || index === 0;
+
+          return (
+            <div key={row.uid} className="space-y-1.5">
+              <MembersTableRow
+                member={row}
+                key={row.uid}
+                class_id={class_id}
+                isAdmin={
+                  studentEnrollmentRes ? studentEnrollmentRes.data.admin : false
+                }
+              />
+              {showAd && <AmazonAdRow />}
+            </div>
+          );
+        })}
       </div>
     </>
   );

@@ -71,8 +71,6 @@ export const registerEventAction = withSession(
   async (uid: string, class_id: string, eventData: EventData) => {
     const res = await registerEventInFirestore(class_id, eventData);
     if (res.status === 200) {
-      console.log("Revalidating...");
-
       revalidatePath(`/dashboard/classes/${class_id}/events`);
       revalidatePath(`/dashboard/classes/${class_id}/overview`);
       revalidatePath(`/dashboard/classes/${class_id}/team`);

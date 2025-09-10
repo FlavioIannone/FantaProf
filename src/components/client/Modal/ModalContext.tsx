@@ -9,6 +9,7 @@ export type ModalProps = {
   confirmButtonText?: string;
   onClose?: () => void;
   onConfirm?: (formData?: FormData) => void | boolean | Promise<void | boolean>;
+  canBeClosed?: boolean;
 };
 
 export type ModalContextType = {
@@ -37,6 +38,7 @@ function ModalProvider({ children }: Readonly<{ children: React.ReactNode }>) {
       setModalProps({
         ...props,
         closeOnSubmit: props.closeOnSubmit ?? true,
+        canBeClosed: props.canBeClosed ?? true,
       });
     setIsOpen(open);
   };
@@ -76,16 +78,18 @@ function ModalProvider({ children }: Readonly<{ children: React.ReactNode }>) {
         <div className="d-modal-box">
           <div className="flex justify-between items-center">
             <h1 className="font-bold text-lg">{modalProps.title}</h1>
-            <button
-              disabled={submitDisabled}
-              className="d-btn d-btn-ghost p-0"
-              type="button"
-              onClick={() => {
-                setModal(false);
-              }}
-            >
-              <i className="bi bi-x text-3xl" aria-hidden></i>
-            </button>
+            {modalProps.canBeClosed && (
+              <button
+                disabled={submitDisabled || !modalProps.canBeClosed}
+                className="d-btn d-btn-ghost p-0"
+                type="button"
+                onClick={() => {
+                  setModal(false);
+                }}
+              >
+                <i className="bi bi-x text-3xl" aria-hidden></i>
+              </button>
+            )}
           </div>
           <form
             onSubmit={async (e) => {
