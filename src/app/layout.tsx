@@ -6,6 +6,7 @@ import { ThemeProvider } from "@/components/client/Theme/ThemeContext";
 import { ModalProvider } from "@/components/client/Modal/ModalContext";
 import { UserDataProvider } from "@/components/client/UserDataContext";
 import { ToastProvider } from "@/components/client/Toast/ToastContext";
+import Script from "next/script";
 
 const siteUrl = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
 
@@ -84,6 +85,13 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="it" className={`bg-base-100 ${inter.className}`}>
+      <head>
+        <Script
+          async
+          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5780485830378667"
+          crossOrigin="anonymous"
+        />
+      </head>
       <body
         className={`w-full h-dvh overflow-x-hidden bg-base-100 m-0 antialiased`}
       >
