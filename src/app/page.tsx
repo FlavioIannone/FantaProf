@@ -65,7 +65,7 @@ export default function Home() {
         </div>
       </main>
       <Footer className="lg:px-20 md:px-15 sm:px-10 px-5"></Footer>
-      <CookieConsentModal />
+      <CookieConsentModal defaultChecked />
     </>
   );
 }
