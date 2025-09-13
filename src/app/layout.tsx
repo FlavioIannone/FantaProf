@@ -7,6 +7,7 @@ import { ModalProvider } from "@/components/client/Modal/ModalContext";
 import { UserDataProvider } from "@/components/client/UserDataContext";
 import { ToastProvider } from "@/components/client/Toast/ToastContext";
 import Script from "next/script";
+import { GoogleTagManager } from "@next/third-parties/google";
 
 const siteUrl = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
 
@@ -86,12 +87,28 @@ export default function RootLayout({
   return (
     <html lang="it" className={`bg-base-100 ${inter.className}`}>
       <head>
+        {/* Script AdSense */}
         <Script
           async
           src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5780485830378667"
           crossOrigin="anonymous"
+          strategy="afterInteractive"
         />
+        {/* Google Consent Mode (default: denied) */}
+        <Script id="consent-mode" strategy="beforeInteractive">
+          {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('consent', 'default', {
+              ad_storage: 'denied',
+              ad_user_data: 'denied',
+              ad_personalization: 'denied',
+              analytics_storage: 'denied'
+            });
+          `}
+        </Script>
       </head>
+      <GoogleTagManager gtmId=" GTM-TQTHCTQV " />
       <body
         className={`w-full h-dvh overflow-x-hidden bg-base-100 m-0 antialiased`}
       >
