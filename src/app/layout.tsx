@@ -108,7 +108,7 @@ export default function RootLayout({
           `}
         </Script>
       </head>
-      <GoogleTagManager gtmId=" GTM-TQTHCTQV " />
+      <GoogleTagManager gtmId="GTM-TQTHCTQV" />
       <body
         className={`w-full h-dvh overflow-x-hidden bg-base-100 m-0 antialiased`}
       >
