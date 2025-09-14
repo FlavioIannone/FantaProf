@@ -19,7 +19,10 @@ import {
 } from "@/lib/authentication-manager";
 import { client_auth } from "@/lib/firebase-connection.client";
 import { useRef, useState } from "react";
-import CookieConsentModal from "@/components/client/CookieConsentModal";
+import CookieConsentModal, {
+  adsConsent,
+  affiliateConsent,
+} from "@/components/client/CookieConsentModal";
 
 export default function UserSecuritySettingsSection() {
   const { userData } = useUserData();
@@ -369,23 +372,9 @@ export default function UserSecuritySettingsSection() {
           onClick={() => {
             modal.setModal(true, {
               title: "Gestione cookie",
-              content: <CookieConsentModal alwaysShow defaultChecked={false} />, // il componente Banner interno gestirà i toggle
+              content: <CookieConsentModal alwaysShow />, // il componente Banner interno gestirà i toggle
               confirmButtonText: "Salva",
               closeOnSubmit: true,
-              onConfirm: (formData) => {
-                if (!formData) return;
-
-                const affiliateCookie = formData.get("affiliate_cookie");
-                const consentValue =
-                  affiliateCookie === "on" || affiliateCookie === "true";
-
-                localStorage.setItem(
-                  "affiliateConsent",
-                  consentValue ? "true" : "false"
-                );
-
-                // Qui puoi attivare eventuali script Amazon se consentValue === true
-              },
             });
           }}
         >
