@@ -6,7 +6,13 @@ import {
   createEventTemplateAction,
   registerEventAction,
 } from "@/lib/data/actions/events.actions";
-import { EventTemplateType, TeacherRowType } from "@/lib/data/types.data";
+import { getClassDataWithSession } from "@/lib/data/data-layer/classes.data-layer";
+import {
+  ClassData,
+  EventTemplateType,
+  TeacherRowType,
+} from "@/lib/data/types.data";
+import { use } from "react";
 
 /**
  * Action buttons of the events tab
@@ -15,10 +21,12 @@ export default function EventsActionButtons({
   class_id,
   teachers,
   eventTemplates,
+  classData,
 }: {
   class_id: string;
   teachers: TeacherRowType[];
   eventTemplates: EventTemplateType[];
+  classData: Pick<ClassData, "game_started">;
 }) {
   const modal = useModal();
   const toast = useToast();
@@ -108,6 +116,11 @@ export default function EventsActionButtons({
 
           if (teachers.length === 0) {
             toastMessage = "la classe non ha professori";
+          }
+
+          if (!classData.game_started) {
+            toastMessage =
+              "il gioco ancora non è iniziato, modifica le impostazioni classe";
           }
 
           if (eventTemplates.length === 0) {

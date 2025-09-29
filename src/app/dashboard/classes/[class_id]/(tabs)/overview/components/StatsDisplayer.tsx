@@ -1,4 +1,7 @@
-import { getClassData } from "@/lib/data/data-layer/classes.data-layer";
+import {
+  getClassData,
+  getClassDataWithSession,
+} from "@/lib/data/data-layer/classes.data-layer";
 import StatSection from "./StatSection";
 import { getCurrentUserPoints } from "@/lib/data/data-layer/user.data-layer";
 import { ReadOperationResult } from "@/lib/types";
@@ -16,7 +19,7 @@ export default async function Stats({
   studentEnrollment: ReadOperationResult<FilteredStudentEnrollmentData>;
 }) {
   const [classRes, points] = await Promise.all([
-    getClassData<"members" | "teachers">(class_id),
+    getClassDataWithSession<"members" | "teachers">(class_id),
     getCurrentUserPoints(class_id),
   ]);
 

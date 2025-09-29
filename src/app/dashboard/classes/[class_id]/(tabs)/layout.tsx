@@ -1,7 +1,10 @@
 import BackToPathArrow from "@/components/server/BackToPathArrow";
 import { ReactNode } from "react";
 
-import { getClassData } from "@/lib/data/data-layer/classes.data-layer";
+import {
+  getClassData,
+  getClassDataWithSession,
+} from "@/lib/data/data-layer/classes.data-layer";
 import DashboardTabsNavigator from "./components/DashboardTabsNavigator";
 import LeaveClassButton from "./components/LeaveClassButton";
 import { getCurrentUserEnrollmentData } from "@/lib/data/data-layer/user.data-layer";
@@ -16,7 +19,7 @@ export default async function ClassLayout({
 }) {
   const { class_id } = await params;
   const [classRes, enrollmentRes] = await Promise.all([
-    getClassData(class_id),
+    getClassDataWithSession(class_id),
     getCurrentUserEnrollmentData(class_id),
   ]);
 

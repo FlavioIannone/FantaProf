@@ -1,4 +1,4 @@
-import { getClassData } from "@/lib/data/data-layer/classes.data-layer";
+import { getClassDataWithSession } from "@/lib/data/data-layer/classes.data-layer";
 import { admin_firestore } from "@/lib/db/firebase-connection.server";
 import { Class } from "@/lib/db/schema.db";
 import ClassDataSettingsCard from "./components/ClassDataSettingsCard";
@@ -14,15 +14,15 @@ export default async function ClassSettingsTab({
 }) {
   const { class_id } = await params;
   const [classData, studentEnrollment] = await Promise.all([
-    getClassData(class_id, [
-      "class_name",
-      "members",
-      "teachers",
-      "initial_credits",
-      "game_started",
-      "market_locked",
-      "use_anti_cheat",
-    ]),
+    getClassDataWithSession<
+      | "class_name"
+      | "members"
+      | "teachers"
+      | "initial_credits"
+      | "game_started"
+      | "market_locked"
+      | "use_anti_cheat"
+    >(class_id),
     getCurrentUserEnrollmentData(class_id),
   ]);
 

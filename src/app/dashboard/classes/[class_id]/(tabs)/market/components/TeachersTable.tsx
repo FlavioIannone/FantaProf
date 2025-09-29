@@ -4,7 +4,10 @@ import TeacherCard from "./TeacherCard";
 import TeachersTableHeader from "./TeachersTableHeader";
 import { getCurrentUserEnrollmentData } from "@/lib/data/data-layer/user.data-layer";
 import { redirect } from "next/navigation";
-import { getClassData } from "@/lib/data/data-layer/classes.data-layer";
+import {
+  getClassData,
+  getClassDataWithSession,
+} from "@/lib/data/data-layer/classes.data-layer";
 import Link from "next/link";
 import { getRandomAmazonAd } from "@/lib/types";
 import AmazonAdJoinRow from "@/components/client/Ads/AmazonAdJoinRow";
@@ -17,7 +20,7 @@ export default async function TeachersTable({
   const [teachersRes, studentEnrollmentRes, classRes] = await Promise.all([
     getClassTeachers(class_id),
     getCurrentUserEnrollmentData(class_id),
-    getClassData(class_id, ["game_started", "market_locked"]),
+    getClassDataWithSession<"game_started" | "market_locked">(class_id),
   ]);
 
   // Redirect if enrollment isn't valid

@@ -15,16 +15,8 @@ import { formatDateToDDMMYYYY } from "@/lib/data/types.data";
 import { ReactNode } from "react";
 import { redirect } from "next/navigation";
 import PointsBadge from "@/components/server/PointsBadge";
-import Link from "next/link";
-import { getRandomAmazonAd } from "@/lib/types";
 import AmazonAdJoinRow from "@/components/client/Ads/AmazonAdJoinRow";
-
-export const generateStaticParams = async () => {
-  const classesRefs = await admin_firestore.collection(Class.collection).get();
-
-  const docs = classesRefs.docs;
-  return docs.map((classSnap) => ({ class_id: classSnap.id }));
-};
+import { getClassDataWithSession } from "@/lib/data/data-layer/classes.data-layer";
 
 export default async function EventsTab({
   params,
@@ -32,16 +24,22 @@ export default async function EventsTab({
   params: Promise<{ class_id: string }>;
 }) {
   const { class_id } = await params;
-  const [eventRegistrations, eventTemplates, studentEnrollmentRes, teachers] =
-    await Promise.all([
-      getEventRegistrations(class_id),
-      getEventTemplates(class_id),
-      getCurrentUserEnrollmentData(class_id),
-      getClassTeachers(class_id),
-    ]);
+  const [
+    eventRegistrations,
+    eventTemplates,
+    studentEnrollmentRes,
+    teachers,
+    classData,
+  ] = await Promise.all([
+    getEventRegistrations(class_id),
+    getEventTemplates(class_id),
+    getCurrentUserEnrollmentData(class_id),
+    getClassTeachers(class_id),
+    getClassDataWithSession<"game_started">(class_id),
+  ]);
 
   // Redirect if enrollment isn't valid
-  if (studentEnrollmentRes.status !== 200) {
+  if (studentEnrollmentRes.status !== 200 || classData.status !== 200) {
     redirect("/dashboard");
   }
 
@@ -183,6 +181,7 @@ export default async function EventsTab({
             eventTemplates={
               eventTemplates.status !== 200 ? [] : eventTemplates.data
             }
+            classData={classData.data}
           />
         )}
       </div>
@@ -200,3 +199,10 @@ export default async function EventsTab({
     </>
   );
 }
+
+export const generateStaticParams = async () => {
+  const classesRefs = await admin_firestore.collection(Class.collection).get();
+
+  const docs = classesRefs.docs;
+  return docs.map((classSnap) => ({ class_id: classSnap.id }));
+};

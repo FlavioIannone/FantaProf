@@ -7,7 +7,6 @@ import {
 import { withSession } from "../session/session-helpers.data-layer";
 import z from "zod";
 import { Class } from "@/lib/db/schema.db";
-import { verifySession } from "../session/session-manager.data-layer";
 import { ReadOperationResult } from "@/lib/types";
 
 /**
@@ -47,3 +46,13 @@ export const getClassData = async <K extends keyof ClassType>(
 
   return { status: 200, data: picked as Pick<ClassType, K> };
 };
+
+export const getClassDataWithSession = withSession(
+  async <K extends keyof ClassType>(
+    uid: string,
+    class_id: string,
+    includeKeys?: readonly K[]
+  ) => {
+    return await getClassData(class_id, includeKeys);
+  }
+);

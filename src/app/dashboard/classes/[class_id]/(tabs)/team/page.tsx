@@ -3,7 +3,10 @@ import { Class } from "@/lib/db/schema.db";
 import TeacherTeamTableRow from "./components/TeacherTeamTableRow";
 import { getTeam } from "@/lib/data/data-layer/team.data-layer";
 import NoDataUI from "@/components/server/NoDataUI";
-import { getClassData } from "@/lib/data/data-layer/classes.data-layer";
+import {
+  getClassData,
+  getClassDataWithSession,
+} from "@/lib/data/data-layer/classes.data-layer";
 import { getCurrentUserEnrollmentData } from "@/lib/data/data-layer/user.data-layer";
 import { redirect } from "next/navigation";
 import TeamStats from "./components/TeamStat";
@@ -19,7 +22,7 @@ export default async function TeamTab({
   const { class_id } = await params;
   const [teamRes, classRes, studentEnrollmentRes] = await Promise.all([
     getTeam(class_id),
-    getClassData(class_id, ["initial_credits"]),
+    getClassDataWithSession(class_id, ["initial_credits"]),
     getCurrentUserEnrollmentData(class_id),
   ]);
 

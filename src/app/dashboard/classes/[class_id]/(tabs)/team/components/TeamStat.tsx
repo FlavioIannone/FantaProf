@@ -1,4 +1,7 @@
-import { getClassData } from "@/lib/data/data-layer/classes.data-layer";
+import {
+  getClassData,
+  getClassDataWithSession,
+} from "@/lib/data/data-layer/classes.data-layer";
 import { getCurrentUserEnrollmentData } from "@/lib/data/data-layer/user.data-layer";
 import { calculatePointsBasedOnTeachersInTeamInFirestore } from "@/lib/db/db.utils/members.db.utils";
 import { redirect } from "next/navigation";
@@ -34,7 +37,7 @@ export default async function TeamStats({
   }
 
   const [classRes, studentEnrollmentRes] = await Promise.all([
-    getClassData(class_id, ["initial_credits"]),
+    getClassDataWithSession<"initial_credits">(class_id),
     getCurrentUserEnrollmentData(class_id),
   ]);
 
