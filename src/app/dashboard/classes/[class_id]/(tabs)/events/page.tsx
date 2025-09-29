@@ -74,9 +74,9 @@ export default async function EventsTab({
       <EventsTable>
         {eventRegistrations.data.map((registration) => {
           return (
-            <div
-              className="d-join-vertical d-card md:d-card-md border border-base-300 shadow-md d-card-sm"
+            <AmazonAdJoinRow
               key={registration.registration_id}
+              className="d-card md:d-card-md border border-base-300 shadow-md d-card-sm"
             >
               <EventCard key={registration.registration_id}>
                 <div className="flex items-center justify-between">
@@ -99,8 +99,7 @@ export default async function EventsTab({
                   </span>
                 </div>
               </EventCard>
-              <AmazonAdJoinRow />
-            </div>
+            </AmazonAdJoinRow>
           );
         })}
       </EventsTable>
@@ -136,9 +135,9 @@ export default async function EventsTab({
       <EventsTable>
         {eventTemplates.data.map((eventTemplate) => {
           return (
-            <div
-              className="d-join-vertical d-card md:d-card-md border border-base-300 shadow-md d-card-sm"
+            <AmazonAdJoinRow
               key={eventTemplate.event_id}
+              className="d-card md:d-card-md border border-base-300 shadow-md d-card-sm"
             >
               <EventCard>
                 <div className="flex items-center justify-between">
@@ -163,8 +162,7 @@ export default async function EventsTab({
                   {eventTemplate.description}
                 </p>
               </EventCard>
-              <AmazonAdJoinRow />
-            </div>
+            </AmazonAdJoinRow>
           );
         })}
       </EventsTable>

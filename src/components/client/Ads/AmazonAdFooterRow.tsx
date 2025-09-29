@@ -3,6 +3,11 @@ import { getAmazonAdLink, getRandomAmazonAd } from "@/lib/types";
 import Link from "next/link";
 
 export default function AmazonAdFooterRow() {
+  const showAd = process.env.SHOW_AMAZON_ADS;
+  if (!showAd) {
+    return null;
+  }
+
   const ad = getRandomAmazonAd();
   return (
     <Link

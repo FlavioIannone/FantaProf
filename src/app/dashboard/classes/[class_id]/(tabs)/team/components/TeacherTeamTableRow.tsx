@@ -78,7 +78,8 @@ export default function TeacherTeamTableRow({
         >
           {/* Make captain */}
           <li
-            className={`${teacherData.captain && "d-menu-disabled}"}`}
+            className={`${teacherData.captain && "d-menu-disabled"}`}
+            aria-disabled={teacherData.captain}
             onClick={() => {
               if (teacherData.captain) {
                 toast.setToast(true, {

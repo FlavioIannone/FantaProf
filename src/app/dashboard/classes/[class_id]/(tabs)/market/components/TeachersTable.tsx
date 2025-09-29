@@ -58,9 +58,9 @@ export default async function TeachersTable({
         {await Promise.all(
           teachersRes.data.map(async (teacher) => {
             return (
-              <div
+              <AmazonAdJoinRow
+                className="d-card-md shadow-sm d-rounded-box"
                 key={teacher.teacher_id}
-                className="d-join d-join-vertical d-card-md shadow-sm d-rounded-box"
               >
                 <TeacherCard
                   class_id={class_id}
@@ -68,8 +68,7 @@ export default async function TeachersTable({
                   studentEnrollment={studentEnrollmentRes.data}
                   classData={classRes.data}
                 />
-                <AmazonAdJoinRow />
-              </div>
+              </AmazonAdJoinRow>
             );
           })
         )}
