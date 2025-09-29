@@ -42,6 +42,7 @@ export default function TeachersTableHeader({
       toast.setToast(true, {
         content: `Prof ${name} ${surname} aggiunto con successo.`,
         toastType: "success",
+        overrideQueue: true,
       });
       return;
     }
@@ -49,12 +50,14 @@ export default function TeachersTableHeader({
       toast.setToast(true, {
         content: `Il prezzo del professor ${name} ${surname} supera il limite massimo di crediti impostato per la classe.`,
         toastType: "warning",
+        overrideQueue: true,
       });
       return;
     }
     toast.setToast(true, {
       content: `Errore durante l'aggiunta del professore.`,
       toastType: "error",
+      overrideQueue: true,
     });
   };
 

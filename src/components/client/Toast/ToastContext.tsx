@@ -2,11 +2,69 @@
 
 import { createContext, useState, useContext, useEffect, useRef } from "react";
 
+type ToastType = "info" | "error" | "success" | "warning" | undefined;
+
+type ToastColors = {
+  color: string;
+  loaderTrailColor: string;
+  loaderBgColor: string;
+  loaderBorderColor: string;
+};
+
+const toastColors: Map<ToastType, ToastColors> = new Map([
+  [
+    "success",
+    {
+      color: "d-alert-success",
+      loaderBgColor: "bg-success",
+      loaderBorderColor: "border-t-success",
+      loaderTrailColor: "bg-success-content",
+    },
+  ],
+  [
+    "error",
+    {
+      color: "d-alert-error",
+      loaderBgColor: "bg-error",
+      loaderBorderColor: "border-t-error",
+      loaderTrailColor: "bg-error-content",
+    },
+  ],
+  [
+    "warning",
+    {
+      color: "d-alert-warning",
+      loaderBgColor: "bg-warning",
+      loaderBorderColor: "border-t-warning",
+      loaderTrailColor: "bg-warning-content",
+    },
+  ],
+  [
+    "info",
+    {
+      color: "d-alert-info",
+      loaderBgColor: "bg-info",
+      loaderBorderColor: "border-t-info",
+      loaderTrailColor: "bg-info-content",
+    },
+  ],
+  [
+    undefined,
+    {
+      color: "d-alert-base-200",
+      loaderBgColor: "bg-base-200",
+      loaderBorderColor: "border-t-base-200",
+      loaderTrailColor: "bg-base-content",
+    },
+  ],
+]);
+
 export type ToastProps = {
   content: React.ReactNode;
   onClose?: () => void;
-  toastType?: "info" | "error" | "success" | "warning" | undefined;
+  toastType?: ToastType;
   toastDuration?: number;
+  overrideQueue?: boolean;
 };
 
 type ToastContextType = {
@@ -25,24 +83,51 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
   const queueRef = useRef<ToastProps[]>([]);
 
   const setToast = (open: boolean, props?: ToastProps) => {
-    if (open) {
-      if (isOpen) {
-        // se un toast è già aperto → accoda
-        if (props) queueRef.current.push(props);
-        return;
-      } else {
-        if (props) setToastProps(props);
-        setIsOpen(true);
-      }
-    } else {
+    // Close toast
+    if (!open) {
       setIsOpen(false);
+      return;
     }
+
+    // Called without props only in debug, show toast without props
+    if (!props) {
+      setIsOpen(true);
+      return;
+    }
+
+    // Override the queue: clear the queue and show this specific toast
+    if (props.overrideQueue) {
+      clearToastQueue();
+      addToastToQueue(props);
+      setIsOpen(true);
+      // force reopen on next render cycle
+      requestAnimationFrame(() => setIsOpen(false));
+      return;
+    }
+    // se un toast è già aperto → accoda
+    if (isOpen) {
+      addToastToQueue(props);
+      return;
+    }
+
+    if (isOpen) setIsOpen(false);
+
+    setToastProps(props);
+    setIsOpen(true);
+  };
+
+  const addToastToQueue = (props: ToastProps) => {
+    queueRef.current.push(props);
+  };
+
+  const clearToastQueue = () => {
+    queueRef.current = [];
   };
 
   useEffect(() => {
     const duration = getToastDuration(); // In seconds
 
-    let timeout: NodeJS.Timeout;
+    let timeout: ReturnType<typeof setTimeout>;
     if (isOpen) {
       timeout = setTimeout(() => {
         setIsOpen(false);
@@ -55,68 +140,11 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     if (!isOpen && queueRef.current.length > 0) {
       const next = queueRef.current.shift()!;
-      setToast(true, next);
+
+      setToastProps(next);
+      setIsOpen(true);
     }
   }, [isOpen]);
-
-  const getToastLoaderTrailColor = () => {
-    switch (toastProps?.toastType) {
-      case "success":
-        return "bg-success-content";
-      case "error":
-        return "bg-error-content";
-      case "warning":
-        return "bg-warning-content";
-      case "info":
-        return "bg-info-content";
-      default:
-        return "bg-base-content";
-    }
-  };
-
-  const getToastLoaderBgColor = () => {
-    switch (toastProps?.toastType) {
-      case "success":
-        return "bg-success";
-      case "error":
-        return "bg-error";
-      case "warning":
-        return "bg-warning";
-      case "info":
-        return "bg-info";
-      default:
-        return "bg-base-200";
-    }
-  };
-  const getToastLoaderBorderColor = () => {
-    switch (toastProps?.toastType) {
-      case "success":
-        return "border-t-success";
-      case "error":
-        return "border-t-error";
-      case "warning":
-        return "border-t-warning";
-      case "info":
-        return "border-t-info";
-      default:
-        return "border-t-base-200";
-    }
-  };
-
-  const getToastColor = () => {
-    switch (toastProps?.toastType) {
-      case "success":
-        return "d-alert-success";
-      case "error":
-        return "d-alert-error";
-      case "warning":
-        return "d-alert-warning";
-      case "info":
-        return "d-alert-info";
-      default:
-        return "d-alert-base-200";
-    }
-  };
 
   const getToastDuration = () => {
     if (!toastProps?.toastDuration) return 4;
@@ -127,7 +155,11 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
     <ToastContext.Provider value={{ isOpen, setToast, toastProps }}>
       {isOpen && toastProps && (
         <div className="d-toast sm:w-auto w-full z-50">
-          <div className={`flex flex-col ${getToastColor()}`}>
+          <div
+            className={`flex flex-col ${
+              toastColors.get(toastProps.toastType)?.color
+            }`}
+          >
             <div className="flex justify-between items-center d-alert rounded-b-none border-b-0">
               <span>{toastProps.content}</span>
               <button
@@ -142,10 +174,16 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
               </button>
             </div>
             <div
-              className={`w-full h-1 overflow-clip ${getToastLoaderBgColor()} rounded-b-box border border-base-200 ${getToastLoaderBorderColor()}`}
+              className={`w-full h-1 overflow-clip ${
+                toastColors.get(toastProps.toastType)?.loaderBgColor
+              } rounded-b-box border border-base-200 ${
+                toastColors.get(toastProps.toastType)?.loaderBorderColor
+              }`}
             >
               <div
-                className={`h-full animate-shrink ${getToastLoaderTrailColor()}`}
+                className={`h-full animate-shrink ${
+                  toastColors.get(toastProps.toastType)?.loaderTrailColor
+                }`}
                 style={{
                   animationDuration: `${getToastDuration()}s`,
                 }}

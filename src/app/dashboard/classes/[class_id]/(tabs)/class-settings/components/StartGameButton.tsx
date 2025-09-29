@@ -30,11 +30,13 @@ export default function StartGameButton({
               toast.setToast(true, {
                 content: "Partita iniziata con successo.",
                 toastType: "success",
+                overrideQueue: true,
               });
             } else {
               toast.setToast(true, {
                 content: "Errore durante l'inizio della partita.",
                 toastType: "error",
+                overrideQueue: true,
               });
             }
           },

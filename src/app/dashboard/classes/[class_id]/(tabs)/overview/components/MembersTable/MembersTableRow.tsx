@@ -39,12 +39,14 @@ export default function MembersTableRow({
       toast.setToast(true, {
         content: "Lo studente ora è un admin.",
         toastType: "success",
+        overrideQueue: true,
       });
       return;
     }
     toast.setToast(true, {
       content: "Non è stato possibile cambiare il ruolo dello studente.",
       toastType: "error",
+      overrideQueue: true,
     });
   };
 

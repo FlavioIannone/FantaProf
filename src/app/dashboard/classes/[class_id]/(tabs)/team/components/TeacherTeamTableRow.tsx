@@ -138,6 +138,8 @@ export default function TeacherTeamTableRow({
                     toast.setToast(true, {
                       content: `Il prof ${teacherData.name} ${teacherData.surname} non può essere rimosso dal team in quanto è il capitano, nomina un altro professore capitano e riprova.`,
                       toastType: "warning",
+                      overrideQueue: true,
+
                       toastDuration: 8,
                     });
                   }

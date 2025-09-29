@@ -100,6 +100,7 @@ export default function TeacherCard({
           toast.setToast(true, {
             content: `Errore durante la modifica dei dati del professore.`,
             toastType: "error",
+            overrideQueue: true,
           });
           return;
         }
@@ -181,6 +182,7 @@ export default function TeacherCard({
                     toast.setToast(true, {
                       content: `Il prof ${teacherData.name} ${teacherData.surname} fa già parte del team.`,
                       toastType: "warning",
+                      overrideQueue: true,
                     });
                     return;
                   }
@@ -188,12 +190,14 @@ export default function TeacherCard({
                     toast.setToast(true, {
                       content: `Non hai abbastanza crediti per aggiungere il prof ${teacherData.name} ${teacherData.surname} al team.`,
                       toastType: "warning",
+                      overrideQueue: true,
                     });
                     return;
                   }
                   toast.setToast(true, {
                     content: `Non è stato possibile aggiungere il prof ${teacherData.name} ${teacherData.surname} al team.`,
                     toastType: "error",
+                    overrideQueue: true,
                   });
                 },
               });
@@ -237,6 +241,7 @@ export default function TeacherCard({
                             toast.setToast(true, {
                               content: `Errore durante l'eliminazione del prof ${teacherData.name} ${teacherData.surname}.`,
                               toastType: "error",
+                              overrideQueue: true,
                             });
                             return;
                           }

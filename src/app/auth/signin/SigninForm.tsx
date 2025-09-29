@@ -67,8 +67,9 @@ export default function RegistrationForm() {
       signInData.password === ""
     ) {
       toast.setToast(true, {
-        content: "Per favore, compila tutti i campi richiesti.",
+        content: "Compila tutti i campi.",
         toastType: "warning",
+        overrideQueue: true,
       });
       return;
     }
@@ -82,11 +83,13 @@ export default function RegistrationForm() {
         content: "Ti è stata inviata una mail di verifica per questo account.",
         toastDuration: 10,
         toastType: "info",
+        overrideQueue: true,
       });
     } else {
       toast.setToast(true, {
         content: "Si è verificato un errore durante la registrazione.",
         toastType: "warning",
+        overrideQueue: true,
       });
     }
 
@@ -104,11 +107,13 @@ export default function RegistrationForm() {
         content: "Ti è stata inviata una mail di verifica per questo account.",
         toastDuration: 10,
         toastType: "info",
+        overrideQueue: true,
       });
     } else {
       toast.setToast(true, {
         content: "Si è verificato un errore durante la registrazione.",
         toastType: "error",
+        overrideQueue: true,
       });
     }
     setIsLoading(false);

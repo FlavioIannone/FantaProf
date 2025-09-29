@@ -15,6 +15,7 @@ export default function AddClassButton() {
       toast.setToast(true, {
         content: "I dati inseriti non sono validi.",
         toastType: "warning",
+        overrideQueue: true,
       });
       return;
     }
@@ -29,6 +30,7 @@ export default function AddClassButton() {
       toast.setToast(true, {
         content: "I dati inseriti non sono validi.",
         toastType: "warning",
+        overrideQueue: true,
       });
       return;
     }
@@ -43,6 +45,7 @@ export default function AddClassButton() {
       toast.setToast(true, {
         content: "Errore durante la creazione della classe.",
         toastType: "error",
+        overrideQueue: true,
       });
       return;
     }

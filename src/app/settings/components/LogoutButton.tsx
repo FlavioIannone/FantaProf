@@ -26,6 +26,7 @@ export default function LogoutButton() {
                 content:
                   "Si è verificato un errore durante la procedura di logout.",
                 toastType: "error",
+                overrideQueue: true,
               });
               return;
             }

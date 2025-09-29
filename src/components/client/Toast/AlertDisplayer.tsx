@@ -25,6 +25,7 @@ export default function AlertDisplayer(toastProps: ToastProps) {
         writeDataInLocalStorage("lastAlert", "true");
         toastProps.onClose?.();
       },
+      overrideQueue: true,
     });
   }, [firstRender.current]);
   return <></>;

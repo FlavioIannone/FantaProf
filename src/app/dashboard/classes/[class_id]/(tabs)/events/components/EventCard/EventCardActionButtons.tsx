@@ -46,6 +46,7 @@ export default function EventCardActionButtons({
       content:
         "Si è verificato un errore durante l'operazione di modifica del template.",
       toastType: "error",
+      overrideQueue: true,
     });
   };
 
@@ -109,6 +110,7 @@ export default function EventCardActionButtons({
                     content:
                       "Si è verificato un errore durante l'eliminazione del template.",
                     toastType: "error",
+                    overrideQueue: true,
                   });
                 },
               });

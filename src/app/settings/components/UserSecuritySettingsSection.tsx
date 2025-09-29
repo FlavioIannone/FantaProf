@@ -87,6 +87,7 @@ export default function UserSecuritySettingsSection() {
       toast.setToast(true, {
         content: "L’indirizzo email non è valido.",
         toastType: "warning",
+        overrideQueue: true,
       });
       return;
     }
@@ -106,6 +107,7 @@ export default function UserSecuritySettingsSection() {
         content: `Per modificare l’indirizzo email, devi prima confermare quello attuale.`,
         toastType: "warning",
         toastDuration: 8,
+        overrideQueue: true,
       });
       sendEmailVerification(userData);
       return;
@@ -120,6 +122,7 @@ export default function UserSecuritySettingsSection() {
         content: `Email di verifica inviata a ${newEmail}, controlla anche nella sezione spam. Dopo averla verificata, esegui di nuovo il login con la nuova email.`,
         toastType: "info",
         toastDuration: 10,
+        overrideQueue: true,
       });
       router.replace("/auth/login");
     } catch (error: any) {
@@ -136,6 +139,7 @@ export default function UserSecuritySettingsSection() {
             content:
               "Si è verificato un errore durante la procedura di reautenticazione.",
             toastType: "error",
+            overrideQueue: true,
           });
           return;
         } // stop if reauth failed
@@ -159,6 +163,7 @@ export default function UserSecuritySettingsSection() {
       toast.setToast(true, {
         content: message,
         toastType: "error",
+        overrideQueue: true,
       });
     }
   };
@@ -174,6 +179,7 @@ export default function UserSecuritySettingsSection() {
       toast.setToast(true, {
         content: "Nessun indirizzo mail collegato con questo account.",
         toastType: "error",
+        overrideQueue: true,
       });
       return;
     }
@@ -181,6 +187,7 @@ export default function UserSecuritySettingsSection() {
       toast.setToast(true, {
         content: "Questa email è già stata verificata.",
         toastType: "warning",
+        overrideQueue: true,
       });
       return;
     }
@@ -188,6 +195,7 @@ export default function UserSecuritySettingsSection() {
     toast.setToast(true, {
       content: `Email di verifica inviato all'indirizzo ${userData.email}.`,
       toastType: "info",
+      overrideQueue: true,
     });
   };
 
@@ -203,6 +211,7 @@ export default function UserSecuritySettingsSection() {
       toast.setToast(true, {
         content: "Nessun indirizzo email associato a questo account.",
         toastType: "error",
+        overrideQueue: true,
       });
       return;
     }
@@ -212,6 +221,7 @@ export default function UserSecuritySettingsSection() {
         content:
           "Devi verificare il tuo indirizzo email prima di resettare la password.",
         toastType: "error",
+        overrideQueue: true,
       });
       return;
     }
@@ -228,6 +238,7 @@ export default function UserSecuritySettingsSection() {
         content: `Email di reset inviata a ${userData.email}. Controlla anche la cartella spam.`,
         toastType: "info",
         toastDuration: 10,
+        overrideQueue: true,
       });
       const logoutRes = await handleLogout();
       if (logoutRes) {
@@ -237,6 +248,7 @@ export default function UserSecuritySettingsSection() {
       toast.setToast(true, {
         content: `Si è verificato un errore.`,
         toastType: "error",
+        overrideQueue: true,
       });
     } catch (error: any) {
       console.log(error);
@@ -251,6 +263,7 @@ export default function UserSecuritySettingsSection() {
       toast.setToast(true, {
         content: message,
         toastType: "error",
+        overrideQueue: true,
       });
     }
   };
@@ -336,6 +349,7 @@ export default function UserSecuritySettingsSection() {
               toast.setToast(true, {
                 content: "Nessun indirizzo mail collegato con questo account.",
                 toastType: "error",
+                overrideQueue: true,
               });
               return;
             }

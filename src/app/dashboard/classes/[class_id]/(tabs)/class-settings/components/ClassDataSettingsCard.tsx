@@ -79,13 +79,14 @@ export default function ClassDataSettingsCard({
           const res = await updateClassAction(classData.class_id, newClassData);
           if (res.status === 200) {
             toast.setToast(true, {
-              content: "La classe aggiornata",
+              content: "La classe è stata aggiornata",
               toastType: "success",
             });
           } else {
             toast.setToast(true, {
               content: "Errore durante l'aggiornamento della classe",
               toastType: "error",
+              overrideQueue: true,
             });
           }
           setModifyState("idle");

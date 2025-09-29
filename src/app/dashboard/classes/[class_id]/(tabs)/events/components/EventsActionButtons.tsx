@@ -58,6 +58,7 @@ export default function EventsActionButtons({
     toast.setToast(true, {
       content: "Si è verificato un errore durante la creazione del template.",
       toastType: "error",
+      overrideQueue: true,
     });
   };
 
@@ -87,7 +88,8 @@ export default function EventsActionButtons({
     }
     toast.setToast(true, {
       content: "Si è verificato un errore durante la registazione dell'evento.",
-      toastType: "success",
+      toastType: "error",
+      overrideQueue: true,
     });
   };
 
@@ -133,6 +135,7 @@ export default function EventsActionButtons({
             toast.setToast(true, {
               content: `Impossibile registrare eventi: ${toastMessage}.`,
               toastType: "error",
+              overrideQueue: true,
             });
             return;
           }

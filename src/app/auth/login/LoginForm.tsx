@@ -43,11 +43,13 @@ export default function LoginForm() {
       toast.setToast(true, {
         content: "Esegui il login per entrare nella classe.",
         toastType: "info",
+        overrideQueue: true,
       });
     } else if (reason === AuthenticationWorkflowCodes.sessionExpired) {
       toast.setToast(true, {
         content: "Effettua di nuovo il login per continuare.",
         toastType: "info",
+        overrideQueue: true,
       });
     }
   }, [reason]);
@@ -82,6 +84,7 @@ export default function LoginForm() {
       toast.setToast(true, {
         content: "Si è verificato un errore. Effettua di nuovo il login.",
         toastType: "error",
+        overrideQueue: true,
       });
       redirectFlag.current = false;
       setIsRedirecting(false);
@@ -95,6 +98,7 @@ export default function LoginForm() {
       if (classId === "") {
         toast.setToast(true, {
           content: "ID classe non valido.",
+          overrideQueue: true,
         });
         return;
       }
@@ -118,6 +122,7 @@ export default function LoginForm() {
       toast.setToast(true, {
         content: "Compila tutti i campi.",
         toastType: "warning",
+        overrideQueue: true,
       });
       return;
     }
@@ -131,6 +136,7 @@ export default function LoginForm() {
       toast.setToast(true, {
         content: result.errorMsg,
         toastType: "error",
+        overrideQueue: true,
       });
     }
     setIsSubmitting(false);
@@ -146,6 +152,7 @@ export default function LoginForm() {
       toast.setToast(true, {
         content: result.errorMsg,
         toastType: "error",
+        overrideQueue: true,
       });
     }
     setIsSubmitting(false);

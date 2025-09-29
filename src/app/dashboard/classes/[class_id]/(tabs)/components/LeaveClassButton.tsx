@@ -19,6 +19,7 @@ export default function LeaveClassButton({ class_id }: { class_id: string }) {
       toast.setToast(true, {
         content: "Classe abbandonata con successo.",
         toastType: "success",
+        overrideQueue: true,
       });
       return;
     }
@@ -26,6 +27,7 @@ export default function LeaveClassButton({ class_id }: { class_id: string }) {
       toast.setToast(true, {
         content: "La classe non è più esistente.",
         toastType: "error",
+        overrideQueue: true,
       });
     } else if (res.status === 409) {
       toast.setToast(true, {
@@ -33,11 +35,13 @@ export default function LeaveClassButton({ class_id }: { class_id: string }) {
           "Impossibile abbandonare la classe: sei l’unico amministratore. Assegna il ruolo di admin a un altro membro o fai abbandonare la classe agli altri membri prima di riprovare.",
         toastType: "warning",
         toastDuration: 8,
+        overrideQueue: true,
       });
     } else {
       toast.setToast(true, {
         content: "Si è verificato un errore.",
         toastType: "error",
+        overrideQueue: true,
       });
     }
   };

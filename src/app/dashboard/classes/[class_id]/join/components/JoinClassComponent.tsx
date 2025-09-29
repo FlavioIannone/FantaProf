@@ -42,6 +42,7 @@ export default function JoinClassComponent({
           toast.setToast(true, {
             content: "Questa classe non esiste più.",
             toastType: "error",
+            overrideQueue: true,
           });
         } else if (res.status === 409) {
           modal.setModal(true, {
@@ -66,6 +67,7 @@ export default function JoinClassComponent({
           toast.setToast(true, {
             content: "Si è verificato un errore interno.",
             toastType: "error",
+            overrideQueue: true,
           });
         }
       }
