@@ -314,12 +314,21 @@ export const removeTeacherFromTeamInFirestore = async (
 
   try {
     await admin_firestore.runTransaction(async (t) => {
-      const [studentEnrollmentRes, teacherRes, teamEnrollmentRes] =
-        await Promise.all([
-          getStudentEnrollmentDataFromFirestore(class_id, uid),
-          getClassTeacherFromFirestore(class_id, teacher_id),
-          getTeacherTeamEnrollmentFromFirestore(uid, class_id, teacher_id),
-        ]);
+      const [
+        studentEnrollmentRes,
+        teacherRes,
+        teamEnrollmentRes,
+        teamEnrollmentCountQuery,
+      ] = await Promise.all([
+        getStudentEnrollmentDataFromFirestore(class_id, uid),
+        getClassTeacherFromFirestore(class_id, teacher_id),
+        getTeacherTeamEnrollmentFromFirestore(uid, class_id, teacher_id),
+        studentEnrollmentDocRef
+          .collection(TeamEnrollment.collection)
+          .count()
+          .get(),
+      ]);
+      const teamEnrollmentCount = teamEnrollmentCountQuery.data().count;
 
       if (studentEnrollmentRes.status !== 200) {
         throw studentEnrollmentRes;
@@ -330,7 +339,7 @@ export const removeTeacherFromTeamInFirestore = async (
       if (teamEnrollmentRes.status !== 200) {
         throw teamEnrollmentRes;
       }
-      if (teamEnrollmentRes.data.captain) {
+      if (teamEnrollmentRes.data.captain && teamEnrollmentCount > 1) {
         throw {
           status: 400,
           message: "This teacher is the captain and cannot be removed.",
