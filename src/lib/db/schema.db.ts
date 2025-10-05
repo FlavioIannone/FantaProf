@@ -94,12 +94,19 @@ export const Teacher = {
 //
 const ClassSchema = z.object({
   class_name: z.string(),
-  initial_credits: z.number().int().positive(),
-  members: z.number().int().positive().optional().default(1),
+  initial_credits: z.int().positive(),
+  members: z.int().positive().optional().default(1),
+  admin_count: z
+    .int()
+    .optional()
+    .transform((v) => {
+      if (!v) return 0;
+      return v;
+    }),
   created_at: TimestampFieldType,
   game_started: z.boolean().optional().default(false),
   market_locked: z.boolean().optional().default(false),
-  teachers: z.number().int().optional().default(0),
+  teachers: z.int().optional().default(0),
   use_anti_cheat: z.boolean().optional().default(false),
 });
 

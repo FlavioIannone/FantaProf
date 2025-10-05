@@ -7,7 +7,7 @@ import {
   TeamEnrollment,
 } from "../schema.db";
 import { MemberRowType } from "@/lib/data/types.data";
-import { FieldPath } from "firebase-admin/firestore";
+import { FieldPath, FieldValue } from "firebase-admin/firestore";
 import { ReadOperationResult, WriteOperationResult } from "@/lib/types";
 import { deprecate } from "util";
 
@@ -103,29 +103,16 @@ export const makeUserAdminInFirestore = async (
   const classDocRef = admin_firestore
     .collection(Class.collection)
     .doc(class_id);
+
   const studentDocRef = classDocRef
     .collection(StudentEnrollment.collection)
     .doc(uid);
+  const batch = admin_firestore.batch();
+
   try {
-    const [classDocSnap, studentDocSnap] = await Promise.all([
-      classDocRef.get(),
-      studentDocRef.get(),
-    ]);
-
-    if (!classDocSnap.exists) {
-      throw {
-        status: 404,
-        message: "The class doesn't exist.",
-      };
-    }
-    if (!studentDocSnap.exists) {
-      throw {
-        status: 404,
-        message: "The student doesn't exist.",
-      };
-    }
-
-    await studentDocRef.update({ admin: true });
+    batch.update(studentDocRef, { admin: true }).update(classDocRef, {
+      admin_count: FieldValue.increment(1),
+    });
     return {
       status: 200,
     };

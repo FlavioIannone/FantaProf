@@ -1,3 +1,4 @@
+import { FieldPath } from "firebase-admin/firestore";
 import { admin_firestore } from "../firebase-connection.server";
 import { Class, StudentEnrollment } from "../schema.db";
 import { calculatePointsBasedOnTeachersInTeamInFirestore } from "./members.db.utils";
@@ -24,5 +25,23 @@ import { calculatePointsBasedOnTeachersInTeamInFirestore } from "./members.db.ut
 
 //       await studentDoc.ref.update({ points: points ?? 0 });
 //     }
+//   }
+// };
+
+// export const migrateAdminCount = async () => {
+//   const classesSnap = await admin_firestore.collection(Class.collection).get();
+
+//   for (const classDoc of classesSnap.docs) {
+//     const classId = classDoc.id;
+
+//     const adminsSnap = await classDoc.ref
+//       .collection(StudentEnrollment.collection)
+//       .where("admin", "==", true)
+//       .count()
+//       .get();
+//     const count = adminsSnap.data().count;
+//     classDoc.ref.update({
+//       admin_count: count,
+//     });
 //   }
 // };

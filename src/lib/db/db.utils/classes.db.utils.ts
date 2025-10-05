@@ -1,5 +1,5 @@
 import { admin_firestore } from "../firebase-connection.server";
-import { FieldPath, FieldValue } from "firebase-admin/firestore";
+import { FieldValue } from "firebase-admin/firestore";
 import { Class, StudentEnrollment } from "../schema.db";
 import z from "zod";
 import { cache } from "react";
@@ -392,13 +392,7 @@ export const leaveClassInFirestore = async (
 
       // Is admin
       if (studentData.admin) {
-        const adminsSnap = await classDocRef
-          .collection(StudentEnrollment.collection)
-          .where("admin", "==", true)
-          .where(FieldPath.documentId(), "!=", uid)
-          .count()
-          .get();
-        if (adminsSnap.data().count === 0 && classData.members > 1)
+        if (classData.admin_count === 1 && classData.members > 1)
           throw {
             status: 409,
             message: "Only admin cannot leave if other members exist",
@@ -410,7 +404,10 @@ export const leaveClassInFirestore = async (
 
       // Aggiorna members
       if (classData.members > 1) {
-        tx.update(classDocRef, { members: classData.members - 1 });
+        tx.update(classDocRef, { members: FieldValue.increment(-1) });
+        if (studentData.admin) {
+          tx.update(classDocRef, { admin_count: FieldValue.increment(-1) });
+        }
         return false;
       } else {
         return true; // ultimo membro
