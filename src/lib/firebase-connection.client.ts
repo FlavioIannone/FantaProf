@@ -3,18 +3,14 @@ import { initializeApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
 
-const firebaseConfig = {
-  apiKey: "AIzaSyCa1gxQDYaBObzw711IY9KNnY2h_llDVcw",
-  authDomain: "fantaprof-app.firebaseapp.com",
-  projectId: "fantaprof-app",
-  storageBucket: "fantaprof-app.firebasestorage.app",
-  messagingSenderId: "509926920805",
-  appId: "1:509926920805:web:eae3304ad019f1cb08ec8c",
-  measurementId: "G-41YX2T75WZ",
-};
+if (process.env.NEXT_PUBLIC_CLIENT_SDK_KEY === undefined) {
+  throw new Error(
+    "process.env.NEXT_PUBLIC_CLIENT_SDK_KEY environment variable is not set."
+  );
+} //* Ensure that the NEXT_PUBLIC_CLIENT_SDK_KEY is set in your environment variables
 
 // Initialize Firebase
-const app = initializeApp(firebaseConfig);
+const app = initializeApp(JSON.parse(process.env.NEXT_PUBLIC_CLIENT_SDK_KEY));
 export const client_auth = getAuth(app);
 client_auth.useDeviceLanguage(); // Set the auth language to the user's device language
 // Initialize Firestore

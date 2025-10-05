@@ -1,18 +1,10 @@
 import { admin_firestore } from "../firebase-connection.server";
 import { FieldPath, FieldValue } from "firebase-admin/firestore";
-import {
-  Class,
-  EventRegistration,
-  EventTemplate,
-  StudentEnrollment,
-  Teacher,
-  TeamEnrollment,
-} from "../schema.db";
+import { Class, StudentEnrollment } from "../schema.db";
 import z from "zod";
 import { cache } from "react";
 import { ReadOperationResult, WriteOperationResult } from "@/lib/types";
 import { ClassRowType } from "@/lib/data/types.data";
-import { calculatePointsBasedOnTeachersInTeamInFirestore } from "./members.db.utils";
 
 type ClassType = z.infer<typeof Class.schema>;
 
@@ -35,47 +27,47 @@ export const createClassInFirestore = async (
     class_id: string;
   }>
 > => {
-  const batch = admin_firestore.batch(); // Start a batch write for atomic operation
+  const batch = admin_firestore.batch();
 
-  // Generate new document reference for the class (auto ID)
   const classDocRef = admin_firestore.collection(Class.collection).doc();
-
-  // Generate document reference for the creator's enrollment inside the class
-  const studentEnrollmentDocRef = admin_firestore
-    .collection(Class.collection)
-    .doc(classDocRef.id)
+  const studentEnrollmentDocRef = classDocRef
     .collection(StudentEnrollment.collection)
     .doc(uid);
 
   try {
-    // Convert class data to Firestore format using converter
-    const classDocData = Class.schema.parse({
+    // Pre-validate input data once
+    const validatedClassData = Class.schema.parse({
       ...classData,
     });
-    // Add create operation for the class doc to the batch
-    batch.create(classDocRef, classDocData);
 
-    // Convert student enrollment data (creator is admin, gets initial credits)
-    const studentEnrollmentDocData = StudentEnrollment.schema.parse({
+    const validatedStudentEnrollment = StudentEnrollment.schema.parse({
       uid,
-      admin: true, // The creator is admin
+      admin: true,
       credits: classData.initial_credits,
     });
 
-    // Add create operation for enrollment doc to batch
-    batch.create(studentEnrollmentDocRef, studentEnrollmentDocData);
+    // Add both create ops
+    batch.create(classDocRef, validatedClassData);
+    batch.create(studentEnrollmentDocRef, validatedStudentEnrollment);
 
-    // Commit the batch atomically
     await batch.commit();
 
-    const classFromFirestore = await classDocRef.get();
+    // Convert the DBModelData to AppModelData
+    const plainClassData = {
+      ...validatedClassData,
+      created_at:
+        validatedClassData.created_at instanceof Date
+          ? validatedClassData.created_at
+          : new Date(),
+    };
+
     return {
       status: 200,
       data: {
-        classData: Class.schema.parse(classFromFirestore.data()),
-        class_id: classFromFirestore.id,
+        classData: plainClassData, // (created_at as Timestamp to Date)
+        class_id: classDocRef.id,
       },
-    }; // Success
+    };
   } catch (error: any) {
     // Default to 500 internal error if status/message not set
     const status = error.status ?? 500;
@@ -103,21 +95,34 @@ export const updateClassInFirestore = async (
   const classDocRef = admin_firestore
     .collection(Class.collection)
     .doc(class_id);
-  const studentEnrollments = classDocRef.collection(
+  const studentEnrollmentsRef = classDocRef.collection(
     StudentEnrollment.collection
   );
+
   try {
     await admin_firestore.runTransaction(async (t) => {
-      const enrollments = await t.get(studentEnrollments);
-      if (enrollments.empty) {
-        throw { status: 404, message: "No students enrolled in this class" };
+      const [classSnap, enrollmentsSnap] = await Promise.all([
+        t.get(classDocRef),
+        t.get(studentEnrollmentsRef),
+      ]);
+
+      if (!classSnap.exists) {
+        throw { status: 404, message: "Class not found" };
       }
-      t.update(classDocRef, { ...updatedData });
-      enrollments.docs.forEach((doc) => {
-        t.update(doc.ref, {
-          credits: updatedData.initial_credits,
+
+      // Update class data only if there are actual changes
+      if (updatedData.class_name || updatedData.initial_credits !== undefined) {
+        t.update(classDocRef, updatedData);
+      }
+
+      // Update student credits only if initial_credits is provided
+      if (updatedData.initial_credits !== undefined && !enrollmentsSnap.empty) {
+        enrollmentsSnap.docs.forEach((doc) => {
+          t.update(doc.ref, {
+            credits: updatedData.initial_credits,
+          });
         });
-      });
+      }
     });
 
     return { status: 200 };
@@ -205,10 +210,6 @@ export const getClassesFromFirestore = cache(
       const classes: ClassRowType[] = await Promise.all(
         classSnapshots.map(async (doc, index) => {
           const data = Class.schema.parse(doc.data());
-          const points = await calculatePointsBasedOnTeachersInTeamInFirestore(
-            enrollmentDocsData[index].uid,
-            doc.id
-          );
           return {
             class_id: doc.id,
             class_name: data.class_name,
@@ -218,7 +219,7 @@ export const getClassesFromFirestore = cache(
             currUserData: {
               admin: enrollmentDocsData[index].admin,
               credits: enrollmentDocsData[index].credits,
-              points: points ?? 0,
+              points: enrollmentDocsData[index].points ?? 0,
             },
           };
         })
@@ -295,55 +296,43 @@ export const joinClassInFirestore = async (
   class_id: string
 ): Promise<WriteOperationResult> => {
   try {
-    await admin_firestore.runTransaction(async (transaction) => {
-      const classRef = admin_firestore.doc(`${Class.collection}/${class_id}`);
-      const enrollmentRef = admin_firestore.doc(
-        `${classRef.path}/${StudentEnrollment.collection}/${uid}`
-      );
+    const classRef = admin_firestore.doc(`${Class.collection}/${class_id}`);
+    const enrollmentRef = admin_firestore.doc(
+      `${classRef.path}/${StudentEnrollment.collection}/${uid}`
+    );
 
-      // Fetch class and enrollment docs concurrently
-      const [classSnap, enrollmentSnap] = await Promise.all([
-        transaction.get(classRef),
-        transaction.get(enrollmentRef), // fetch to see if the student is already part of the class
-      ]);
+    // Fetch class and enrollment docs concurrently
+    const classSnap = await classRef.get();
 
-      // Throw 404 if class does not exist
-      if (!classSnap.exists) {
-        throw {
-          status: 404,
-          message: `Class ${class_id} doesn't exist`,
-        };
-      }
+    // Throw 404 if class does not exist
+    if (!classSnap.exists) {
+      throw {
+        status: 404,
+        message: `Class ${class_id} doesn't exist`,
+      };
+    }
 
-      // Throw 409 if student already enrolled
-      if (enrollmentSnap.exists) {
-        throw {
-          status: 409,
-          message: `Student ${uid} is already enrolled in class ${class_id}`,
-        };
-      }
+    // Get class data from Firestore snapshot
+    const classData = Class.schema.parse(classSnap.data());
 
-      // Get class data from Firestore snapshot
-      const classData = Class.schema.parse(classSnap.data());
+    if (classData.game_started) {
+      throw {
+        status: 423,
+        message: `The game for this class has already started, you cannot join it anymore.`,
+      };
+    }
 
-      if (classData.game_started) {
-        throw {
-          status: 423,
-          message: `The game for this class has already started, you cannot join it anymore.`,
-        };
-      }
+    // Prepare new student enrollment data (not admin, zero points initially)
+    const newStudent = StudentEnrollment.schema.parse({
+      uid,
+      credits: classData.initial_credits,
+      points: 0,
+    });
 
-      // Prepare new student enrollment data (not admin, zero points initially)
-      const newStudent = StudentEnrollment.schema.parse({
-        uid,
-        credits: classData.initial_credits,
-        points: 0,
-      });
-
-      // Create enrollment doc and increment member count atomically
-      transaction.create(enrollmentRef, newStudent).update(classRef, {
-        members: FieldValue.increment(1),
-      });
+    // Create enrollment doc and increment member count atomically
+    enrollmentRef.create(newStudent);
+    classRef.update({
+      members: FieldValue.increment(1),
     });
 
     return {
@@ -351,8 +340,13 @@ export const joinClassInFirestore = async (
     };
   } catch (error: any) {
     // Default to 500 internal error if status/message not set
-    const status = error.status ?? 500;
-    const message = error.message ?? "Internal server error";
+    let status = error.status ?? 500;
+    let message = error.message ?? "Internal server error";
+    if (error.code === "already-exists") {
+      status = 409;
+      message = `Student ${uid} already enrolled`;
+    }
+
     console.log(`Fn: joinClassInFirestore, error: `);
     console.log(error);
 
@@ -384,7 +378,7 @@ export const leaveClassInFirestore = async (
     .doc(uid);
 
   try {
-    // Step 1: Transaction per rimuovere lo studente e aggiornare membri
+    // Step 1: Transaction to remove the student and update the students count
     const lastMember = await admin_firestore.runTransaction(async (tx) => {
       const classSnap = await tx.get(classDocRef);
       if (!classSnap.exists) throw { status: 404, message: "Class not found" };
@@ -396,7 +390,7 @@ export const leaveClassInFirestore = async (
       const classData = Class.schema.parse(classSnap.data());
       const studentData = StudentEnrollment.schema.parse(studentSnap.data());
 
-      // Controllo admin
+      // Is admin
       if (studentData.admin) {
         const adminsSnap = await classDocRef
           .collection(StudentEnrollment.collection)
@@ -411,7 +405,7 @@ export const leaveClassInFirestore = async (
           };
       }
 
-      // Elimina studente
+      // Delete studente
       tx.delete(studentDocRef);
 
       // Aggiorna members

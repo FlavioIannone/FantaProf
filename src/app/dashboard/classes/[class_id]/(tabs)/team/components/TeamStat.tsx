@@ -1,9 +1,5 @@
-import {
-  getClassData,
-  getClassDataWithSession,
-} from "@/lib/data/data-layer/classes.data-layer";
+import { getClassDataWithSession } from "@/lib/data/data-layer/classes.data-layer";
 import { getCurrentUserEnrollmentData } from "@/lib/data/data-layer/user.data-layer";
-import { calculatePointsBasedOnTeachersInTeamInFirestore } from "@/lib/db/db.utils/members.db.utils";
 import { redirect } from "next/navigation";
 
 export default async function TeamStats({
@@ -54,12 +50,7 @@ export default async function TeamStats({
     <div className="d-rounded-box flex items-center shadow-lg border border-base-200 p-5">
       <section className="grow">
         <p className="text-primary">
-          <span className="text-4xl">
-            {calculatePointsBasedOnTeachersInTeamInFirestore(
-              studentEnrollmentRes.data.uid,
-              class_id
-            )}
-          </span>
+          <span className="text-4xl">{studentEnrollmentRes.data.points}</span>
           pts
         </p>
         <p>Il tuo punteggio</p>

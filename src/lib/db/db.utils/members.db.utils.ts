@@ -9,6 +9,7 @@ import {
 import { MemberRowType } from "@/lib/data/types.data";
 import { FieldPath } from "firebase-admin/firestore";
 import { ReadOperationResult, WriteOperationResult } from "@/lib/types";
+import { deprecate } from "util";
 
 /**
  * Retrieves every member of an existing class from Firestore + Auth.
@@ -52,11 +53,6 @@ export const getClassMembersFromFirestore = cache(
         const enrollmentData = StudentEnrollment.schema.parse(
           enrollmentDoc.data()
         );
-        const totalPoints =
-          await calculatePointsBasedOnTeachersInTeamInFirestore(
-            enrollmentDoc.id,
-            class_id
-          );
 
         const user = userMap.get(enrollmentDoc.id);
 
@@ -71,7 +67,7 @@ export const getClassMembersFromFirestore = cache(
           display_name: user.displayName ?? "No name",
           photo_URL: user.photoURL ?? "",
           credits: enrollmentData.credits ?? 0,
-          points: totalPoints ?? 0,
+          points: enrollmentData.points ?? 0,
           admin: enrollmentData.admin ?? false,
           email: user.email ?? "No email",
           uid: user.uid,
@@ -152,11 +148,13 @@ export const makeUserAdminInFirestore = async (
  *
  * Throws a 500 error if the team is in an invalid state (no captain).
  *
+ * @deprecated
  * @param uid - The student's ID
  * @param class_id - The class ID
  * @returns - Total points for the team, or undefined on error
  *
  */
+
 export const calculatePointsBasedOnTeachersInTeamInFirestore = cache(
   async (uid: string, class_id: string): Promise<number | undefined> => {
     const studentEnrollmentDocRef = admin_firestore

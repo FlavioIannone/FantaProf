@@ -5,7 +5,8 @@ import {
   getStudentEnrollmentDataFromFirestore,
 } from "@/lib/db/db.utils/users.db.utils";
 import { withSession } from "../session/session-helpers.data-layer";
-import { calculatePointsBasedOnTeachersInTeamInFirestore } from "@/lib/db/db.utils/members.db.utils";
+import { admin_firestore } from "@/lib/db/firebase-connection.server";
+import { Class, StudentEnrollment } from "@/lib/db/schema.db";
 
 /**
  * Fetches global statistics for the currently authenticated user.
@@ -43,6 +44,12 @@ export const getCurrentUserEnrollmentData = withSession(
 
 export const getCurrentUserPoints = withSession(
   async (uid: string, class_id: string) => {
-    return await calculatePointsBasedOnTeachersInTeamInFirestore(uid, class_id);
+    const currUser = await admin_firestore
+      .collection(Class.collection)
+      .doc(class_id)
+      .collection(StudentEnrollment.collection)
+      .doc(uid)
+      .get();
+    return StudentEnrollment.schema.parse(currUser.data()).points;
   }
 );

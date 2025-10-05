@@ -1,5 +1,12 @@
 import { cache } from "react";
-import { Class, EventTemplate, Teacher, EventRegistration } from "../schema.db";
+import {
+  Class,
+  EventTemplate,
+  Teacher,
+  EventRegistration,
+  StudentEnrollment,
+  TeamEnrollment,
+} from "../schema.db";
 import z from "zod";
 import { admin_firestore } from "../firebase-connection.server";
 import {
@@ -317,63 +324,77 @@ export const registerEventInFirestore = async (
   const classDocRef = admin_firestore
     .collection(Class.collection)
     .doc(class_id);
-  // Ref to the teacher doc
+
+  // Students that have this teacher in the class
+  const enrollmentsToUpdateRef = classDocRef
+    .collection(StudentEnrollment.collection)
+    .where("teacher_team_ids", "array-contains", eventData.teacher_id);
+
+  // Ref to the new event registration
+  const teachersEventRegistrationDocRef = classDocRef
+    .collection(EventRegistration.collection)
+    .doc();
+
+  // Ref to the teacher
   const teacherDocRef = classDocRef
     .collection(Teacher.collection)
     .doc(eventData.teacher_id);
 
-  // Ref to the new event registration
-  const teachersEventRegistrationDocRef = admin_firestore
-    .collection(Class.collection)
-    .doc(class_id)
-    .collection(EventRegistration.collection)
-    .doc();
+  const batch = admin_firestore.batch();
 
   try {
-    await admin_firestore.runTransaction(async (transaction) => {
-      const [classDocSnap, templateData, teacherDocSnap] = await Promise.all([
-        classDocRef.get(),
-        getEventTemplateFromFirestore(class_id, eventData.event_id),
-        teacherDocRef.get(),
-      ]);
+    const [templateData, enrollmentsToUpdateSnap] = await Promise.all([
+      getEventTemplateFromFirestore(class_id, eventData.event_id),
+      enrollmentsToUpdateRef.get(),
+    ]);
 
-      if (!classDocSnap.exists) {
-        throw {
-          status: 404,
-          message: "The class doesn't exist",
-        };
-      }
+    if (templateData.status !== 200) {
+      throw templateData;
+    }
 
-      if (templateData.status !== 200) {
-        throw templateData;
-      }
-      if (!teacherDocSnap.exists) {
-        throw {
-          status: 404,
-          message: "The teacher doesn't exist",
-        };
-      }
+    const points = templateData.data.points;
 
-      // Run the operations
-      transaction
-        // Add points to the teacher
-        .update(teacherDocRef, {
-          points: FieldValue.increment(templateData.data.points),
-        })
-        // Create the event registration
-        .create(teachersEventRegistrationDocRef, {
-          ...EventRegistration.schema.parse(eventData),
-        });
+    // Create the event registration
+    batch.create(teachersEventRegistrationDocRef, {
+      ...EventRegistration.schema.parse(eventData),
     });
+
+    // Increment teacher points
+    batch.update(teacherDocRef, {
+      points: FieldValue.increment(points),
+    });
+
+    if (!enrollmentsToUpdateSnap.empty) {
+      // Fetch all TeamEnrollment docs for these students in one go
+      const teamDocsSnap = await Promise.all(
+        enrollmentsToUpdateSnap.docs.map((e) =>
+          e.ref
+            .collection(TeamEnrollment.collection)
+            .doc(eventData.teacher_id)
+            .get()
+        )
+      );
+
+      enrollmentsToUpdateSnap.docs.forEach((e, index) => {
+        const teamData = TeamEnrollment.schema.parse(
+          teamDocsSnap[index].data()
+        );
+        const isCaptain = teamData.captain;
+        batch.update(e.ref, {
+          points: FieldValue.increment(isCaptain ? points * 2 : points),
+        });
+      });
+    }
+
+    await batch.commit();
 
     return {
       status: 200,
     };
   } catch (error: any) {
     const status = error.status ?? 500;
-    const message = error.message ?? "Error while deleting the event template";
-    console.log(`Fn: registerEventInFirestore, error: `);
-    console.log(error);
+    const message = error.message ?? "Error while registering the event.";
+    console.log(`Fn: registerEventInFirestore, error: `, error);
     return {
       status,
       message,

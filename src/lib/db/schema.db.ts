@@ -131,6 +131,13 @@ const StudentEnrollmentSchema = z.object({
   credits: z.number().int().min(0),
   created_at: TimestampFieldType,
   teacher_team_ids: z.array(z.string()).optional().default([]),
+  points: z
+    .int()
+    .optional()
+    .transform((v) => {
+      if (!v) return 0;
+      return v;
+    }),
 });
 
 export const StudentEnrollment = {

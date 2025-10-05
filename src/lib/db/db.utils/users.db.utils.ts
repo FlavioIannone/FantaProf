@@ -2,7 +2,6 @@ import { cache } from "react";
 import { admin_firestore } from "../firebase-connection.server";
 import { Class, StudentEnrollment } from "../schema.db";
 import z from "zod";
-import { calculatePointsBasedOnTeachersInTeamInFirestore } from "./members.db.utils";
 import { ReadOperationResult } from "@/lib/types";
 
 type StudentEnrollmentType = Omit<
@@ -33,20 +32,12 @@ export const getBestScoreFromFirestore = cache(
           const classDocRef = doc.ref.parent.parent;
           if (!classDocRef) throw new Error("Parent class reference not found");
 
-          const [points, classDocSnap] = await Promise.all([
-            calculatePointsBasedOnTeachersInTeamInFirestore(
-              uid,
-              classDocRef.id
-            ),
-            classDocRef.get(),
-          ]);
+          const [classDocSnap] = await Promise.all([classDocRef.get()]);
 
-          if (points === undefined)
-            throw new Error("Error while calculating the points");
           if (!classDocSnap.exists) throw new Error("Class document not found");
 
           return {
-            points,
+            points: StudentEnrollment.schema.parse(doc.data()).points,
             class_name: Class.schema.parse(classDocSnap.data()).class_name,
           };
         })
@@ -62,10 +53,9 @@ export const getBestScoreFromFirestore = cache(
         className: bestScore.class_name,
       };
     } catch (error) {
-      console.error(
-        "[getBestScoreFromFirestore] Error fetching best score:",
-        error
-      );
+      console.log("[getBestScoreFromFirestore] Error fetching best score:");
+      // console.log(error);
+
       return { points: -1, className: "" };
     }
   }
@@ -88,10 +78,11 @@ export const getClassesEnrollmentCountFromFirestore = cache(
 
       return countSnapshot.data().count ?? 0;
     } catch (error) {
-      console.error(
-        "[getClassesEnrollmentCountFromFirestore] Error fetching class count:",
-        error
+      console.log(
+        "[getClassesEnrollmentCountFromFirestore] Error fetching class count:"
       );
+      // console.log(error);
+
       return -1;
     }
   }
@@ -114,17 +105,8 @@ export const getStudentEnrollmentDataFromFirestore = async (
     .collection(StudentEnrollment.collection)
     .doc(uid);
   try {
-    const [classDocSnap, studentDocSnap] = await Promise.all([
-      classDocRef.get(),
-      studentDocRef.get(),
-    ]);
+    const studentDocSnap = await studentDocRef.get();
 
-    if (!classDocSnap.exists) {
-      throw {
-        status: 404,
-        message: "The class doesn't exist",
-      };
-    }
     if (!studentDocSnap.exists) {
       throw {
         status: 404,
@@ -140,7 +122,7 @@ export const getStudentEnrollmentDataFromFirestore = async (
     const status = error.status ?? 500;
     const message = error.message ?? "Error while deleting the event template";
     console.log(`Fn: getStudentEnrollmentDataFromFirestore, error: `);
-    console.log(error);
+    // console.log(error);
 
     return {
       status,
