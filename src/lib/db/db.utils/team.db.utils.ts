@@ -61,17 +61,17 @@ export const addTeacherToTeamInFirestore = async (
     // - The team collection (to check if this is the first teacher, i.e., captain)
     // - The teacher doc
     let isCaptain = false;
-    await admin_firestore.runTransaction(async (transaction) => {
+    await admin_firestore.runTransaction(async (t) => {
       const [
         studentEnrollmentDocSnap,
         teacherTeamEnrollmentDocSnap,
         teamCollectionSnap,
         teacherDocSnap,
       ] = await Promise.all([
-        transaction.get(studentEnrollmentDocRef),
-        transaction.get(teacherTeamEnrollmentDocRef),
-        transaction.get(teamCollectionRef),
-        transaction.get(teacherDocRef),
+        t.get(studentEnrollmentDocRef),
+        t.get(teacherTeamEnrollmentDocRef),
+        t.get(teamCollectionRef),
+        t.get(teacherDocRef),
       ]);
 
       // If the student isn’t enrolled in this class, return 404
@@ -108,18 +108,25 @@ export const addTeacherToTeamInFirestore = async (
       }
 
       isCaptain = teamCollectionSnap.empty; // The teacher becomes captain if this is the first teacher in the team
+      const studentUpdateData: any = {
+        credits: FieldValue.increment(-teacherData.price),
+        teacher_team_ids: FieldValue.arrayUnion(teacherDocRef.id),
+        points: FieldValue.increment(
+          isCaptain ? 2 * teacherData.points : teacherData.points
+        ),
+      };
+      if (isCaptain) {
+        studentUpdateData.team_captain_id = teacherDocRef.id;
+      }
       // Add the teacher to the student’s team
-      transaction
-        .create(
-          teacherTeamEnrollmentDocRef,
-          TeamEnrollment.schema.parse({
-            captain: isCaptain,
-          })
-        )
-        .update(studentEnrollmentDocRef, {
-          credits: FieldValue.increment(-teacherData.price),
-          teacher_team_ids: FieldValue.arrayUnion(teacherDocRef.id),
-        });
+      t.create(
+        teacherTeamEnrollmentDocRef,
+        TeamEnrollment.schema.parse({
+          captain: isCaptain,
+          points: teacherData.points,
+          price: teacherData.price,
+        })
+      ).update(studentEnrollmentDocRef, studentUpdateData);
     });
 
     // If everything went fine, return success
@@ -314,14 +321,7 @@ export const removeTeacherFromTeamInFirestore = async (
 
   try {
     await admin_firestore.runTransaction(async (t) => {
-      const [
-        studentEnrollmentRes,
-        teacherRes,
-        teamEnrollmentRes,
-        teamEnrollmentCountQuery,
-      ] = await Promise.all([
-        getStudentEnrollmentDataFromFirestore(class_id, uid),
-        getClassTeacherFromFirestore(class_id, teacher_id),
+      const [teamEnrollmentRes, teamEnrollmentCountQuery] = await Promise.all([
         getTeacherTeamEnrollmentFromFirestore(uid, class_id, teacher_id),
         studentEnrollmentDocRef
           .collection(TeamEnrollment.collection)
@@ -330,12 +330,6 @@ export const removeTeacherFromTeamInFirestore = async (
       ]);
       const teamEnrollmentCount = teamEnrollmentCountQuery.data().count;
 
-      if (studentEnrollmentRes.status !== 200) {
-        throw studentEnrollmentRes;
-      }
-      if (teacherRes.status !== 200) {
-        throw teacherRes;
-      }
       if (teamEnrollmentRes.status !== 200) {
         throw teamEnrollmentRes;
       }
@@ -348,7 +342,13 @@ export const removeTeacherFromTeamInFirestore = async (
 
       t.update(studentEnrollmentDocRef, {
         teacher_team_ids: FieldValue.arrayRemove(teacher_id),
-        credits: FieldValue.increment(teacherRes.data.price),
+        credits: FieldValue.increment(teamEnrollmentRes.data.price),
+        points: FieldValue.increment(
+          teamEnrollmentRes.data.captain
+            ? 2 * -teamEnrollmentRes.data.points
+            : -teamEnrollmentRes.data.points
+        ),
+        team_captain_id: "",
       }).delete(teacherTeamDocRef);
     });
     return { status: 200 };
@@ -379,64 +379,64 @@ export const makeTeacherCaptainInFirestore = async (
   class_id: string,
   teacher_id: string
 ): Promise<WriteOperationResult> => {
-  const newCaptainDocRef = admin_firestore
+  const studentEnrollmentRef = admin_firestore
     .collection(Class.collection)
     .doc(class_id)
     .collection(StudentEnrollment.collection)
-    .doc(uid)
-    .collection(TeamEnrollment.collection)
-    .doc(teacher_id);
-  const oldCaptainCollectionRef = admin_firestore
-    .collection(Class.collection)
-    .doc(class_id)
-    .collection(StudentEnrollment.collection)
-    .doc(uid)
-    .collection(TeamEnrollment.collection)
-    .where("captain", "==", true)
-    .limit(1);
+    .doc(uid);
 
   try {
-    admin_firestore.runTransaction(async (t) => {
-      const [newCaptainSnap, oldCaptainCollectionSnap] = await Promise.all([
-        t.get(newCaptainDocRef),
-        t.get(oldCaptainCollectionRef),
-      ]);
+    await admin_firestore.runTransaction(async (t) => {
+      // 1) Read student enrollment
+      const studentSnap = await t.get(studentEnrollmentRef);
+      if (!studentSnap.exists)
+        throw { status: 404, message: "Student not found" };
+      const studentData = StudentEnrollment.schema.parse(studentSnap.data());
+      const teacherTeamIds = studentData.teacher_team_ids;
 
-      if (!newCaptainSnap.exists) {
-        throw {
-          status: 404,
-          message: "The teacher to make captain doesn't exist",
-        };
+      if (!teacherTeamIds || teacherTeamIds.length !== 2) {
+        throw { status: 400, message: "Team must have exactly 2 teachers" };
       }
-      if (oldCaptainCollectionSnap.empty) {
-        throw {
-          status: 404,
-          message:
-            "The teacher you want to remove from captain role doesn’t exist.",
-        };
-      }
-      const oldCaptainDocRef = oldCaptainCollectionSnap.docs[0].ref;
-      t.update(oldCaptainDocRef, {
-        captain: false,
-      }).update(newCaptainDocRef, {
-        captain: true,
+
+      // 2) Read all team docs (2 docs)
+      const teamCollectionRef = studentEnrollmentRef.collection(
+        TeamEnrollment.collection
+      );
+      const teamSnaps = await t.get(teamCollectionRef);
+      const teamDocs = teamSnaps.docs.map((doc) => ({
+        id: doc.id,
+        data: TeamEnrollment.schema.parse(doc.data()),
+      }));
+
+      const oldCaptain = teamDocs.find((d) => d.data.captain);
+      const newCaptain = teamDocs.find((d) => d.id === teacher_id);
+
+      if (!oldCaptain) throw { status: 404, message: "Old captain not found" };
+      if (!newCaptain)
+        throw { status: 404, message: "New captain not found in team" };
+      if (oldCaptain.id === newCaptain.id)
+        throw { status: 400, message: "Teacher is already captain" };
+
+      // Update captain flags
+      t.update(teamCollectionRef.doc(newCaptain.id), { captain: true });
+      t.update(teamCollectionRef.doc(oldCaptain.id), { captain: false });
+      t.update(studentEnrollmentRef, { team_captain_id: newCaptain.id });
+
+      // Update points using points from Team docs
+      const pointsDiff = -oldCaptain.data.points + newCaptain.data.points;
+      t.update(studentEnrollmentRef, {
+        points: FieldValue.increment(
+          -oldCaptain.data.points + newCaptain.data.points
+        ),
       });
     });
 
-    return {
-      status: 200,
-    };
+    return { status: 200 };
   } catch (error: any) {
-    const status = error.status ?? 500;
-    const message = error.message ?? "Internal server error";
-    console.log(`Fn: makeTeacherCaptainInFirestore, error: `);
-    console.log(error);
-
-    // On failure, return error info.
-    // Defaults to 500 if status/message aren’t explicitly set
+    console.error("makeTeacherCaptainInFirestore error:", error);
     return {
-      status,
-      message,
+      status: error.status ?? 500,
+      message: error.message ?? "Internal server error",
     };
   }
 };

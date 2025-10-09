@@ -155,6 +155,15 @@ export default function TeacherCard({
           <button
             className="d-btn d-btn-primary flex-1"
             onClick={async () => {
+              if (!classData.market_locked) {
+                toast.setToast(true, {
+                  content:
+                    "Il mercato è bloccato. Non puoi acquistare professori finché la partita non è iniziata.",
+                  toastType: "warning",
+                  overrideQueue: true,
+                });
+                return;
+              }
               modal.setModal(true, {
                 title: "Aggiungere il professore al team?",
                 content: `Vuoi davvero aggiungere il prof ${teacherData.name} ${teacherData.surname} al tuo team?`,

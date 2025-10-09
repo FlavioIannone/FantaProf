@@ -30,13 +30,12 @@ export const addClassAction = withSession(
     }
   ) => {
     const res = await createClassInFirestore(uid, class_data);
-    if (res.status === 200) {
-      revalidatePath(`/dashboard`);
-      revalidatePath(`/dashboard/classes/${res.data!.class_id}/overview`);
-      revalidatePath(`/dashboard/classes/${res.data!.class_id}/events`);
-      revalidatePath(`/dashboard/classes/${res.data!.class_id}/market`);
-      revalidatePath(`/dashboard/classes/${res.data!.class_id}/join`);
-    }
+    // if (res.status === 200) {
+    //   revalidatePath(`/dashboard/classes/${res.data!.class_id}/overview`);
+    //   revalidatePath(`/dashboard/classes/${res.data!.class_id}/events`);
+    //   revalidatePath(`/dashboard/classes/${res.data!.class_id}/market`);
+    //   revalidatePath(`/dashboard/classes/${res.data!.class_id}/join`);
+    // }
     return res;
   }
 );
@@ -59,8 +58,6 @@ export const updateClassAction = withSession(
     const res = await updateClassInFirestore(class_id, class_data);
     if (res.status === 200) {
       revalidatePath(`/dashboard/classes/${class_id}/overview`);
-      revalidatePath(`/dashboard/classes/${class_id}/events`);
-      revalidatePath(`/dashboard/classes/${class_id}/market`);
       revalidatePath(`/dashboard/classes/${class_id}/join`);
       revalidatePath(`/dashboard/classes/${class_id}/class-settings`);
     }
@@ -72,10 +69,8 @@ export const startGameAction = withSession(
   async (uid: string, class_id: string) => {
     const res = await startGameInFirestore(class_id);
     if (res.status === 200) {
-      revalidatePath(`/dashboard/classes/${class_id}/overview`);
       revalidatePath(`/dashboard/classes/${class_id}/events`);
       revalidatePath(`/dashboard/classes/${class_id}/market`);
-      revalidatePath(`/dashboard/classes/${class_id}/join`);
       revalidatePath(`/dashboard/classes/${class_id}/class-settings`);
     }
     return res;
@@ -102,7 +97,7 @@ export const joinClassAction = async (class_id: string) => {
   }
   const joinResult = await joinClassInFirestore(res.session.uid, class_id);
   if (joinResult.status === 200) {
-    revalidatePath("/dashboard");
+    revalidatePath(`/dashboard/classes/${class_id}/overview`);
   }
   return joinResult;
 };
@@ -121,7 +116,7 @@ export const leaveClassAction = withSession(
   async (uid: string, class_id: string) => {
     const leaveResult = await leaveClassInFirestore(uid, class_id);
     if (leaveResult.status === 200) {
-      revalidatePath("/dashboard");
+      revalidatePath(`/dashboard/classes/${class_id}/overview`);
     }
     return leaveResult;
   }

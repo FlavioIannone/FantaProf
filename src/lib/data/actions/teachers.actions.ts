@@ -53,6 +53,7 @@ export const modifyTeacherAction = withSession(
     );
     if (result.status === 200) {
       revalidatePath(`/dashboard/classes/${class_id}/market`);
+      revalidatePath(`/dashboard/classes/${class_id}/team`);
     }
     return result;
   }
@@ -72,6 +73,7 @@ export const deleteTeacherAction = withSession(
     const result = await deleteTeacherFromFirestore(class_id, teacher_id);
     if (result.status === 200) {
       revalidatePath(`/dashboard/classes/${class_id}/market`);
+      revalidatePath(`/dashboard/classes/${class_id}/team`);
     }
     return result;
   }

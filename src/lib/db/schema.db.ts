@@ -9,29 +9,37 @@
  * 🧠 FirestoreDataConverter is used for serializing/deserializing between Firestore and app
  *
  * Collections / Documents:
- * ├── Classes (class_name, initial_credits, members, created_at)
+ * ├── Classes (class_name, initial_credits, members, teachers, admin_count, game_started, market_locked, use_anti_cheat,created_at)
  * │    ├── class_name: string
  * │    ├── initial_credits: number
  * │    ├── members: number,
+ * │    ├── teachers: number,
+ * │    ├── admin_count: number,
  * │    ├── game_started: boolean,
  * │    ├── market_locked: boolean,
  * │    ├── use_anti_cheat: boolean,
  * │    ├── created_at: Timestamp,
- * │    ├── Teachers (uid, name, surname, description, price)
- * │    │   ├── uid: string
+ * │    ├── Teachers ( name, surname, description, points, deleted, price, created_at)
  * │    │   ├── name: string
  * │    │   ├── surname: string
  * │    │   ├── description: string
+ * │    │   ├── points: number
  * │    │   ├── deleted: boolean
- * │    │   └── price: number
- * │    ├── StudentEnrollments (admin, credits, created_at)
+ * │    │   ├── points: number
+ * │    │   └── created_at: Timestamp
+ * │    ├── StudentEnrollments (uid, admin, credits, teacher_team_ids, team_captain_id, points, created_at)
+ * │    │   ├── uid: string
  * │    │   ├── admin: boolean
  * │    │   ├── credits: number
  * │    │   ├── teacher_team_ids: Array<string>
+ * │    │   ├── team_captain_id: string
+ * │    │   ├── points: number
  * │    │   ├── created_at: Timestamp
- * │    │   ├── Team(teacher_id, captain, created_at)
+ * │    │   ├── Team(teacher_id, captain, points, price, created_at)
  * │    │   │   ├── teacher_id: string,
  * │    │   │   ├── captain: boolean,
+ * │    │   │   ├── points: number,
+ * │    │   │   ├── price: number,
  * │    │   └── └── created_at: Timestamp
  * │    ├── Events (title, description, points, created_at)
  * │    │   ├── title: string
@@ -96,13 +104,7 @@ const ClassSchema = z.object({
   class_name: z.string(),
   initial_credits: z.int().positive(),
   members: z.int().positive().optional().default(1),
-  admin_count: z
-    .int()
-    .optional()
-    .transform((v) => {
-      if (!v) return 0;
-      return v;
-    }),
+  admin_count: z.int().optional().default(1),
   created_at: TimestampFieldType,
   game_started: z.boolean().optional().default(false),
   market_locked: z.boolean().optional().default(false),
@@ -122,6 +124,8 @@ export const Class = {
 const TeamEnrollmentSchema = z.object({
   captain: z.boolean(),
   created_at: TimestampFieldType,
+  points: z.int().optional().default(0),
+  price: z.number().min(0).optional().default(0),
 });
 
 export const TeamEnrollment = {
@@ -138,13 +142,8 @@ const StudentEnrollmentSchema = z.object({
   credits: z.number().int().min(0),
   created_at: TimestampFieldType,
   teacher_team_ids: z.array(z.string()).optional().default([]),
-  points: z
-    .int()
-    .optional()
-    .transform((v) => {
-      if (!v) return 0;
-      return v;
-    }),
+  team_captain_id: z.string().optional().default(""),
+  points: z.int().optional().default(0),
 });
 
 export const StudentEnrollment = {

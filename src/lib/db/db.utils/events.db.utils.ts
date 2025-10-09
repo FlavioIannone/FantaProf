@@ -326,7 +326,7 @@ export const registerEventInFirestore = async (
     .doc(class_id);
 
   // Students that have this teacher in the class
-  const enrollmentsToUpdateRef = classDocRef
+  const studentEnrollmentsToUpdateRef = classDocRef
     .collection(StudentEnrollment.collection)
     .where("teacher_team_ids", "array-contains", eventData.teacher_id);
 
@@ -343,9 +343,9 @@ export const registerEventInFirestore = async (
   const batch = admin_firestore.batch();
 
   try {
-    const [templateData, enrollmentsToUpdateSnap] = await Promise.all([
+    const [templateData, studentEnrollmentsToUpdateSnap] = await Promise.all([
       getEventTemplateFromFirestore(class_id, eventData.event_id),
-      enrollmentsToUpdateRef.get(),
+      studentEnrollmentsToUpdateRef.get(),
     ]);
 
     if (templateData.status !== 200) {
@@ -364,10 +364,10 @@ export const registerEventInFirestore = async (
       points: FieldValue.increment(points),
     });
 
-    if (!enrollmentsToUpdateSnap.empty) {
+    if (!studentEnrollmentsToUpdateSnap.empty) {
       // Fetch all TeamEnrollment docs for these students in one go
       const teamDocsSnap = await Promise.all(
-        enrollmentsToUpdateSnap.docs.map((e) =>
+        studentEnrollmentsToUpdateSnap.docs.map((e) =>
           e.ref
             .collection(TeamEnrollment.collection)
             .doc(eventData.teacher_id)
@@ -375,14 +375,18 @@ export const registerEventInFirestore = async (
         )
       );
 
-      enrollmentsToUpdateSnap.docs.forEach((e, index) => {
+      studentEnrollmentsToUpdateSnap.docs.forEach((e, index) => {
         const teamData = TeamEnrollment.schema.parse(
           teamDocsSnap[index].data()
         );
         const isCaptain = teamData.captain;
-        batch.update(e.ref, {
-          points: FieldValue.increment(isCaptain ? points * 2 : points),
-        });
+        batch
+          .update(e.ref, {
+            points: FieldValue.increment(isCaptain ? points * 2 : points),
+          })
+          .update(teamDocsSnap[index].ref, {
+            points: FieldValue.increment(isCaptain ? points * 2 : points),
+          });
       });
     }
 

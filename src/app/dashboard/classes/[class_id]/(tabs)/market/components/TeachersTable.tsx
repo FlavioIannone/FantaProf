@@ -4,12 +4,7 @@ import TeacherCard from "./TeacherCard";
 import TeachersTableHeader from "./TeachersTableHeader";
 import { getCurrentUserEnrollmentData } from "@/lib/data/data-layer/user.data-layer";
 import { redirect } from "next/navigation";
-import {
-  getClassData,
-  getClassDataWithSession,
-} from "@/lib/data/data-layer/classes.data-layer";
-import Link from "next/link";
-import { getRandomAmazonAd } from "@/lib/types";
+import { getClassDataWithSession } from "@/lib/data/data-layer/classes.data-layer";
 import AmazonAdJoinRow from "@/components/client/Ads/AmazonAdJoinRow";
 
 export default async function TeachersTable({
