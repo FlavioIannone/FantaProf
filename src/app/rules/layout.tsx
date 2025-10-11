@@ -1,10 +1,10 @@
 import RulesPageNavigator from "@/app/rules/components/RulesPageNavigator";
 import Footer from "@/components/server/Footer";
 import Navbar from "@/components/server/Navbar";
-import ReturnToHome from "@/components/server/BackToPathArrow";
 import { ReactNode } from "react";
 import BackToPathArrow from "@/components/server/BackToPathArrow";
 import { Metadata } from "next";
+import Script from "next/script";
 
 const siteUrl = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
 
@@ -73,6 +73,26 @@ export default function RulesLayout({
 }: Readonly<{ children: ReactNode }>) {
   return (
     <>
+      {/* Script AdSense */}
+      <Script
+        async
+        src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5780485830378667"
+        crossOrigin="anonymous"
+        strategy="afterInteractive"
+      />
+      {/* Google Consent Mode (default: denied) */}
+      <Script id="consent-mode" strategy="beforeInteractive">
+        {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('consent', 'default', {
+              ad_storage: 'denied',
+              ad_user_data: 'denied',
+              ad_personalization: 'denied',
+              analytics_storage: 'denied'
+            });
+          `}
+      </Script>
       <Navbar
         className="lg:px-20 md:px-15 sm:px-10 px-5"
         showReturnToHome

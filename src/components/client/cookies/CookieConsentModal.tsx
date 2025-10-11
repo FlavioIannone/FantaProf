@@ -92,7 +92,7 @@ const Banner = ({
       <h2 className="text-2xl font-bold">Preferenze cookie:</h2>
 
       {/* Amazon Affiliate */}
-      <div className="flex flex-col gap-2 mt-2">
+      {/* <div className="flex flex-col gap-2 mt-2">
         <div className="flex justify-between items-center">
           <h3 className="text-lg">Cookie di affiliazione Amazon</h3>
           <input
@@ -105,7 +105,7 @@ const Banner = ({
         <p className="opacity-70 text-sm">
           Permettono di supportare il progetto tramite link affiliati Amazon.
         </p>
-      </div>
+      </div> */}
 
       {/* Google AdSense */}
       <div className="flex flex-col gap-2 mt-2">

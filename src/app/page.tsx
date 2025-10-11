@@ -1,4 +1,4 @@
-import CookieConsentModal from "@/components/client/CookieConsentModal";
+import CookieConsentModal from "@/components/client/cookies/CookieConsentModal";
 import Footer from "@/components/server/Footer";
 import LandingCard from "@/components/server/LandingCard";
 import Navbar from "@/components/server/Navbar";
