@@ -22,7 +22,7 @@ import { useRef, useState } from "react";
 import CookieConsentModal, {
   adsConsent,
   affiliateConsent,
-} from "@/components/client/CookieConsentModal";
+} from "@/components/client/cookies/CookieConsentModal";
 
 export default function UserSecuritySettingsSection() {
   const { userData } = useUserData();
@@ -380,6 +380,7 @@ export default function UserSecuritySettingsSection() {
 
         <div className="d-divider opacity-40"></div>
 
+        {/* Cookie consents */}
         <UserSecuritySettingsCard
           title="Consensi"
           description="Modifica i consensi dei cookie"

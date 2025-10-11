@@ -113,6 +113,7 @@ export const makeUserAdminInFirestore = async (
     batch.update(studentDocRef, { admin: true }).update(classDocRef, {
       admin_count: FieldValue.increment(1),
     });
+    await batch.commit();
     return {
       status: 200,
     };

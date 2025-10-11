@@ -1,4 +1,4 @@
-import { affiliateConsent } from "@/components/client/CookieConsentModal";
+import { affiliateConsent } from "@/components/client/cookies/CookieConsentModal";
 import { deleteSession } from "./data/session/session-manager.data-layer";
 import { client_auth } from "./firebase-connection.client";
 

@@ -18,7 +18,11 @@ export default function Navbar({
       <nav className={`d-navbar bg-base-100 shadow-sm ${className} fixed z-50`}>
         <div className="flex-1">
           <div className="lg:text-2xl md:text-xl text-lg text-primary font-extrabold animate-fade-in-left motion-reduce:animate-none w-fit flex items-center">
-            {showReturnToHome && <ReturnToHome className="sm:block hidden" />}
+            {showReturnToHome && (
+              <ReturnToHome
+                className={`${hideLogoOnSmallBrP && "sm:block hidden"}`}
+              />
+            )}
             {showDrawerButton && (
               <label
                 htmlFor="rules-drawer"

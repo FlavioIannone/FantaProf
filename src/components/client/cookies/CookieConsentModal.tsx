@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
-import { useModal } from "./Modal/ModalContext";
+import { useModal } from "../Modal/ModalContext";
 import { readDataFromLocalStorage, writeDataInLocalStorage } from "@/lib/types";
 
 export const affiliateConsent = "affiliateConsent";
