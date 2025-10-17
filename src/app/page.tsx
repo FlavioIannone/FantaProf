@@ -40,7 +40,7 @@ export default function Home() {
               ></i>
             }
             title="Crea il tuo team"
-            subtitle="Selezione i professori per creare il tuo team dei sogni"
+            subtitle="Seleziona i professori per creare il tuo team dei sogni"
           ></LandingCard>
           <LandingCard
             icon={
