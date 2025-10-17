@@ -60,7 +60,7 @@ export default function Home() {
               ></i>
             }
             title="Ottieni punti"
-            subtitle="Guarda il tuo punteggio salire mentre i tuoi professori compioni azioni in classe"
+            subtitle="Guarda il tuo punteggio salire mentre i tuoi professori compiono azioni in classe"
           ></LandingCard>
         </div>
       </main>
